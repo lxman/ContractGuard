@@ -44,7 +44,7 @@ public static class SymbolSurfaceReader
             CollectType(nested, types, options);
     }
 
-    private static TypeContract? ReadType(INamedTypeSymbol type, ReaderOptions options)
+    internal static TypeContract? ReadType(INamedTypeSymbol type, ReaderOptions options)
     {
         if (type.Name.Length == 0 || type.Name[0] == '<')
             return null;

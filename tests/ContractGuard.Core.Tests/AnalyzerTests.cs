@@ -117,6 +117,17 @@ public class AnalyzerTests
     }
 
     [Fact]
+    public async Task Reports_missing_governed_types_at_compilation_end()
+    {
+        ImmutableArray<Diagnostic> diagnostics = await RunAsync(
+            "namespace Shop { public class SomethingElse { } }", Contract);
+
+        Diagnostic diagnostic = Assert.Single(diagnostics);
+        Assert.Equal("CG0100", diagnostic.Id);
+        Assert.Contains("Shop.Calc", diagnostic.GetMessage());
+    }
+
+    [Fact]
     public async Task Reports_an_unparseable_contract_instead_of_silently_ungoverning()
     {
         ImmutableArray<Diagnostic> diagnostics = await RunAsync(

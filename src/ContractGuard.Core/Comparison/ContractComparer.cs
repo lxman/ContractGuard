@@ -77,7 +77,7 @@ public sealed class ContractComparer
         return _surface.Types.FirstOrDefault(observed => string.Equals(observed.Type, name, StringComparison.Ordinal) && (observed.TypeParams?.Count ?? 0) == arity);
     }
 
-    private static (string Name, int Arity) ParseGovernedTypeName(TypeContract governed)
+    internal static (string Name, int Arity) ParseGovernedTypeName(TypeContract governed)
     {
         int declaredArity = governed.TypeParams?.Count ?? 0;
         try
