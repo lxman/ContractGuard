@@ -1,0 +1,31 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          # 10.x drives the build (slnx support); 8.x runtime executes the net8.0 tests.
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      # RequireContract hardening per our own manual: a deleted contract file fails the
+      # build instead of silently removing the gate. Only projects referencing
+      # ContractGuard.MSBuild import the targets, so this affects exactly those.
+      - name: Build (ContractGuard gate enforced)
+        run: dotnet build -c Release -p:ContractGuardRequireContract=true
+
+      - name: Test
+        run: dotnet test -c Release --no-build

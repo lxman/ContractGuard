@@ -1,0 +1,5226 @@
+{
+  "$schema": "https://contractguard.dev/schema/v1.json",
+  "assembly": "ContractGuard.Core",
+  "settings": {
+    "newTypes": "allow",
+    "newMembers": "allow",
+    "parameterNames": "significant",
+    "defaultValues": "significant",
+    "nullableAnnotations": "ignored",
+    "tupleElementNames": "ignored",
+    "scope": [
+      "public",
+      "protected"
+    ]
+  },
+  "types": [
+    {
+      "type": "ContractGuard.TypeNames.TypeNameMatcher",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "members": [
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "System.Collections.Generic.IReadOnlyList<string>",
+              "usings"
+            ],
+            [
+              "ContractGuard.Model.Significance",
+              "nullableAnnotations"
+            ],
+            [
+              "ContractGuard.Model.Significance",
+              "tupleElementNames"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Matches",
+          "returns": "bool",
+          "params": [
+            [
+              "string",
+              "contractName"
+            ],
+            [
+              "string",
+              "observedName"
+            ],
+            [
+              "string",
+              "governedNamespace"
+            ]
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.TypeNames.TypeNameNode",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "abstract"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "virtual"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "virtual"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "virtual"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "original"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "protected"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.TypeNames.TypeNameParser",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "static"
+      ],
+      "members": [
+        {
+          "kind": "method",
+          "name": "Parse",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "ContractGuard.TypeNames.TypeNameNode",
+          "params": [
+            [
+              "string",
+              "text"
+            ]
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Serialization.ContractJson",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "static"
+      ],
+      "members": [
+        {
+          "kind": "method",
+          "name": "Load",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "ContractGuard.Model.AssemblyContract",
+          "params": [
+            [
+              "string",
+              "path"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Parse",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "ContractGuard.Model.AssemblyContract",
+          "params": [
+            [
+              "string",
+              "json"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Serialize",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "string",
+          "params": [
+            [
+              "ContractGuard.Model.AssemblyContract",
+              "contract"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Save",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "void",
+          "params": [
+            [
+              "ContractGuard.Model.AssemblyContract",
+              "contract"
+            ],
+            [
+              "string",
+              "path"
+            ]
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.AccessorsContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.AccessorsContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Get",
+          "type": "ContractGuard.Model.Accessibility?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Set",
+          "type": "ContractGuard.Model.Accessibility?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Init",
+          "type": "ContractGuard.Model.Accessibility?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.AccessorsContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.AccessorsContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.AccessorsContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.AccessorsContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.AccessorsContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.AssemblyContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.AssemblyContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Schema",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Assembly",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Version",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Description",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Settings",
+          "type": "ContractGuard.Model.ContractSettings",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Usings",
+          "type": "System.Collections.Generic.IReadOnlyList<string>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Types",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.AssemblyContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.AssemblyContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.AssemblyContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.AssemblyContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.AssemblyContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.ConstantValue",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.ConstantValue>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Value",
+          "type": "object",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "IsDefaultSentinel",
+          "type": "bool",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "DefaultSentinel",
+          "modifiers": [
+            "static",
+            "readonly"
+          ],
+          "type": "ContractGuard.Model.ConstantValue",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Of",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "ContractGuard.Model.ConstantValue",
+          "params": [
+            [
+              "object",
+              "value"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ConstantValue",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.ContractSettings",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.ContractSettings>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "NewTypes",
+          "type": "ContractGuard.Model.AllowDeny",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "NewMembers",
+          "type": "ContractGuard.Model.AllowDeny",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "ParameterNames",
+          "type": "ContractGuard.Model.Significance",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "DefaultValues",
+          "type": "ContractGuard.Model.Significance",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "NullableAnnotations",
+          "type": "ContractGuard.Model.Significance",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "TupleElementNames",
+          "type": "ContractGuard.Model.Significance",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Scope",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.Accessibility>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "SignificantAttributes",
+          "type": "System.Collections.Generic.IReadOnlyList<string>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ContractSettings",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.ContractSettings",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ContractSettings",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.ContractSettings",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ContractSettings",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.Accessibility",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Public",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Accessibility",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Protected",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Accessibility",
+          "value": 1,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Internal",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Accessibility",
+          "value": 2,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "ProtectedInternal",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Accessibility",
+          "value": 3,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "PrivateProtected",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Accessibility",
+          "value": 4,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Private",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Accessibility",
+          "value": 5,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.AllowDeny",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Allow",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.AllowDeny",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Deny",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.AllowDeny",
+          "value": 1,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.Significance",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Significant",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Significance",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Ignored",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Significance",
+          "value": 1,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.EntryMode",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Required",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.EntryMode",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Forbidden",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.EntryMode",
+          "value": 1,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.TypeKind",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Class",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeKind",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Struct",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeKind",
+          "value": 1,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Interface",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeKind",
+          "value": 2,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Record",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeKind",
+          "value": 3,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "RecordStruct",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeKind",
+          "value": 4,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Enum",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeKind",
+          "value": 5,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Delegate",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeKind",
+          "value": 6,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.TypeModifier",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Static",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeModifier",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Abstract",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeModifier",
+          "value": 1,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Sealed",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeModifier",
+          "value": 2,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Readonly",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeModifier",
+          "value": 3,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Ref",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.TypeModifier",
+          "value": 4,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.MemberModifier",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Static",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.MemberModifier",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Abstract",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.MemberModifier",
+          "value": 1,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Virtual",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.MemberModifier",
+          "value": 2,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Sealed",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.MemberModifier",
+          "value": 3,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Override",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.MemberModifier",
+          "value": 4,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Readonly",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.MemberModifier",
+          "value": 5,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Const",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.MemberModifier",
+          "value": 6,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Volatile",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.MemberModifier",
+          "value": 7,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.ReturnRefKind",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Ref",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.ReturnRefKind",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "RefReadonly",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.ReturnRefKind",
+          "value": 1,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.ParamModifier",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Ref",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.ParamModifier",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Out",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.ParamModifier",
+          "value": 1,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "In",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.ParamModifier",
+          "value": 2,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "RefReadonly",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.ParamModifier",
+          "value": 3,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Params",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.ParamModifier",
+          "value": 4,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "This",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.ParamModifier",
+          "value": 5,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.Variance",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "In",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Variance",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Out",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Model.Variance",
+          "value": 1,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.MemberContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "abstract"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.MemberContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "virtual"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Access",
+          "type": "ContractGuard.Model.Accessibility?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Mode",
+          "type": "ContractGuard.Model.EntryMode",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Reason",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Attributes",
+          "type": "System.Collections.Generic.IReadOnlyList<string>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "KindName",
+          "modifiers": [
+            "abstract"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "DisplayName",
+          "modifiers": [
+            "abstract"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "virtual"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.MemberContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.MemberContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "virtual"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "original"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "protected"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.MethodContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.Model.MemberContract",
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.MethodContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Name",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Modifiers",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Returns",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "RefKind",
+          "type": "ContractGuard.Model.ReturnRefKind?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "TypeParams",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeParamContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Params",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "ParameterNames",
+          "type": "ContractGuard.Model.Significance?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "KindName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "DisplayName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MethodContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.MethodContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MethodContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.MethodContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MethodContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.ConstructorMemberContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.Model.MemberContract",
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.ConstructorMemberContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Params",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "ParameterNames",
+          "type": "ContractGuard.Model.Significance?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "KindName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "DisplayName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ConstructorMemberContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.ConstructorMemberContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ConstructorMemberContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.ConstructorMemberContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ConstructorMemberContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.PropertyContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.Model.MemberContract",
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.PropertyContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Name",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Modifiers",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Type",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "RefKind",
+          "type": "ContractGuard.Model.ReturnRefKind?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Accessors",
+          "type": "ContractGuard.Model.AccessorsContract",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "KindName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "DisplayName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.PropertyContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.PropertyContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.PropertyContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.PropertyContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.PropertyContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.IndexerContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.Model.MemberContract",
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.IndexerContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Modifiers",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Type",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "RefKind",
+          "type": "ContractGuard.Model.ReturnRefKind?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Params",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Accessors",
+          "type": "ContractGuard.Model.AccessorsContract",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "ParameterNames",
+          "type": "ContractGuard.Model.Significance?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "KindName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "DisplayName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.IndexerContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.IndexerContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.IndexerContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.IndexerContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.IndexerContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.EventContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.Model.MemberContract",
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.EventContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Name",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Modifiers",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Type",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "KindName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "DisplayName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.EventContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.EventContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.EventContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.EventContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.EventContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.FieldContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.Model.MemberContract",
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.FieldContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Name",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Modifiers",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Type",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Value",
+          "type": "ContractGuard.Model.ConstantValue",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "KindName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "DisplayName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.FieldContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.FieldContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.FieldContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.FieldContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.FieldContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.OperatorContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.Model.MemberContract",
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.OperatorContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Name",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Returns",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Params",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "ParameterNames",
+          "type": "ContractGuard.Model.Significance?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "KindName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "DisplayName",
+          "modifiers": [
+            "override"
+          ],
+          "type": "string",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.OperatorContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.OperatorContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.OperatorContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.OperatorContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.OperatorContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.ParamContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.ParamContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Type",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Name",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Modifier",
+          "type": "ContractGuard.Model.ParamModifier?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Default",
+          "type": "ContractGuard.Model.ConstantValue",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ParamContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.ParamContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ParamContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.ParamContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.ParamContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.TypeContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.TypeContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Type",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Access",
+          "type": "ContractGuard.Model.Accessibility?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Kind",
+          "type": "ContractGuard.Model.TypeKind?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Modifiers",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeModifier>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "UnderlyingType",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Extends",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Implements",
+          "type": "System.Collections.Generic.IReadOnlyList<string>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "TypeParams",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeParamContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "NewMembers",
+          "type": "ContractGuard.Model.AllowDeny?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "ParameterNames",
+          "type": "ContractGuard.Model.Significance?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Members",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Returns",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Params",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.TypeContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.TypeContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.TypeContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.TypeContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.TypeContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Model.TypeParamContract",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Model.TypeParamContract>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Name",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Variance",
+          "type": "ContractGuard.Model.Variance?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Constraints",
+          "type": "System.Collections.Generic.IReadOnlyList<string>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.TypeParamContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.TypeParamContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.TypeParamContract",
+              "left"
+            ],
+            [
+              "ContractGuard.Model.TypeParamContract",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.TypeParamContract",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Metadata.AssemblyReader",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "static"
+      ],
+      "members": [
+        {
+          "kind": "method",
+          "name": "Read",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "ContractGuard.Metadata.AssemblySurface",
+          "params": [
+            [
+              "string",
+              "path"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Read",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "ContractGuard.Metadata.AssemblySurface",
+          "params": [
+            [
+              "System.IO.Stream",
+              "stream"
+            ]
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Metadata.AssemblySurface",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Metadata.AssemblySurface>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Name",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Types",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeContract>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Metadata.AssemblySurface",
+              "left"
+            ],
+            [
+              "ContractGuard.Metadata.AssemblySurface",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Metadata.AssemblySurface",
+              "left"
+            ],
+            [
+              "ContractGuard.Metadata.AssemblySurface",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Metadata.AssemblySurface",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Comparison.ContractComparer",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "members": [
+        {
+          "kind": "method",
+          "name": "Compare",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "ContractGuard.Comparison.ComparisonResult",
+          "params": [
+            [
+              "ContractGuard.Model.AssemblyContract",
+              "contract"
+            ],
+            [
+              "ContractGuard.Metadata.AssemblySurface",
+              "surface"
+            ]
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Comparison.DeclarationRenderer",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "static"
+      ],
+      "members": [
+        {
+          "kind": "method",
+          "name": "Render",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "string",
+          "params": [
+            [
+              "ContractGuard.Model.MemberContract",
+              "member"
+            ],
+            {
+              "type": "string",
+              "name": "owningTypeShortName",
+              "default": null
+            }
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Render",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "string",
+          "params": [
+            [
+              "ContractGuard.Model.TypeContract",
+              "type"
+            ]
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Comparison.DiagnosticSeverity",
+      "access": "public",
+      "kind": "enum",
+      "underlyingType": "int",
+      "members": [
+        {
+          "kind": "field",
+          "name": "Error",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Comparison.DiagnosticSeverity",
+          "value": 0,
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "Warning",
+          "modifiers": [
+            "const"
+          ],
+          "type": "ContractGuard.Comparison.DiagnosticSeverity",
+          "value": 1,
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Comparison.Diagnostic",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Comparison.Diagnostic>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Id",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Severity",
+          "type": "ContractGuard.Comparison.DiagnosticSeverity",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Message",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "TypeName",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Member",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Reason",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "string",
+              "Id"
+            ],
+            [
+              "ContractGuard.Comparison.DiagnosticSeverity",
+              "Severity"
+            ],
+            [
+              "string",
+              "Message"
+            ],
+            {
+              "type": "string",
+              "name": "TypeName",
+              "default": null
+            },
+            {
+              "type": "string",
+              "name": "Member",
+              "default": null
+            },
+            {
+              "type": "string",
+              "name": "Reason",
+              "default": null
+            }
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Comparison.Diagnostic",
+              "left"
+            ],
+            [
+              "ContractGuard.Comparison.Diagnostic",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Comparison.Diagnostic",
+              "left"
+            ],
+            [
+              "ContractGuard.Comparison.Diagnostic",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Comparison.Diagnostic",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Deconstruct",
+          "returns": "void",
+          "params": [
+            {
+              "type": "string",
+              "name": "Id",
+              "modifier": "out"
+            },
+            {
+              "type": "ContractGuard.Comparison.DiagnosticSeverity",
+              "name": "Severity",
+              "modifier": "out"
+            },
+            {
+              "type": "string",
+              "name": "Message",
+              "modifier": "out"
+            },
+            {
+              "type": "string",
+              "name": "TypeName",
+              "modifier": "out"
+            },
+            {
+              "type": "string",
+              "name": "Member",
+              "modifier": "out"
+            },
+            {
+              "type": "string",
+              "name": "Reason",
+              "modifier": "out"
+            }
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Comparison.ComparisonResult",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "implements": [
+        "System.IEquatable<ContractGuard.Comparison.ComparisonResult>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Diagnostics",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Comparison.Diagnostic>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Passed",
+          "type": "bool",
+          "accessors": {
+            "get": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "System.Collections.Generic.IReadOnlyList<ContractGuard.Comparison.Diagnostic>",
+              "Diagnostics"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Comparison.ComparisonResult",
+              "left"
+            ],
+            [
+              "ContractGuard.Comparison.ComparisonResult",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Comparison.ComparisonResult",
+              "left"
+            ],
+            [
+              "ContractGuard.Comparison.ComparisonResult",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Comparison.ComparisonResult",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Deconstruct",
+          "returns": "void",
+          "params": [
+            {
+              "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Comparison.Diagnostic>",
+              "name": "Diagnostics",
+              "modifier": "out"
+            }
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Comparison.DiagnosticIds",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "static"
+      ],
+      "members": [
+        {
+          "kind": "field",
+          "name": "AssemblyNameMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0001",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "TypeMissing",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0100",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "TypeKindMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0101",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "TypeModifiersMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0102",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "BaseTypeMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0103",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "InterfaceMissing",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0104",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "TypeParamsMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0105",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "UnderlyingTypeMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0106",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "DelegateSignatureMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0107",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "MemberMissing",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0200",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "MemberSignatureChanged",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0201",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "AccessMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0202",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "ModifiersMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0203",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "ReturnTypeMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0204",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "ParameterNamesChanged",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0205",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "ParameterDefaultsChanged",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0206",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "AccessorsMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0207",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "ConstValueChanged",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0208",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "TypeParamsChanged",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0209",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "ParameterModifiersChanged",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0210",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "ForbiddenMemberPresent",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0300",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "UnexpectedMember",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0400",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "UnexpectedType",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0500",
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.Comparison.ScopeFilter",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "static"
+      ],
+      "members": [
+        {
+          "kind": "method",
+          "name": "InScope",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.Model.Accessibility",
+              "access"
+            ],
+            [
+              "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.Accessibility>",
+              "scope"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Apply",
+          "modifiers": [
+            "static"
+          ],
+          "returns": "ContractGuard.Metadata.AssemblySurface",
+          "params": [
+            [
+              "ContractGuard.Metadata.AssemblySurface",
+              "surface"
+            ],
+            [
+              "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.Accessibility>",
+              "scope"
+            ]
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.TypeNames.TypeNameNode+Named",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "implements": [
+        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Named>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Name",
+          "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Args",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.TypeNames.TypeNameNode>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "string",
+              "Name"
+            ],
+            [
+              "System.Collections.Generic.IReadOnlyList<ContractGuard.TypeNames.TypeNameNode>",
+              "Args"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Named",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Named",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Named",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Named",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Named",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Deconstruct",
+          "returns": "void",
+          "params": [
+            {
+              "type": "string",
+              "name": "Name",
+              "modifier": "out"
+            },
+            {
+              "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.TypeNames.TypeNameNode>",
+              "name": "Args",
+              "modifier": "out"
+            }
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.TypeNames.TypeNameNode+Array",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "implements": [
+        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Array>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Element",
+          "type": "ContractGuard.TypeNames.TypeNameNode",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "Rank",
+          "type": "int",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "Element"
+            ],
+            [
+              "int",
+              "Rank"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Array",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Array",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Array",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Array",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Array",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Deconstruct",
+          "returns": "void",
+          "params": [
+            {
+              "type": "ContractGuard.TypeNames.TypeNameNode",
+              "name": "Element",
+              "modifier": "out"
+            },
+            {
+              "type": "int",
+              "name": "Rank",
+              "modifier": "out"
+            }
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.TypeNames.TypeNameNode+Nullable",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "implements": [
+        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Nullable>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Element",
+          "type": "ContractGuard.TypeNames.TypeNameNode",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "Element"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Nullable",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Nullable",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Nullable",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Nullable",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Nullable",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Deconstruct",
+          "returns": "void",
+          "params": [
+            {
+              "type": "ContractGuard.TypeNames.TypeNameNode",
+              "name": "Element",
+              "modifier": "out"
+            }
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.TypeNames.TypeNameNode+Tuple",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "implements": [
+        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Tuple>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Elements",
+          "type": "System.Collections.Generic.IReadOnlyList<(string, ContractGuard.TypeNames.TypeNameNode)>",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "System.Collections.Generic.IReadOnlyList<(string, ContractGuard.TypeNames.TypeNameNode)>",
+              "Elements"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Tuple",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Tuple",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Tuple",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Tuple",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Tuple",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Deconstruct",
+          "returns": "void",
+          "params": [
+            {
+              "type": "System.Collections.Generic.IReadOnlyList<(string, ContractGuard.TypeNames.TypeNameNode)>",
+              "name": "Elements",
+              "modifier": "out"
+            }
+          ],
+          "access": "public"
+        }
+      ]
+    },
+    {
+      "type": "ContractGuard.TypeNames.TypeNameNode+Pointer",
+      "access": "public",
+      "kind": "class",
+      "modifiers": [
+        "sealed"
+      ],
+      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "implements": [
+        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Pointer>"
+      ],
+      "members": [
+        {
+          "kind": "property",
+          "name": "EqualityContract",
+          "modifiers": [
+            "override"
+          ],
+          "type": "System.Type",
+          "accessors": {
+            "get": "protected"
+          },
+          "access": "protected"
+        },
+        {
+          "kind": "property",
+          "name": "Element",
+          "type": "ContractGuard.TypeNames.TypeNameNode",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "constructor",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "Element"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "ToString",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "string",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "PrintMembers",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "System.Text.StringBuilder",
+              "builder"
+            ]
+          ],
+          "access": "protected"
+        },
+        {
+          "kind": "operator",
+          "name": "!=",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Pointer",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Pointer",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "==",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Pointer",
+              "left"
+            ],
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Pointer",
+              "right"
+            ]
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "GetHashCode",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "int",
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "object",
+              "obj"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "modifiers": [
+            "override",
+            "sealed"
+          ],
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Equals",
+          "returns": "bool",
+          "params": [
+            [
+              "ContractGuard.TypeNames.TypeNameNode+Pointer",
+              "other"
+            ]
+          ],
+          "access": "public"
+        },
+        {
+          "kind": "method",
+          "name": "Deconstruct",
+          "returns": "void",
+          "params": [
+            {
+              "type": "ContractGuard.TypeNames.TypeNameNode",
+              "name": "Element",
+              "modifier": "out"
+            }
+          ],
+          "access": "public"
+        }
+      ]
+    }
+  ]
+}

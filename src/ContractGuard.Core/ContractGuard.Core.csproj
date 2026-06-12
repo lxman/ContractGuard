@@ -6,4 +6,9 @@
     <Description>Core engine for ContractGuard: the neutral signature model, contract JSON serialization, assembly metadata reader, and comparison engine.</Description>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Dogfood: this assembly's public surface is governed by its own published gate. -->
+    <PackageReference Include="ContractGuard.MSBuild" Version="0.0.1-alpha" PrivateAssets="all" />
+  </ItemGroup>
+
 </Project>

@@ -129,6 +129,10 @@ Requires the .NET 8 SDK or later. Tests compile C# snippets in-memory with Rosly
 the emitted PE bytes back through the metadata reader — the same harness that will pin
 metadata-vs-ISymbol front-end consistency when the Roslyn analyzer (phase 2) lands.
 
+ContractGuard eats its own cooking: `ContractGuard.Core`'s public surface is governed by
+[its own contract](src/ContractGuard.Core/ContractGuard.Core.contract.json) through the
+published `ContractGuard.MSBuild` package, so a PR that drifts the API fails its own gate.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
