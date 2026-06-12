@@ -1,4 +1,4 @@
-namespace ContractGuard.Model;
+namespace ContractGuard.Core.Model;
 
 public sealed record TypeParamContract
 {

@@ -1,4 +1,4 @@
-namespace ContractGuard.Metadata;
+namespace ContractGuard.Core.Metadata;
 
 public sealed record ReaderOptions
 {

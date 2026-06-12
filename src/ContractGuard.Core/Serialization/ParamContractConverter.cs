@@ -1,9 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using ContractGuard.Model;
+using ContractGuard.Core.Model;
 
-namespace ContractGuard.Serialization;
+namespace ContractGuard.Core.Serialization;
 
 /// <summary>
 /// Parameters have two JSON forms: the compact ["type", "name"] pair for plain parameters,
@@ -26,7 +26,7 @@ internal sealed class ParamContractConverter : JsonConverter<ParamContract>
 
     private static ParamContract ReadPair(ref Utf8JsonReader reader)
     {
-        var node = JsonNode.Parse(ref reader)!.AsArray();
+        JsonArray node = JsonNode.Parse(ref reader)!.AsArray();
         if (node.Count != 2 || node.Any(n => n?.GetValueKind() != JsonValueKind.String))
         {
             throw new JsonException(
@@ -42,13 +42,13 @@ internal sealed class ParamContractConverter : JsonConverter<ParamContract>
 
     private static ParamContract ReadObject(ref Utf8JsonReader reader)
     {
-        var node = JsonNode.Parse(ref reader)!.AsObject();
+        JsonObject node = JsonNode.Parse(ref reader)!.AsObject();
         string? type = null;
         string? name = null;
         ParamModifier? modifier = null;
         ConstantValue? defaultValue = null;
 
-        foreach (var (key, value) in node.ToList())
+        foreach ((string key, JsonNode? value) in node.ToList())
         {
             switch (key)
             {
@@ -69,10 +69,9 @@ internal sealed class ParamContractConverter : JsonConverter<ParamContract>
             }
         }
 
-        if (string.IsNullOrEmpty(type))
-            throw new JsonException("A parameter object requires a non-empty 'type'.");
-
-        return new ParamContract { Type = type, Name = name, Modifier = modifier, Default = defaultValue };
+        return string.IsNullOrEmpty(type)
+            ? throw new JsonException("A parameter object requires a non-empty 'type'.")
+            : new ParamContract { Type = type, Name = name, Modifier = modifier, Default = defaultValue };
     }
 
     private static ParamModifier ParseModifier(string? text) => text switch
@@ -101,7 +100,7 @@ internal sealed class ParamContractConverter : JsonConverter<ParamContract>
         writer.WriteString("type", value.Type);
         if (value.Name is not null)
             writer.WriteString("name", value.Name);
-        if (value.Modifier is ParamModifier m)
+        if (value.Modifier is { } m)
         {
             writer.WritePropertyName("modifier");
             EnumMaps.ParamModifier.Write(writer, m, options);

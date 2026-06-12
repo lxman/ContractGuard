@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Reflection.Metadata;
 
-namespace ContractGuard.Metadata;
+namespace ContractGuard.Core.Metadata;
 
 /// <summary>
 /// Decodes metadata signatures into <see cref="MetaType"/> trees. Value-ness comes from the
@@ -17,7 +17,7 @@ internal sealed class MetaTypeProvider : ISignatureTypeProvider<MetaType, Generi
 
     public MetaType GetPrimitiveType(PrimitiveTypeCode typeCode)
     {
-        var (name, isValue) = typeCode switch
+        (string name, bool isValue) = typeCode switch
         {
             PrimitiveTypeCode.Boolean => ("bool", true),
             PrimitiveTypeCode.Byte => ("byte", true),
@@ -92,11 +92,11 @@ internal sealed class MetaTypeProvider : ISignatureTypeProvider<MetaType, Generi
         if (rawTypeKind is 0x11 or 0x12)
             return rawTypeKind == 0x11;
 
-        var td = reader.GetTypeDefinition(handle);
+        TypeDefinition td = reader.GetTypeDefinition(handle);
         if (td.BaseType.IsNil)
             return false;
 
-        var baseName = td.BaseType.Kind switch
+        string? baseName = td.BaseType.Kind switch
         {
             HandleKind.TypeDefinition => MetadataNames.FullName(reader, (TypeDefinitionHandle)td.BaseType),
             HandleKind.TypeReference => MetadataNames.FullName(reader, (TypeReferenceHandle)td.BaseType),

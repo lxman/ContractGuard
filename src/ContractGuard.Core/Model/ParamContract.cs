@@ -1,4 +1,4 @@
-namespace ContractGuard.Model;
+namespace ContractGuard.Core.Model;
 
 /// <summary>
 /// One parameter. JSON forms: compact ["type", "name"] pair, or an object when a modifier

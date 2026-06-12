@@ -2,9 +2,9 @@ using System.Collections.Immutable;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
-using ContractGuard.Model;
+using ContractGuard.Core.Model;
 
-namespace ContractGuard.Metadata;
+namespace ContractGuard.Core.Metadata;
 
 /// <summary>
 /// Reads an assembly's API surface from metadata - no code execution, no dependency
@@ -19,14 +19,14 @@ public static class AssemblyReader
 
     public static AssemblySurface Read(string path, ReaderOptions options)
     {
-        using var stream = File.OpenRead(path);
+        using FileStream stream = File.OpenRead(path);
         return Read(stream, options);
     }
 
     public static AssemblySurface Read(Stream stream, ReaderOptions options)
     {
         using var pe = new PEReader(stream, PEStreamOptions.LeaveOpen);
-        var md = pe.GetMetadataReader();
+        MetadataReader md = pe.GetMetadataReader();
         return new Session(md, options).ReadAssembly();
     }
 
@@ -42,11 +42,11 @@ public static class AssemblyReader
 
         public AssemblySurface ReadAssembly()
         {
-            var name = md.GetString(md.GetAssemblyDefinition().Name);
+            string name = md.GetString(md.GetAssemblyDefinition().Name);
             var types = new List<TypeContract>();
-            foreach (var handle in md.TypeDefinitions)
+            foreach (TypeDefinitionHandle handle in md.TypeDefinitions)
             {
-                var type = ReadType(handle);
+                TypeContract? type = ReadType(handle);
                 if (type is not null)
                     types.Add(type);
             }
@@ -56,22 +56,22 @@ public static class AssemblyReader
 
         private TypeContract? ReadType(TypeDefinitionHandle handle)
         {
-            var td = md.GetTypeDefinition(handle);
-            var shortName = md.GetString(td.Name);
+            TypeDefinition td = md.GetTypeDefinition(handle);
+            string shortName = md.GetString(td.Name);
             if (shortName.StartsWith('<'))
                 return null;
 
-            var accessibility = EffectiveTypeAccessibility(td);
-            var fullName = MetadataNames.FullName(md, handle);
-            var typeContext = _decoder.TypeContext(handle);
+            Accessibility accessibility = EffectiveTypeAccessibility(td);
+            string fullName = MetadataNames.FullName(md, handle);
+            byte typeContext = _decoder.TypeContext(handle);
 
-            var typeParamNames = td.GetGenericParameters()
+            List<string> typeParamNames = td.GetGenericParameters()
                 .Select(h => md.GetString(md.GetGenericParameter(h).Name))
                 .ToList();
             var context = new GenericContext(typeParamNames, []);
 
-            var kind = ClassifyType(td, context, out var baseTypeName);
-            var typeParams = ReadGenericParams(td.GetGenericParameters(), context);
+            TypeKind kind = ClassifyType(td, context, out string? baseTypeName);
+            List<TypeParamContract> typeParams = ReadGenericParams(td.GetGenericParameters(), context);
 
             string? extends = null;
             if (kind == TypeKind.Class && baseTypeName is not null && baseTypeName != "System.Object")
@@ -80,9 +80,9 @@ public static class AssemblyReader
             // TODO: base type / interface nullable annotations (NullableAttribute on the
             // InterfaceImpl rows) are not decoded.
             var implements = new List<string>();
-            foreach (var ih in td.GetInterfaceImplementations())
+            foreach (InterfaceImplementationHandle ih in td.GetInterfaceImplementations())
             {
-                var impl = md.GetInterfaceImplementation(ih);
+                InterfaceImplementation impl = md.GetInterfaceImplementation(ih);
                 implements.Add(RenderEntity(impl.Interface, context));
             }
 
@@ -106,12 +106,12 @@ public static class AssemblyReader
                         Members = NullIfEmpty(ReadEnumMembers(td, context, typeContext)),
                     };
                 case TypeKind.Delegate:
-                    var invoke = FindMethod(td, "Invoke");
-                    if (invoke is MethodDefinition invokeDef)
+                    MethodDefinition? invoke = FindMethod(td, "Invoke");
+                    if (invoke is { } invokeDef)
                     {
-                        var methodContext = MethodContext(invokeDef, typeContext);
-                        var sig = invokeDef.DecodeSignature(MetaTypeProvider.Instance, context);
-                        var (returnType, _) = RenderReturn(invokeDef, sig.ReturnType, methodContext);
+                        byte methodContext = MethodContext(invokeDef, typeContext);
+                        MethodSignature<MetaType> sig = invokeDef.DecodeSignature(MetaTypeProvider.Instance, context);
+                        (string returnType, _) = RenderReturn(invokeDef, sig.ReturnType, methodContext);
                         return contract with
                         {
                             Returns = returnType,
@@ -132,50 +132,50 @@ public static class AssemblyReader
         {
             var members = new List<MemberContract>();
             var accessorHandles = new HashSet<MethodDefinitionHandle>();
-            var isInterface = (td.Attributes & TypeAttributes.Interface) != 0;
+            bool isInterface = (td.Attributes & TypeAttributes.Interface) != 0;
 
             // Properties and events first: their accessor methods must not surface as methods.
-            foreach (var ph in td.GetProperties())
+            foreach (PropertyDefinitionHandle ph in td.GetProperties())
             {
-                var pd = md.GetPropertyDefinition(ph);
-                var accessors = pd.GetAccessors();
+                PropertyDefinition pd = md.GetPropertyDefinition(ph);
+                PropertyAccessors accessors = pd.GetAccessors();
                 if (!accessors.Getter.IsNil)
                     accessorHandles.Add(accessors.Getter);
                 if (!accessors.Setter.IsNil)
                     accessorHandles.Add(accessors.Setter);
 
-                var property = ReadProperty(pd, accessors, typeContext, nullableContext, isInterface);
+                MemberContract? property = ReadProperty(pd, accessors, typeContext, nullableContext, isInterface);
                 if (property is not null)
                     members.Add(property);
             }
 
-            foreach (var eh in td.GetEvents())
+            foreach (EventDefinitionHandle eh in td.GetEvents())
             {
-                var ed = md.GetEventDefinition(eh);
-                var accessors = ed.GetAccessors();
+                EventDefinition ed = md.GetEventDefinition(eh);
+                EventAccessors accessors = ed.GetAccessors();
                 if (!accessors.Adder.IsNil)
                     accessorHandles.Add(accessors.Adder);
                 if (!accessors.Remover.IsNil)
                     accessorHandles.Add(accessors.Remover);
 
-                var evt = ReadEvent(ed, accessors, typeContext, nullableContext, isInterface);
+                EventContract? evt = ReadEvent(ed, accessors, typeContext, nullableContext, isInterface);
                 if (evt is not null)
                     members.Add(evt);
             }
 
-            foreach (var fh in td.GetFields())
+            foreach (FieldDefinitionHandle fh in td.GetFields())
             {
-                var field = ReadField(md.GetFieldDefinition(fh), typeContext, nullableContext);
+                FieldContract? field = ReadField(md.GetFieldDefinition(fh), typeContext, nullableContext);
                 if (field is not null)
                     members.Add(field);
             }
 
-            foreach (var mh in td.GetMethods())
+            foreach (MethodDefinitionHandle mh in td.GetMethods())
             {
                 if (accessorHandles.Contains(mh))
                     continue;
 
-                var method = ReadMethod(md.GetMethodDefinition(mh), typeContext, nullableContext, isInterface);
+                MemberContract? method = ReadMethod(md.GetMethodDefinition(mh), typeContext, nullableContext, isInterface);
                 if (method is not null)
                     members.Add(method);
             }
@@ -186,7 +186,7 @@ public static class AssemblyReader
         private MemberContract? ReadMethod(
             MethodDefinition def, GenericContext typeContext, byte typeNullableContext, bool isInterface)
         {
-            var name = md.GetString(def.Name);
+            string name = md.GetString(def.Name);
             if (name.StartsWith('<') || name == ".cctor")
                 return null;
 
@@ -195,13 +195,13 @@ public static class AssemblyReader
             if (name.Contains('.') && name is not (".ctor"))
                 return null;
 
-            var methodParamNames = def.GetGenericParameters()
+            List<string> methodParamNames = def.GetGenericParameters()
                 .Select(h => md.GetString(md.GetGenericParameter(h).Name))
                 .ToList();
             var context = new GenericContext(typeContext.TypeParameters, methodParamNames);
-            var sig = def.DecodeSignature(MetaTypeProvider.Instance, context);
-            var access = MemberAccessibility(def.Attributes);
-            var nullableContext = MethodContext(def, typeNullableContext);
+            MethodSignature<MetaType> sig = def.DecodeSignature(MetaTypeProvider.Instance, context);
+            Accessibility access = MemberAccessibility(def.Attributes);
+            byte nullableContext = MethodContext(def, typeNullableContext);
 
             if (name == ".ctor")
             {
@@ -214,7 +214,7 @@ public static class AssemblyReader
 
             if ((def.Attributes & MethodAttributes.SpecialName) != 0 && name.StartsWith("op_", StringComparison.Ordinal))
             {
-                var (operatorReturn, _) = RenderReturn(def, sig.ReturnType, nullableContext);
+                (string operatorReturn, _) = RenderReturn(def, sig.ReturnType, nullableContext);
                 return new OperatorContract
                 {
                     Name = OperatorSymbol(name),
@@ -223,8 +223,8 @@ public static class AssemblyReader
                 };
             }
 
-            var (returns, refKind) = RenderReturn(def, sig.ReturnType, nullableContext);
-            var parameters = BuildParams(def, sig.ParameterTypes, nullableContext);
+            (string returns, ReturnRefKind? refKind) = RenderReturn(def, sig.ReturnType, nullableContext);
+            List<ParamContract> parameters = BuildParams(def, sig.ParameterTypes, nullableContext);
 
             if (parameters.Count > 0 && MetadataNames.HasAttribute(md, def.GetCustomAttributes(), ExtensionAttribute)
                 && parameters[0].Modifier is null)
@@ -248,7 +248,7 @@ public static class AssemblyReader
             PropertyDefinition pd, PropertyAccessors accessors, GenericContext context,
             byte typeNullableContext, bool isInterface)
         {
-            var name = md.GetString(pd.Name);
+            string name = md.GetString(pd.Name);
             if (name.Contains('.'))
                 return null; // explicit interface implementation
 
@@ -257,26 +257,26 @@ public static class AssemblyReader
             if (getter is null && setter is null)
                 return null;
 
-            var nullableContext = getter is MethodDefinition g0 ? MethodContext(g0, typeNullableContext)
-                : setter is MethodDefinition s0 ? MethodContext(s0, typeNullableContext)
+            byte nullableContext = getter is { } g0 ? MethodContext(g0, typeNullableContext)
+                : setter is { } s0 ? MethodContext(s0, typeNullableContext)
                 : typeNullableContext;
 
-            var sig = pd.DecodeSignature(MetaTypeProvider.Instance, context);
-            var typeMeta = ApplyAnnotations(sig.ReturnType, pd.GetCustomAttributes(), nullableContext);
-            var (type, refKind) = SplitByRef(typeMeta);
+            MethodSignature<MetaType> sig = pd.DecodeSignature(MetaTypeProvider.Instance, context);
+            MetaType typeMeta = ApplyAnnotations(sig.ReturnType, pd.GetCustomAttributes(), nullableContext);
+            (string type, ReturnRefKind? refKind) = SplitByRef(typeMeta);
 
-            Accessibility? getterAccess = getter is MethodDefinition g ? MemberAccessibility(g.Attributes) : null;
-            Accessibility? setterAccess = setter is MethodDefinition s ? MemberAccessibility(s.Attributes) : null;
-            var access = Broadest(getterAccess, setterAccess);
+            Accessibility? getterAccess = getter is { } g ? MemberAccessibility(g.Attributes) : null;
+            Accessibility? setterAccess = setter is { } s ? MemberAccessibility(s.Attributes) : null;
+            Accessibility access = Broadest(getterAccess, setterAccess);
 
             var isInit = false;
-            if (setter is MethodDefinition setterDef)
+            if (setter is { } setterDef)
             {
-                var setterSig = setterDef.DecodeSignature(MetaTypeProvider.Instance, context);
+                MethodSignature<MetaType> setterSig = setterDef.DecodeSignature(MetaTypeProvider.Instance, context);
                 isInit = setterSig.ReturnType.HasRequiredModifier(ExternalInitModifier);
             }
 
-            var primary = getter ?? setter!.Value;
+            MethodDefinition primary = getter ?? setter!.Value;
             var accessorsContract = new AccessorsContract
             {
                 Get = getterAccess,
@@ -284,46 +284,44 @@ public static class AssemblyReader
                 Init = isInit ? setterAccess : null,
             };
 
-            if (sig.ParameterTypes.Length > 0)
-            {
-                // Indexer: index parameters come from the getter, or the setter minus 'value'.
-                var paramSource = getter ?? setter!.Value;
-                return new IndexerContract
+            if (sig.ParameterTypes.Length <= 0)
+                return new PropertyContract
                 {
+                    Name = name,
                     Access = access,
                     Modifiers = NullIfEmpty(MethodModifiers(primary, isInterface)),
                     Type = type,
                     RefKind = refKind,
-                    Params = BuildParams(paramSource, sig.ParameterTypes, nullableContext),
                     Accessors = accessorsContract,
                 };
-            }
-
-            return new PropertyContract
+            // Indexer: index parameters come from the getter, or the setter minus 'value'.
+            MethodDefinition paramSource = getter ?? setter!.Value;
+            return new IndexerContract
             {
-                Name = name,
                 Access = access,
                 Modifiers = NullIfEmpty(MethodModifiers(primary, isInterface)),
                 Type = type,
                 RefKind = refKind,
+                Params = BuildParams(paramSource, sig.ParameterTypes, nullableContext),
                 Accessors = accessorsContract,
             };
+
         }
 
         private EventContract? ReadEvent(
             EventDefinition ed, EventAccessors accessors, GenericContext context,
             byte typeNullableContext, bool isInterface)
         {
-            var name = md.GetString(ed.Name);
+            string name = md.GetString(ed.Name);
             if (name.Contains('.'))
                 return null;
 
             if (accessors.Adder.IsNil)
                 return null;
 
-            var adder = md.GetMethodDefinition(accessors.Adder);
-            var nullableContext = MethodContext(adder, typeNullableContext);
-            var typeMeta = ApplyAnnotations(MetaTypeFromEntity(ed.Type, context), ed.GetCustomAttributes(), nullableContext);
+            MethodDefinition adder = md.GetMethodDefinition(accessors.Adder);
+            byte nullableContext = MethodContext(adder, typeNullableContext);
+            MetaType typeMeta = ApplyAnnotations(MetaTypeFromEntity(ed.Type, context), ed.GetCustomAttributes(), nullableContext);
 
             return new EventContract
             {
@@ -336,12 +334,12 @@ public static class AssemblyReader
 
         private FieldContract? ReadField(FieldDefinition fd, GenericContext context, byte typeNullableContext)
         {
-            var name = md.GetString(fd.Name);
+            string name = md.GetString(fd.Name);
             if (name.StartsWith('<') || name == "value__")
                 return null;
 
             var modifiers = new List<MemberModifier>();
-            var isConst = (fd.Attributes & FieldAttributes.Literal) != 0;
+            bool isConst = (fd.Attributes & FieldAttributes.Literal) != 0;
             if (isConst)
             {
                 modifiers.Add(MemberModifier.Const);
@@ -354,7 +352,7 @@ public static class AssemblyReader
                     modifiers.Add(MemberModifier.Readonly);
             }
 
-            var typeMeta = ApplyAnnotations(
+            MetaType typeMeta = ApplyAnnotations(
                 fd.DecodeSignature(MetaTypeProvider.Instance, context), fd.GetCustomAttributes(), typeNullableContext);
 
             return new FieldContract
@@ -370,9 +368,9 @@ public static class AssemblyReader
         private List<MemberContract> ReadEnumMembers(TypeDefinition td, GenericContext context, byte nullableContext)
         {
             var members = new List<MemberContract>();
-            foreach (var fh in td.GetFields())
+            foreach (FieldDefinitionHandle fh in td.GetFields())
             {
-                var field = ReadField(md.GetFieldDefinition(fh), context, nullableContext);
+                FieldContract? field = ReadField(md.GetFieldDefinition(fh), context, nullableContext);
                 if (field is not null)
                     members.Add(field);
             }
@@ -384,35 +382,35 @@ public static class AssemblyReader
             MethodDefinition def, ImmutableArray<MetaType> signatureTypes, byte nullableContext)
         {
             var bySequence = new Dictionary<int, Parameter>();
-            foreach (var ph in def.GetParameters())
+            foreach (ParameterHandle ph in def.GetParameters())
             {
-                var p = md.GetParameter(ph);
+                Parameter p = md.GetParameter(ph);
                 bySequence[p.SequenceNumber] = p;
             }
 
             var result = new List<ParamContract>(signatureTypes.Length);
             for (var i = 0; i < signatureTypes.Length; i++)
             {
-                var meta = signatureTypes[i];
+                MetaType meta = signatureTypes[i];
                 string? name = null;
                 ParamModifier? modifier = null;
                 ConstantValue? defaultValue = null;
 
-                Parameter? row = bySequence.TryGetValue(i + 1, out var found) ? found : null;
+                Parameter? row = bySequence.TryGetValue(i + 1, out Parameter found) ? found : null;
                 meta = ApplyAnnotations(meta, row?.GetCustomAttributes(), nullableContext);
-                var byRef = meta is MetaType.ByRef;
+                bool byRef = meta is MetaType.ByRef;
                 if (meta is MetaType.ByRef br)
                     meta = br.Element;
                 if (byRef)
                     modifier = ParamModifier.Ref;
 
-                if (row is Parameter p)
+                if (row is { } p)
                 {
                     name = p.Name.IsNil ? null : md.GetString(p.Name);
                     if (byRef)
                     {
-                        var isOut = (p.Attributes & ParameterAttributes.Out) != 0;
-                        var isIn = (p.Attributes & ParameterAttributes.In) != 0;
+                        bool isOut = (p.Attributes & ParameterAttributes.Out) != 0;
+                        bool isIn = (p.Attributes & ParameterAttributes.In) != 0;
                         modifier = isIn ? ParamModifier.In : isOut ? ParamModifier.Out : ParamModifier.Ref;
                     }
                     else if (MetadataNames.HasAttribute(md, p.GetCustomAttributes(), ParamArrayAttribute))
@@ -443,17 +441,15 @@ public static class AssemblyReader
             MethodDefinition def, MetaType returnType, byte nullableContext)
         {
             CustomAttributeHandleCollection? returnAttributes = null;
-            foreach (var ph in def.GetParameters())
+            foreach (ParameterHandle ph in def.GetParameters())
             {
-                var p = md.GetParameter(ph);
-                if (p.SequenceNumber == 0)
-                {
-                    returnAttributes = p.GetCustomAttributes();
-                    break;
-                }
+                Parameter p = md.GetParameter(ph);
+                if (p.SequenceNumber != 0) continue;
+                returnAttributes = p.GetCustomAttributes();
+                break;
             }
 
-            var meta = ApplyAnnotations(returnType, returnAttributes, nullableContext);
+            MetaType meta = ApplyAnnotations(returnType, returnAttributes, nullableContext);
             return SplitByRef(meta);
         }
 
@@ -468,17 +464,15 @@ public static class AssemblyReader
 
         private MetaType ApplyAnnotations(MetaType meta, CustomAttributeHandleCollection? attributes, byte context)
         {
-            var names = attributes is CustomAttributeHandleCollection a
+            ImmutableArray<string?> names = attributes is { } a
                 ? _decoder.FindTupleNames(a)
                 : [];
 
             NullabilityDecoder.Flags? flags = null;
             byte effectiveContext = 0;
-            if (options.DecodeNullableAnnotations)
-            {
-                flags = attributes is CustomAttributeHandleCollection attrs ? _decoder.FindNullableFlags(attrs) : null;
-                effectiveContext = context;
-            }
+            if (!options.DecodeNullableAnnotations) return _decoder.Apply(meta, flags, effectiveContext, names);
+            flags = attributes is { } attrs ? _decoder.FindNullableFlags(attrs) : null;
+            effectiveContext = context;
 
             return _decoder.Apply(meta, flags, effectiveContext, names);
         }
@@ -490,11 +484,11 @@ public static class AssemblyReader
             GenericParameterHandleCollection handles, GenericContext context)
         {
             var result = new List<TypeParamContract>();
-            foreach (var h in handles)
+            foreach (GenericParameterHandle h in handles)
             {
-                var gp = md.GetGenericParameter(h);
-                var attrs = gp.Attributes;
-                var isStruct = (attrs & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0;
+                GenericParameter gp = md.GetGenericParameter(h);
+                GenericParameterAttributes attrs = gp.Attributes;
+                bool isStruct = (attrs & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0;
 
                 // TODO: constraint nullability ('class?', 'notnull') is not decoded.
                 var constraints = new List<string>();
@@ -503,10 +497,10 @@ public static class AssemblyReader
                 if (isStruct)
                     constraints.Add("struct");
 
-                foreach (var ch in gp.GetConstraints())
+                foreach (GenericParameterConstraintHandle ch in gp.GetConstraints())
                 {
-                    var constraint = md.GetGenericParameterConstraint(ch);
-                    var typeName = RenderEntity(constraint.Type, context);
+                    GenericParameterConstraint constraint = md.GetGenericParameterConstraint(ch);
+                    string typeName = RenderEntity(constraint.Type, context);
                     if (typeName is "System.ValueType" or "System.Object")
                         continue;
                     constraints.Add(typeName);
@@ -552,28 +546,34 @@ public static class AssemblyReader
         private List<TypeModifier> TypeModifiers(TypeDefinition td, TypeKind kind)
         {
             var result = new List<TypeModifier>();
-            if (kind == TypeKind.Class)
+            switch (kind)
             {
-                var isAbstract = (td.Attributes & TypeAttributes.Abstract) != 0;
-                var isSealed = (td.Attributes & TypeAttributes.Sealed) != 0;
-                if (isAbstract && isSealed)
+                case TypeKind.Class:
                 {
-                    result.Add(TypeModifier.Static);
+                    bool isAbstract = (td.Attributes & TypeAttributes.Abstract) != 0;
+                    bool isSealed = (td.Attributes & TypeAttributes.Sealed) != 0;
+                    if (isAbstract && isSealed)
+                    {
+                        result.Add(TypeModifier.Static);
+                    }
+                    else
+                    {
+                        if (isAbstract)
+                            result.Add(TypeModifier.Abstract);
+                        if (isSealed)
+                            result.Add(TypeModifier.Sealed);
+                    }
+
+                    break;
                 }
-                else
+                case TypeKind.Struct:
                 {
-                    if (isAbstract)
-                        result.Add(TypeModifier.Abstract);
-                    if (isSealed)
-                        result.Add(TypeModifier.Sealed);
+                    if (MetadataNames.HasAttribute(md, td.GetCustomAttributes(), ReadOnlyAttribute))
+                        result.Add(TypeModifier.Readonly);
+                    if (MetadataNames.HasAttribute(md, td.GetCustomAttributes(), ByRefLikeAttribute))
+                        result.Add(TypeModifier.Ref);
+                    break;
                 }
-            }
-            else if (kind == TypeKind.Struct)
-            {
-                if (MetadataNames.HasAttribute(md, td.GetCustomAttributes(), ReadOnlyAttribute))
-                    result.Add(TypeModifier.Readonly);
-                if (MetadataNames.HasAttribute(md, td.GetCustomAttributes(), ByRefLikeAttribute))
-                    result.Add(TypeModifier.Ref);
             }
 
             return result;
@@ -582,28 +582,31 @@ public static class AssemblyReader
         private List<MemberModifier> MethodModifiers(MethodDefinition def, bool isInterface)
         {
             var result = new List<MemberModifier>();
-            var attrs = def.Attributes;
+            MethodAttributes attrs = def.Attributes;
             if ((attrs & MethodAttributes.Static) != 0)
                 result.Add(MemberModifier.Static);
 
             if (!isInterface)
             {
-                var isVirtual = (attrs & MethodAttributes.Virtual) != 0;
-                var isNewSlot = (attrs & MethodAttributes.VtableLayoutMask) == MethodAttributes.NewSlot;
-                var isFinal = (attrs & MethodAttributes.Final) != 0;
+                bool isVirtual = (attrs & MethodAttributes.Virtual) != 0;
+                bool isNewSlot = (attrs & MethodAttributes.VtableLayoutMask) == MethodAttributes.NewSlot;
+                bool isFinal = (attrs & MethodAttributes.Final) != 0;
                 if ((attrs & MethodAttributes.Abstract) != 0)
                 {
                     result.Add(MemberModifier.Abstract);
                 }
-                else if (isVirtual && !isNewSlot)
+                else switch (isVirtual)
                 {
-                    result.Add(MemberModifier.Override);
-                    if (isFinal)
-                        result.Add(MemberModifier.Sealed);
-                }
-                else if (isVirtual && !isFinal)
-                {
-                    result.Add(MemberModifier.Virtual);
+                    case true when !isNewSlot:
+                    {
+                        result.Add(MemberModifier.Override);
+                        if (isFinal)
+                            result.Add(MemberModifier.Sealed);
+                        break;
+                    }
+                    case true when !isFinal:
+                        result.Add(MemberModifier.Virtual);
+                        break;
                 }
             }
 
@@ -615,9 +618,9 @@ public static class AssemblyReader
 
         private string EnumUnderlyingType(TypeDefinition td, GenericContext context)
         {
-            foreach (var fh in td.GetFields())
+            foreach (FieldDefinitionHandle fh in td.GetFields())
             {
-                var fd = md.GetFieldDefinition(fh);
+                FieldDefinition fd = md.GetFieldDefinition(fh);
                 if ((fd.Attributes & FieldAttributes.Static) == 0)
                     return MetaTypeRenderer.Render(fd.DecodeSignature(MetaTypeProvider.Instance, context));
             }
@@ -627,9 +630,9 @@ public static class AssemblyReader
 
         private MethodDefinition? FindMethod(TypeDefinition td, string name)
         {
-            foreach (var mh in td.GetMethods())
+            foreach (MethodDefinitionHandle mh in td.GetMethods())
             {
-                var def = md.GetMethodDefinition(mh);
+                MethodDefinition def = md.GetMethodDefinition(mh);
                 if (md.GetString(def.Name) == name)
                     return def;
             }
@@ -654,9 +657,9 @@ public static class AssemblyReader
 
         private ConstantValue ReadConstant(ConstantHandle handle)
         {
-            var constant = md.GetConstant(handle);
-            var blob = md.GetBlobReader(constant.Value);
-            var value = constant.TypeCode switch
+            Constant constant = md.GetConstant(handle);
+            BlobReader blob = md.GetBlobReader(constant.Value);
+            object? value = constant.TypeCode switch
             {
                 ConstantTypeCode.Boolean => (object?)blob.ReadBoolean(),
                 ConstantTypeCode.Char => blob.ReadChar(),
@@ -682,12 +685,12 @@ public static class AssemblyReader
         /// in the chain so scope filtering sees reality.</summary>
         private Accessibility EffectiveTypeAccessibility(TypeDefinition td)
         {
-            var access = TypeAccessibility(td.Attributes);
-            var declaring = td.GetDeclaringType();
+            Accessibility access = TypeAccessibility(td.Attributes);
+            TypeDefinitionHandle declaring = td.GetDeclaringType();
             while (!declaring.IsNil)
             {
-                var parent = md.GetTypeDefinition(declaring);
-                var parentAccess = TypeAccessibility(parent.Attributes);
+                TypeDefinition parent = md.GetTypeDefinition(declaring);
+                Accessibility parentAccess = TypeAccessibility(parent.Attributes);
                 if (Rank(parentAccess) < Rank(access))
                     access = parentAccess;
                 declaring = parent.GetDeclaringType();

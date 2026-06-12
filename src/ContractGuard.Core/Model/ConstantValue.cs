@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace ContractGuard.Model;
+namespace ContractGuard.Core.Model;
 
 /// <summary>
 /// A constant (parameter default, const field value) as a typed value. Numeric values are
@@ -43,8 +43,8 @@ public sealed class ConstantValue : IEquatable<ConstantValue>
 
         // Metadata encodes both 'null' and 'default(TStruct)' as a nullref constant, so the
         // two cannot be told apart at comparison time and are treated as equal.
-        var thisNullish = IsDefaultSentinel || Value is null;
-        var otherNullish = other.IsDefaultSentinel || other.Value is null;
+        bool thisNullish = IsDefaultSentinel || Value is null;
+        bool otherNullish = other.IsDefaultSentinel || other.Value is null;
         if (thisNullish || otherNullish)
             return thisNullish && otherNullish;
 

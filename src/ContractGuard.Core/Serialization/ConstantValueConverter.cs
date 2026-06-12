@@ -1,9 +1,9 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
-using ContractGuard.Model;
+using ContractGuard.Core.Model;
 
-namespace ContractGuard.Serialization;
+namespace ContractGuard.Core.Serialization;
 
 /// <summary>
 /// Constants are typed JSON values: string, number, boolean, or null. The object form
@@ -26,9 +26,9 @@ internal sealed class ConstantValueConverter : JsonConverter<ConstantValue>
             case JsonTokenType.False:
                 return ConstantValue.Of(false);
             case JsonTokenType.Number:
-                return reader.TryGetInt64(out var l) ? ConstantValue.Of(l) : ConstantValue.Of(reader.GetDouble());
+                return reader.TryGetInt64(out long l) ? ConstantValue.Of(l) : ConstantValue.Of(reader.GetDouble());
             case JsonTokenType.StartObject:
-                var node = JsonNode.Parse(ref reader)!.AsObject();
+                JsonObject node = JsonNode.Parse(ref reader)!.AsObject();
                 return ReadSpecial(node);
             default:
                 throw new JsonException($"Unexpected token '{reader.TokenType}' for a constant value.");
@@ -37,26 +37,26 @@ internal sealed class ConstantValueConverter : JsonConverter<ConstantValue>
 
     public static ConstantValue FromNode(JsonNode? node)
     {
-        if (node is null)
-            return ConstantValue.Of(null);
-        if (node is JsonObject obj)
-            return ReadSpecial(obj);
-
-        return node.GetValueKind() switch
+        return node switch
         {
-            JsonValueKind.String => ConstantValue.Of(node.GetValue<string>()),
-            JsonValueKind.True => ConstantValue.Of(true),
-            JsonValueKind.False => ConstantValue.Of(false),
-            JsonValueKind.Number => node.AsValue().TryGetValue<long>(out var l)
-                ? ConstantValue.Of(l)
-                : ConstantValue.Of(node.GetValue<double>()),
-            var kind => throw new JsonException($"Unexpected '{kind}' for a constant value."),
+            null => ConstantValue.Of(null),
+            JsonObject obj => ReadSpecial(obj),
+            _ => node.GetValueKind() switch
+            {
+                JsonValueKind.String => ConstantValue.Of(node.GetValue<string>()),
+                JsonValueKind.True => ConstantValue.Of(true),
+                JsonValueKind.False => ConstantValue.Of(false),
+                JsonValueKind.Number => node.AsValue().TryGetValue<long>(out long l)
+                    ? ConstantValue.Of(l)
+                    : ConstantValue.Of(node.GetValue<double>()),
+                var kind => throw new JsonException($"Unexpected '{kind}' for a constant value."),
+            }
         };
     }
 
     private static ConstantValue ReadSpecial(JsonObject obj)
     {
-        if (obj.Count == 1 && obj.TryGetPropertyValue("$special", out var special)
+        if (obj.Count == 1 && obj.TryGetPropertyValue("$special", out JsonNode? special)
             && special?.GetValue<string>() == "default")
         {
             return ConstantValue.DefaultSentinel;

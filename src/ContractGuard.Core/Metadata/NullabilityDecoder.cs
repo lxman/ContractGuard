@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Reflection.Metadata;
 
-namespace ContractGuard.Metadata;
+namespace ContractGuard.Core.Metadata;
 
 /// <summary>
 /// Decodes NullableAttribute / NullableContextAttribute / TupleElementNamesAttribute blobs
@@ -37,28 +37,25 @@ internal sealed class NullabilityDecoder(MetadataReader md)
 
     public Flags? FindNullableFlags(CustomAttributeHandleCollection attributes)
     {
-        foreach (var h in attributes)
+        foreach (CustomAttributeHandle h in attributes)
         {
-            var ca = md.GetCustomAttribute(h);
+            CustomAttribute ca = md.GetCustomAttribute(h);
             if (MetadataNames.AttributeTypeName(md, ca) != NullableAttribute)
                 continue;
 
-            var blob = md.GetBlobReader(ca.Value);
+            BlobReader blob = md.GetBlobReader(ca.Value);
             if (blob.ReadUInt16() != 1)
                 return null;
 
-            if (TakesByteArray(ca))
-            {
-                var count = blob.ReadInt32();
-                if (count < 0)
-                    return null;
-                var bytes = new byte[count];
-                for (var i = 0; i < count; i++)
-                    bytes[i] = blob.ReadByte();
-                return new Flags(bytes);
-            }
+            if (!TakesByteArray(ca)) return new Flags(blob.ReadByte());
+            int count = blob.ReadInt32();
+            if (count < 0)
+                return null;
+            var bytes = new byte[count];
+            for (var i = 0; i < count; i++)
+                bytes[i] = blob.ReadByte();
+            return new Flags(bytes);
 
-            return new Flags(blob.ReadByte());
         }
 
         return null;
@@ -66,13 +63,13 @@ internal sealed class NullabilityDecoder(MetadataReader md)
 
     public byte? FindNullableContext(CustomAttributeHandleCollection attributes)
     {
-        foreach (var h in attributes)
+        foreach (CustomAttributeHandle h in attributes)
         {
-            var ca = md.GetCustomAttribute(h);
+            CustomAttribute ca = md.GetCustomAttribute(h);
             if (MetadataNames.AttributeTypeName(md, ca) != NullableContextAttribute)
                 continue;
 
-            var blob = md.GetBlobReader(ca.Value);
+            BlobReader blob = md.GetBlobReader(ca.Value);
             if (blob.ReadUInt16() != 1)
                 return null;
             return blob.ReadByte();
@@ -86,8 +83,8 @@ internal sealed class NullabilityDecoder(MetadataReader md)
     {
         while (!handle.IsNil)
         {
-            var td = md.GetTypeDefinition(handle);
-            if (FindNullableContext(td.GetCustomAttributes()) is byte context)
+            TypeDefinition td = md.GetTypeDefinition(handle);
+            if (FindNullableContext(td.GetCustomAttributes()) is { } context)
                 return context;
             handle = td.GetDeclaringType();
         }
@@ -97,21 +94,21 @@ internal sealed class NullabilityDecoder(MetadataReader md)
 
     public ImmutableArray<string?> FindTupleNames(CustomAttributeHandleCollection attributes)
     {
-        foreach (var h in attributes)
+        foreach (CustomAttributeHandle h in attributes)
         {
-            var ca = md.GetCustomAttribute(h);
+            CustomAttribute ca = md.GetCustomAttribute(h);
             if (MetadataNames.AttributeTypeName(md, ca) != TupleElementNamesAttribute)
                 continue;
 
-            var blob = md.GetBlobReader(ca.Value);
+            BlobReader blob = md.GetBlobReader(ca.Value);
             if (blob.ReadUInt16() != 1)
                 return [];
 
-            var count = blob.ReadInt32();
+            int count = blob.ReadInt32();
             if (count < 0)
                 return [];
 
-            var names = ImmutableArray.CreateBuilder<string?>(count);
+            ImmutableArray<string?>.Builder names = ImmutableArray.CreateBuilder<string?>(count);
             for (var i = 0; i < count; i++)
                 names.Add(blob.ReadSerializedString());
             return names.ToImmutable();
@@ -123,17 +120,15 @@ internal sealed class NullabilityDecoder(MetadataReader md)
     /// <summary>Applies nullable flags (or a context default) and tuple element names.</summary>
     public MetaType Apply(MetaType type, Flags? flags, byte context, ImmutableArray<string?> tupleNames)
     {
-        var effective = flags ?? new Flags(context);
+        Flags effective = flags ?? new Flags(context);
         try
         {
             var index = 0;
-            var annotated = ApplyFlags(type, effective, ref index);
+            MetaType annotated = ApplyFlags(type, effective, ref index);
 
-            if (!tupleNames.IsDefaultOrEmpty)
-            {
-                var nameIndex = 0;
-                annotated = ApplyTupleNames(annotated, tupleNames, ref nameIndex);
-            }
+            if (tupleNames.IsDefaultOrEmpty) return annotated;
+            var nameIndex = 0;
+            annotated = ApplyTupleNames(annotated, tupleNames, ref nameIndex);
 
             return annotated;
         }
@@ -158,7 +153,7 @@ internal sealed class NullabilityDecoder(MetadataReader md)
 
             case MetaType.Named { IsValueType: false } reference:
             {
-                var flag = flags.At(index++);
+                byte flag = flags.At(index++);
                 return reference with
                 {
                     Nullability = flag,
@@ -175,7 +170,7 @@ internal sealed class NullabilityDecoder(MetadataReader md)
 
             case MetaType.Array array:
             {
-                var flag = flags.At(index++);
+                byte flag = flags.At(index++);
                 return array with
                 {
                     Nullability = flag,
@@ -197,8 +192,8 @@ internal sealed class NullabilityDecoder(MetadataReader md)
 
     private static ImmutableArray<MetaType> ApplyAll(ImmutableArray<MetaType> types, Flags flags, ref int index)
     {
-        var builder = ImmutableArray.CreateBuilder<MetaType>(types.Length);
-        foreach (var t in types)
+        ImmutableArray<MetaType>.Builder builder = ImmutableArray.CreateBuilder<MetaType>(types.Length);
+        foreach (MetaType t in types)
             builder.Add(ApplyFlags(t, flags, ref index));
         return builder.ToImmutable();
     }
@@ -211,21 +206,21 @@ internal sealed class NullabilityDecoder(MetadataReader md)
         {
             case MetaType.Named { IsValueTuple: true } tuple:
             {
-                var elementNames = ImmutableArray.CreateBuilder<string?>(tuple.Args.Length);
+                ImmutableArray<string?>.Builder elementNames = ImmutableArray.CreateBuilder<string?>(tuple.Args.Length);
                 for (var i = 0; i < tuple.Args.Length; i++)
                     elementNames.Add(index < names.Length ? names[index++] : null);
 
-                var args = ImmutableArray.CreateBuilder<MetaType>(tuple.Args.Length);
-                foreach (var arg in tuple.Args)
+                ImmutableArray<MetaType>.Builder args = ImmutableArray.CreateBuilder<MetaType>(tuple.Args.Length);
+                foreach (MetaType arg in tuple.Args)
                     args.Add(ApplyTupleNames(arg, names, ref index));
 
                 return tuple with { Args = args.ToImmutable(), TupleNames = elementNames.ToImmutable() };
             }
 
-            case MetaType.Named named when named.Args.Length > 0:
+            case MetaType.Named { Args.Length: > 0 } named:
             {
-                var args = ImmutableArray.CreateBuilder<MetaType>(named.Args.Length);
-                foreach (var arg in named.Args)
+                ImmutableArray<MetaType>.Builder args = ImmutableArray.CreateBuilder<MetaType>(named.Args.Length);
+                foreach (MetaType arg in named.Args)
                     args.Add(ApplyTupleNames(arg, names, ref index));
                 return named with { Args = args.ToImmutable() };
             }
@@ -249,7 +244,7 @@ internal sealed class NullabilityDecoder(MetadataReader md)
 
     private bool TakesByteArray(CustomAttribute attribute)
     {
-        var sig = attribute.Constructor.Kind switch
+        MethodSignature<MetaType> sig = attribute.Constructor.Kind switch
         {
             HandleKind.MethodDefinition =>
                 md.GetMethodDefinition((MethodDefinitionHandle)attribute.Constructor)
@@ -260,8 +255,7 @@ internal sealed class NullabilityDecoder(MetadataReader md)
             _ => default,
         };
 
-        return !sig.ParameterTypes.IsDefaultOrEmpty
-            && sig.ParameterTypes.Length == 1
-            && sig.ParameterTypes[0].Unwrap() is MetaType.Array;
+        return sig.ParameterTypes is { IsDefaultOrEmpty: false, Length: 1 }
+               && sig.ParameterTypes[0].Unwrap() is MetaType.Array;
     }
 }

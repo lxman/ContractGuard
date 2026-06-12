@@ -1,7 +1,7 @@
-using ContractGuard.Metadata;
-using ContractGuard.Model;
+using ContractGuard.Core.Metadata;
+using ContractGuard.Core.Model;
 
-namespace ContractGuard.Comparison;
+namespace ContractGuard.Core.Comparison;
 
 public static class ScopeFilter
 {
@@ -21,21 +21,15 @@ public static class ScopeFilter
     /// <summary>Drops out-of-scope types and members from an observed surface.</summary>
     public static AssemblySurface Apply(AssemblySurface surface, IReadOnlyList<Accessibility> scope)
     {
-        var types = new List<TypeContract>();
-        foreach (var type in surface.Types)
-        {
-            if (!InScope(type.Access ?? Accessibility.Public, scope))
-                continue;
-
-            types.Add(type.Members is null
+        List<TypeContract> types = (from type in surface.Types
+            where InScope(type.Access ?? Accessibility.Public, scope)
+            select type.Members is null
                 ? type
                 : type with
                 {
-                    Members = type.Members
-                        .Where(m => InScope(m.Access ?? Accessibility.Public, scope))
+                    Members = type.Members.Where(m => InScope(m.Access ?? Accessibility.Public, scope))
                         .ToList(),
-                });
-        }
+                }).ToList();
 
         return surface with { Types = types };
     }

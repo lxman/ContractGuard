@@ -1,4 +1,4 @@
-namespace ContractGuard.Metadata;
+namespace ContractGuard.Core.Metadata;
 
 /// <summary>Generic parameter names in scope while decoding a signature.</summary>
 internal readonly struct GenericContext(IReadOnlyList<string> typeParameters, IReadOnlyList<string> methodParameters)

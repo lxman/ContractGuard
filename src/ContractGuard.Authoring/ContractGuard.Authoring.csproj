@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <!-- Authoring is where C# text becomes contract elements - the only place Roslyn is
+         allowed. Core (the gate path) stays metadata-only by design. Not packaged on its
+         own yet; it ships inside the ContractGuard dotnet tool. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
+    <ProjectReference Include="..\ContractGuard.Core\ContractGuard.Core.csproj" />
+  </ItemGroup>
+
+</Project>

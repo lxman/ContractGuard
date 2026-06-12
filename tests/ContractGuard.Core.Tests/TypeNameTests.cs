@@ -1,5 +1,5 @@
-using ContractGuard.Model;
-using ContractGuard.TypeNames;
+using ContractGuard.Core.Model;
+using ContractGuard.Core.TypeNames;
 
 namespace ContractGuard.Core.Tests;
 
@@ -8,7 +8,7 @@ public class TypeNameTests
     [Fact]
     public void Parses_nested_generics()
     {
-        var node = TypeNameParser.Parse("Dictionary<string, List<int>>");
+        TypeNameNode node = TypeNameParser.Parse("Dictionary<string, List<int>>");
 
         var named = Assert.IsType<TypeNameNode.Named>(node);
         Assert.Equal("Dictionary", named.Name);
@@ -20,7 +20,7 @@ public class TypeNameTests
     [Fact]
     public void Parses_suffixes_in_order()
     {
-        var node = TypeNameParser.Parse("int?[]");
+        TypeNameNode node = TypeNameParser.Parse("int?[]");
 
         var array = Assert.IsType<TypeNameNode.Array>(node);
         Assert.IsType<TypeNameNode.Nullable>(array.Element);
@@ -29,7 +29,7 @@ public class TypeNameTests
     [Fact]
     public void Parses_multidimensional_arrays()
     {
-        var node = TypeNameParser.Parse("int[,]");
+        TypeNameNode node = TypeNameParser.Parse("int[,]");
 
         var array = Assert.IsType<TypeNameNode.Array>(node);
         Assert.Equal(2, array.Rank);
@@ -38,7 +38,7 @@ public class TypeNameTests
     [Fact]
     public void Parses_named_tuples()
     {
-        var node = TypeNameParser.Parse("(int x, int y)");
+        TypeNameNode node = TypeNameParser.Parse("(int x, int y)");
 
         var tuple = Assert.IsType<TypeNameNode.Tuple>(node);
         Assert.Equal(["x", "y"], tuple.Elements.Select(e => e.Name));
@@ -58,7 +58,7 @@ public class TypeNameTests
     [Fact]
     public void Resolves_shorthand_through_usings()
     {
-        var matcher = Matcher(usings: ["System.Threading.Tasks", "MyCompany.Orders.Model"]);
+        TypeNameMatcher matcher = Matcher(usings: ["System.Threading.Tasks", "MyCompany.Orders.Model"]);
 
         Assert.True(matcher.Matches(
             "Task<Result>",
@@ -69,7 +69,7 @@ public class TypeNameTests
     [Fact]
     public void Resolves_shorthand_through_the_governed_namespace_walking_outward()
     {
-        var matcher = Matcher();
+        TypeNameMatcher matcher = Matcher();
 
         Assert.True(matcher.Matches("IOrderService", "MyCompany.Orders.IOrderService", "MyCompany.Orders.Internal"));
         Assert.False(matcher.Matches("IOrderService", "Other.IOrderService", "MyCompany.Orders"));
@@ -78,7 +78,7 @@ public class TypeNameTests
     [Fact]
     public void Matches_builtin_aliases()
     {
-        var matcher = Matcher();
+        TypeNameMatcher matcher = Matcher();
 
         Assert.True(matcher.Matches("int", "int", "N"));
         Assert.True(matcher.Matches("int[]", "int[]", "N"));

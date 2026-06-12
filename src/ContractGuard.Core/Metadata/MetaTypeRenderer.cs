@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace ContractGuard.Metadata;
+namespace ContractGuard.Core.Metadata;
 
 /// <summary>
 /// Renders a <see cref="MetaType"/> tree to the canonical name string the contract side
@@ -43,7 +43,7 @@ internal static class MetaTypeRenderer
                     if (i > 0)
                         sb.Append(", ");
                     Append(sb, tuple.Args[i]);
-                    var name = i < tuple.TupleNames.Length ? tuple.TupleNames[i] : null;
+                    string? name = i < tuple.TupleNames.Length ? tuple.TupleNames[i] : null;
                     if (name is not null)
                         sb.Append(' ').Append(name);
                 }

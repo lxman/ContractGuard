@@ -1,4 +1,4 @@
-namespace ContractGuard.Model;
+namespace ContractGuard.Core.Model;
 
 /// <summary>C# accessibility levels. JSON forms include the two-word combinations ("protected internal").</summary>
 public enum Accessibility

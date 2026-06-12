@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ContractGuard.Core\ContractGuard.Core.csproj" />
+    <ProjectReference Include="..\ContractGuard.Authoring\ContractGuard.Authoring.csproj" />
   </ItemGroup>
 
 </Project>

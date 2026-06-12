@@ -1,4 +1,4 @@
-namespace ContractGuard.Model;
+namespace ContractGuard.Core.Model;
 
 /// <summary>
 /// Accessor shape of a property/indexer, each present accessor mapped to its accessibility

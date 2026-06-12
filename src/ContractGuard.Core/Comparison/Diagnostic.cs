@@ -1,4 +1,4 @@
-namespace ContractGuard.Comparison;
+namespace ContractGuard.Core.Comparison;
 
 public enum DiagnosticSeverity
 {
@@ -16,14 +16,14 @@ public sealed record Diagnostic(
 {
     public override string ToString()
     {
-        var location = (TypeName, Member) switch
+        string location = (TypeName, Member) switch
         {
             (null, _) => string.Empty,
             (var t, null) => $" [{t}]",
             (var t, var m) => $" [{t}.{m}]",
         };
 
-        var reason = Reason is null ? string.Empty : $" ({Reason})";
+        string reason = Reason is null ? string.Empty : $" ({Reason})";
         return $"{Id}: {Message}{location}{reason}";
     }
 }

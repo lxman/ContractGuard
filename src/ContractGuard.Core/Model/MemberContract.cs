@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ContractGuard.Model;
+namespace ContractGuard.Core.Model;
 
 /// <summary>
 /// Base of the seven member kinds. The JSON representation is a discriminated union on the

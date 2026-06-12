@@ -1,7 +1,7 @@
-using ContractGuard.Comparison;
-using ContractGuard.Metadata;
-using ContractGuard.Model;
-using ContractGuard.Serialization;
+using ContractGuard.Core.Comparison;
+using ContractGuard.Core.Metadata;
+using ContractGuard.Core.Model;
+using ContractGuard.Core.Serialization;
 
 namespace ContractGuard.Core.Tests;
 
@@ -43,7 +43,7 @@ public class NullabilityTests
     [Fact]
     public void Annotates_returns_and_leaves_unannotated_params_plain()
     {
-        var find = Method("Find");
+        MethodContract find = Method("Find");
 
         Assert.Equal("string?", find.Returns);
         Assert.Equal("string", find.Params![0].Type);
@@ -52,7 +52,7 @@ public class NullabilityTests
     [Fact]
     public void Walks_flags_through_generic_structure()
     {
-        var map = Method("Map");
+        MethodContract map = Method("Map");
 
         Assert.Equal(
             "System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<int?>>?",
@@ -64,7 +64,7 @@ public class NullabilityTests
     [Fact]
     public void Distinguishes_array_of_nullable_from_nullable_array()
     {
-        var fields = Svc.Members!.OfType<FieldContract>().ToList();
+        List<FieldContract> fields = Svc.Members!.OfType<FieldContract>().ToList();
 
         Assert.Equal("string?[]", fields.Single(f => f.Name == "Tags").Type);
         Assert.Equal("string[]?", fields.Single(f => f.Name == "MaybeTags").Type);
@@ -80,7 +80,7 @@ public class NullabilityTests
     [Fact]
     public void Annotates_generic_type_parameters()
     {
-        var get = Method("Get");
+        MethodContract get = Method("Get");
 
         Assert.Equal("T?", get.Returns);
         Assert.Equal("T", get.Params![0].Type);
@@ -99,8 +99,8 @@ public class NullabilityTests
         var source = """
             namespace Old { public class Svc { public string Find(string key) => key; } }
             """;
-        var surface = TestCompiler.CompileAndRead(source, "Old", nullableEnable: false);
-        var find = surface.Types.Single().Members!.OfType<MethodContract>().Single();
+        AssemblySurface surface = TestCompiler.CompileAndRead(source, "Old", nullableEnable: false);
+        MethodContract find = surface.Types.Single().Members!.OfType<MethodContract>().Single();
 
         Assert.Equal("string", find.Returns);
         Assert.Equal("string", find.Params![0].Type);
@@ -109,10 +109,10 @@ public class NullabilityTests
     [Fact]
     public void Decode_off_renders_annotated_assemblies_plain_but_keeps_tuple_names()
     {
-        var surface = TestCompiler.CompileAndRead(
+        AssemblySurface surface = TestCompiler.CompileAndRead(
             Source, "Nrt", new ReaderOptions { DecodeNullableAnnotations = false });
-        var svc = surface.Types.Single(t => t.Type == "Nrt.Svc");
-        var methods = svc.Members!.OfType<MethodContract>().ToList();
+        TypeContract svc = surface.Types.Single(t => t.Type == "Nrt.Svc");
+        List<MethodContract> methods = svc.Members!.OfType<MethodContract>().ToList();
 
         Assert.Equal("string", methods.Single(m => m.Name == "Find").Returns);
         Assert.Equal("(int x, string y)", methods.Single(m => m.Name == "Pair").Returns);
@@ -130,8 +130,8 @@ public class NullabilityTests
 
     private static ComparisonResult Compare(string contractJson, string source, Significance nullableAnnotations)
     {
-        var contract = ContractJson.Parse(contractJson);
-        var surface = TestCompiler.CompileAndRead(source, "Shop", new ReaderOptions
+        AssemblyContract contract = ContractJson.Parse(contractJson);
+        AssemblySurface surface = TestCompiler.CompileAndRead(source, "Shop", new ReaderOptions
         {
             DecodeNullableAnnotations = nullableAnnotations == Significance.Significant,
         });
@@ -159,9 +159,9 @@ public class NullabilityTests
 
         Assert.True(Compare(contract, GateSource, Significance.Significant).Passed);
 
-        var drifted = GateSource.Replace("public string? Describe", "public string Describe")
+        string drifted = GateSource.Replace("public string? Describe", "public string Describe")
             .Replace("=> null;", "=> input;");
-        var result = Compare(contract, drifted, Significance.Significant);
+        ComparisonResult result = Compare(contract, drifted, Significance.Significant);
         Assert.Equal([DiagnosticIds.ReturnTypeMismatch], result.Diagnostics.Select(d => d.Id).ToArray());
     }
 
@@ -183,7 +183,7 @@ public class NullabilityTests
             }
             """;
 
-        var unannotated = GateSource.Replace("public string? Describe", "public string Describe")
+        string unannotated = GateSource.Replace("public string? Describe", "public string Describe")
             .Replace("=> null;", "=> input;");
 
         Assert.True(Compare(contract, GateSource, Significance.Ignored).Passed);
@@ -209,12 +209,12 @@ public class NullabilityTests
             }
             """;
         var source = "namespace Shop { public class Calc { public (int start, int end) Range() => default; } }";
-        var renamed = source.Replace("(int start, int end) Range", "(int from, int to) Range");
+        string renamed = source.Replace("(int start, int end) Range", "(int from, int to) Range");
 
         Assert.True(Compare(contract, source, Significance.Ignored).Passed);
         Assert.False(Compare(contract, renamed, Significance.Ignored).Passed);
 
-        var relaxed = contract.Replace("\"significant\"", "\"ignored\"");
+        string relaxed = contract.Replace("\"significant\"", "\"ignored\"");
         Assert.True(Compare(relaxed, renamed, Significance.Ignored).Passed);
     }
 }

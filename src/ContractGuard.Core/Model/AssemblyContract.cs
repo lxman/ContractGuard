@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ContractGuard.Model;
+namespace ContractGuard.Core.Model;
 
 /// <summary>
 /// The root of a contract: prescribes the API surface of one assembly. Mirrors

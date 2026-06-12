@@ -2,9 +2,9 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using ContractGuard.Model;
+using ContractGuard.Core.Model;
 
-namespace ContractGuard.Serialization;
+namespace ContractGuard.Core.Serialization;
 
 /// <summary>
 /// Loads and saves contract files. Reading is strict (unknown properties are errors, matching

@@ -1,4 +1,4 @@
-namespace ContractGuard.TypeNames;
+namespace ContractGuard.Core.TypeNames;
 
 /// <summary>
 /// AST of a type reference name - the one place a string survives element decomposition.

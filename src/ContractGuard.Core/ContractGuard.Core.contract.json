@@ -15,7 +15,7 @@
   },
   "types": [
     {
-      "type": "ContractGuard.TypeNames.TypeNameMatcher",
+      "type": "ContractGuard.Core.TypeNames.TypeNameMatcher",
       "access": "public",
       "kind": "class",
       "modifiers": [
@@ -30,11 +30,11 @@
               "usings"
             ],
             [
-              "ContractGuard.Model.Significance",
+              "ContractGuard.Core.Model.Significance",
               "nullableAnnotations"
             ],
             [
-              "ContractGuard.Model.Significance",
+              "ContractGuard.Core.Model.Significance",
               "tupleElementNames"
             ]
           ],
@@ -63,14 +63,14 @@
       ]
     },
     {
-      "type": "ContractGuard.TypeNames.TypeNameNode",
+      "type": "ContractGuard.Core.TypeNames.TypeNameNode",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "abstract"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode>"
+        "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode>"
       ],
       "members": [
         {
@@ -115,11 +115,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "right"
             ]
           ]
@@ -130,11 +130,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "right"
             ]
           ]
@@ -172,7 +172,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "other"
             ]
           ],
@@ -182,7 +182,7 @@
           "kind": "constructor",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode",
+              "ContractGuard.Core.TypeNames.TypeNameNode",
               "original"
             ]
           ],
@@ -196,7 +196,7 @@
       ]
     },
     {
-      "type": "ContractGuard.TypeNames.TypeNameParser",
+      "type": "ContractGuard.Core.TypeNames.TypeNameParser",
       "access": "public",
       "kind": "class",
       "modifiers": [
@@ -209,7 +209,7 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.TypeNames.TypeNameNode",
+          "returns": "ContractGuard.Core.TypeNames.TypeNameNode",
           "params": [
             [
               "string",
@@ -221,7 +221,7 @@
       ]
     },
     {
-      "type": "ContractGuard.Serialization.ContractJson",
+      "type": "ContractGuard.Core.Serialization.ContractJson",
       "access": "public",
       "kind": "class",
       "modifiers": [
@@ -234,7 +234,7 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.Model.AssemblyContract",
+          "returns": "ContractGuard.Core.Model.AssemblyContract",
           "params": [
             [
               "string",
@@ -249,7 +249,7 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.Model.AssemblyContract",
+          "returns": "ContractGuard.Core.Model.AssemblyContract",
           "params": [
             [
               "string",
@@ -267,7 +267,7 @@
           "returns": "string",
           "params": [
             [
-              "ContractGuard.Model.AssemblyContract",
+              "ContractGuard.Core.Model.AssemblyContract",
               "contract"
             ]
           ],
@@ -282,7 +282,7 @@
           "returns": "void",
           "params": [
             [
-              "ContractGuard.Model.AssemblyContract",
+              "ContractGuard.Core.Model.AssemblyContract",
               "contract"
             ],
             [
@@ -295,20 +295,20 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.AccessorsContract",
+      "type": "ContractGuard.Core.Model.AccessorsContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Model.AccessorsContract>"
+        "System.IEquatable<ContractGuard.Core.Model.AccessorsContract>"
       ],
       "members": [
         {
           "kind": "property",
           "name": "Get",
-          "type": "ContractGuard.Model.Accessibility?",
+          "type": "ContractGuard.Core.Model.Accessibility?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -318,7 +318,7 @@
         {
           "kind": "property",
           "name": "Set",
-          "type": "ContractGuard.Model.Accessibility?",
+          "type": "ContractGuard.Core.Model.Accessibility?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -328,7 +328,7 @@
         {
           "kind": "property",
           "name": "Init",
-          "type": "ContractGuard.Model.Accessibility?",
+          "type": "ContractGuard.Core.Model.Accessibility?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -350,11 +350,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.AccessorsContract?",
+              "ContractGuard.Core.Model.AccessorsContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.AccessorsContract?",
+              "ContractGuard.Core.Model.AccessorsContract?",
               "right"
             ]
           ]
@@ -365,11 +365,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.AccessorsContract?",
+              "ContractGuard.Core.Model.AccessorsContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.AccessorsContract?",
+              "ContractGuard.Core.Model.AccessorsContract?",
               "right"
             ]
           ]
@@ -404,7 +404,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.AccessorsContract?",
+              "ContractGuard.Core.Model.AccessorsContract?",
               "other"
             ]
           ],
@@ -418,14 +418,14 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.AssemblyContract",
+      "type": "ContractGuard.Core.Model.AssemblyContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Model.AssemblyContract>"
+        "System.IEquatable<ContractGuard.Core.Model.AssemblyContract>"
       ],
       "members": [
         {
@@ -471,7 +471,7 @@
         {
           "kind": "property",
           "name": "Settings",
-          "type": "ContractGuard.Model.ContractSettings",
+          "type": "ContractGuard.Core.Model.ContractSettings",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -491,7 +491,7 @@
         {
           "kind": "property",
           "name": "Types",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeContract>",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.TypeContract>",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -513,11 +513,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.AssemblyContract?",
+              "ContractGuard.Core.Model.AssemblyContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.AssemblyContract?",
+              "ContractGuard.Core.Model.AssemblyContract?",
               "right"
             ]
           ]
@@ -528,11 +528,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.AssemblyContract?",
+              "ContractGuard.Core.Model.AssemblyContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.AssemblyContract?",
+              "ContractGuard.Core.Model.AssemblyContract?",
               "right"
             ]
           ]
@@ -567,7 +567,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.AssemblyContract?",
+              "ContractGuard.Core.Model.AssemblyContract?",
               "other"
             ]
           ],
@@ -581,14 +581,14 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.ConstantValue",
+      "type": "ContractGuard.Core.Model.ConstantValue",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Model.ConstantValue>"
+        "System.IEquatable<ContractGuard.Core.Model.ConstantValue>"
       ],
       "members": [
         {
@@ -616,7 +616,7 @@
             "static",
             "readonly"
           ],
-          "type": "ContractGuard.Model.ConstantValue",
+          "type": "ContractGuard.Core.Model.ConstantValue",
           "access": "public"
         },
         {
@@ -625,7 +625,7 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.Model.ConstantValue",
+          "returns": "ContractGuard.Core.Model.ConstantValue",
           "params": [
             [
               "object?",
@@ -640,7 +640,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ConstantValue?",
+              "ContractGuard.Core.Model.ConstantValue?",
               "other"
             ]
           ],
@@ -682,20 +682,20 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.ContractSettings",
+      "type": "ContractGuard.Core.Model.ContractSettings",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Model.ContractSettings>"
+        "System.IEquatable<ContractGuard.Core.Model.ContractSettings>"
       ],
       "members": [
         {
           "kind": "property",
           "name": "NewTypes",
-          "type": "ContractGuard.Model.AllowDeny",
+          "type": "ContractGuard.Core.Model.AllowDeny",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -705,7 +705,7 @@
         {
           "kind": "property",
           "name": "NewMembers",
-          "type": "ContractGuard.Model.AllowDeny",
+          "type": "ContractGuard.Core.Model.AllowDeny",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -715,7 +715,7 @@
         {
           "kind": "property",
           "name": "ParameterNames",
-          "type": "ContractGuard.Model.Significance",
+          "type": "ContractGuard.Core.Model.Significance",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -725,7 +725,7 @@
         {
           "kind": "property",
           "name": "DefaultValues",
-          "type": "ContractGuard.Model.Significance",
+          "type": "ContractGuard.Core.Model.Significance",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -735,7 +735,7 @@
         {
           "kind": "property",
           "name": "NullableAnnotations",
-          "type": "ContractGuard.Model.Significance",
+          "type": "ContractGuard.Core.Model.Significance",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -745,7 +745,7 @@
         {
           "kind": "property",
           "name": "TupleElementNames",
-          "type": "ContractGuard.Model.Significance",
+          "type": "ContractGuard.Core.Model.Significance",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -755,7 +755,7 @@
         {
           "kind": "property",
           "name": "Scope",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.Accessibility>",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.Accessibility>",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -787,11 +787,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ContractSettings?",
+              "ContractGuard.Core.Model.ContractSettings?",
               "left"
             ],
             [
-              "ContractGuard.Model.ContractSettings?",
+              "ContractGuard.Core.Model.ContractSettings?",
               "right"
             ]
           ]
@@ -802,11 +802,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ContractSettings?",
+              "ContractGuard.Core.Model.ContractSettings?",
               "left"
             ],
             [
-              "ContractGuard.Model.ContractSettings?",
+              "ContractGuard.Core.Model.ContractSettings?",
               "right"
             ]
           ]
@@ -841,7 +841,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ContractSettings?",
+              "ContractGuard.Core.Model.ContractSettings?",
               "other"
             ]
           ],
@@ -855,7 +855,7 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.Accessibility",
+      "type": "ContractGuard.Core.Model.Accessibility",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -866,7 +866,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Accessibility",
+          "type": "ContractGuard.Core.Model.Accessibility",
           "value": 0,
           "access": "public"
         },
@@ -876,7 +876,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Accessibility",
+          "type": "ContractGuard.Core.Model.Accessibility",
           "value": 1,
           "access": "public"
         },
@@ -886,7 +886,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Accessibility",
+          "type": "ContractGuard.Core.Model.Accessibility",
           "value": 2,
           "access": "public"
         },
@@ -896,7 +896,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Accessibility",
+          "type": "ContractGuard.Core.Model.Accessibility",
           "value": 3,
           "access": "public"
         },
@@ -906,7 +906,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Accessibility",
+          "type": "ContractGuard.Core.Model.Accessibility",
           "value": 4,
           "access": "public"
         },
@@ -916,14 +916,14 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Accessibility",
+          "type": "ContractGuard.Core.Model.Accessibility",
           "value": 5,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.AllowDeny",
+      "type": "ContractGuard.Core.Model.AllowDeny",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -934,7 +934,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.AllowDeny",
+          "type": "ContractGuard.Core.Model.AllowDeny",
           "value": 0,
           "access": "public"
         },
@@ -944,14 +944,14 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.AllowDeny",
+          "type": "ContractGuard.Core.Model.AllowDeny",
           "value": 1,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.Significance",
+      "type": "ContractGuard.Core.Model.Significance",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -962,7 +962,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Significance",
+          "type": "ContractGuard.Core.Model.Significance",
           "value": 0,
           "access": "public"
         },
@@ -972,14 +972,14 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Significance",
+          "type": "ContractGuard.Core.Model.Significance",
           "value": 1,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.EntryMode",
+      "type": "ContractGuard.Core.Model.EntryMode",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -990,7 +990,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.EntryMode",
+          "type": "ContractGuard.Core.Model.EntryMode",
           "value": 0,
           "access": "public"
         },
@@ -1000,14 +1000,14 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.EntryMode",
+          "type": "ContractGuard.Core.Model.EntryMode",
           "value": 1,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.TypeKind",
+      "type": "ContractGuard.Core.Model.TypeKind",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -1018,7 +1018,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeKind",
+          "type": "ContractGuard.Core.Model.TypeKind",
           "value": 0,
           "access": "public"
         },
@@ -1028,7 +1028,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeKind",
+          "type": "ContractGuard.Core.Model.TypeKind",
           "value": 1,
           "access": "public"
         },
@@ -1038,7 +1038,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeKind",
+          "type": "ContractGuard.Core.Model.TypeKind",
           "value": 2,
           "access": "public"
         },
@@ -1048,7 +1048,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeKind",
+          "type": "ContractGuard.Core.Model.TypeKind",
           "value": 3,
           "access": "public"
         },
@@ -1058,7 +1058,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeKind",
+          "type": "ContractGuard.Core.Model.TypeKind",
           "value": 4,
           "access": "public"
         },
@@ -1068,7 +1068,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeKind",
+          "type": "ContractGuard.Core.Model.TypeKind",
           "value": 5,
           "access": "public"
         },
@@ -1078,14 +1078,14 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeKind",
+          "type": "ContractGuard.Core.Model.TypeKind",
           "value": 6,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.TypeModifier",
+      "type": "ContractGuard.Core.Model.TypeModifier",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -1096,7 +1096,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeModifier",
+          "type": "ContractGuard.Core.Model.TypeModifier",
           "value": 0,
           "access": "public"
         },
@@ -1106,7 +1106,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeModifier",
+          "type": "ContractGuard.Core.Model.TypeModifier",
           "value": 1,
           "access": "public"
         },
@@ -1116,7 +1116,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeModifier",
+          "type": "ContractGuard.Core.Model.TypeModifier",
           "value": 2,
           "access": "public"
         },
@@ -1126,7 +1126,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeModifier",
+          "type": "ContractGuard.Core.Model.TypeModifier",
           "value": 3,
           "access": "public"
         },
@@ -1136,14 +1136,14 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.TypeModifier",
+          "type": "ContractGuard.Core.Model.TypeModifier",
           "value": 4,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.MemberModifier",
+      "type": "ContractGuard.Core.Model.MemberModifier",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -1154,7 +1154,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.MemberModifier",
+          "type": "ContractGuard.Core.Model.MemberModifier",
           "value": 0,
           "access": "public"
         },
@@ -1164,7 +1164,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.MemberModifier",
+          "type": "ContractGuard.Core.Model.MemberModifier",
           "value": 1,
           "access": "public"
         },
@@ -1174,7 +1174,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.MemberModifier",
+          "type": "ContractGuard.Core.Model.MemberModifier",
           "value": 2,
           "access": "public"
         },
@@ -1184,7 +1184,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.MemberModifier",
+          "type": "ContractGuard.Core.Model.MemberModifier",
           "value": 3,
           "access": "public"
         },
@@ -1194,7 +1194,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.MemberModifier",
+          "type": "ContractGuard.Core.Model.MemberModifier",
           "value": 4,
           "access": "public"
         },
@@ -1204,7 +1204,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.MemberModifier",
+          "type": "ContractGuard.Core.Model.MemberModifier",
           "value": 5,
           "access": "public"
         },
@@ -1214,7 +1214,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.MemberModifier",
+          "type": "ContractGuard.Core.Model.MemberModifier",
           "value": 6,
           "access": "public"
         },
@@ -1224,14 +1224,14 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.MemberModifier",
+          "type": "ContractGuard.Core.Model.MemberModifier",
           "value": 7,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.ReturnRefKind",
+      "type": "ContractGuard.Core.Model.ReturnRefKind",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -1242,7 +1242,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.ReturnRefKind",
+          "type": "ContractGuard.Core.Model.ReturnRefKind",
           "value": 0,
           "access": "public"
         },
@@ -1252,14 +1252,14 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.ReturnRefKind",
+          "type": "ContractGuard.Core.Model.ReturnRefKind",
           "value": 1,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.ParamModifier",
+      "type": "ContractGuard.Core.Model.ParamModifier",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -1270,7 +1270,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.ParamModifier",
+          "type": "ContractGuard.Core.Model.ParamModifier",
           "value": 0,
           "access": "public"
         },
@@ -1280,7 +1280,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.ParamModifier",
+          "type": "ContractGuard.Core.Model.ParamModifier",
           "value": 1,
           "access": "public"
         },
@@ -1290,7 +1290,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.ParamModifier",
+          "type": "ContractGuard.Core.Model.ParamModifier",
           "value": 2,
           "access": "public"
         },
@@ -1300,7 +1300,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.ParamModifier",
+          "type": "ContractGuard.Core.Model.ParamModifier",
           "value": 3,
           "access": "public"
         },
@@ -1310,7 +1310,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.ParamModifier",
+          "type": "ContractGuard.Core.Model.ParamModifier",
           "value": 4,
           "access": "public"
         },
@@ -1320,14 +1320,14 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.ParamModifier",
+          "type": "ContractGuard.Core.Model.ParamModifier",
           "value": 5,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.Variance",
+      "type": "ContractGuard.Core.Model.Variance",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -1338,7 +1338,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Variance",
+          "type": "ContractGuard.Core.Model.Variance",
           "value": 0,
           "access": "public"
         },
@@ -1348,21 +1348,21 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Model.Variance",
+          "type": "ContractGuard.Core.Model.Variance",
           "value": 1,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Model.MemberContract",
+      "type": "ContractGuard.Core.Model.MemberContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "abstract"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Model.MemberContract>"
+        "System.IEquatable<ContractGuard.Core.Model.MemberContract>"
       ],
       "members": [
         {
@@ -1380,7 +1380,7 @@
         {
           "kind": "property",
           "name": "Access",
-          "type": "ContractGuard.Model.Accessibility?",
+          "type": "ContractGuard.Core.Model.Accessibility?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1390,7 +1390,7 @@
         {
           "kind": "property",
           "name": "Mode",
-          "type": "ContractGuard.Model.EntryMode",
+          "type": "ContractGuard.Core.Model.EntryMode",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1471,11 +1471,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "right"
             ]
           ]
@@ -1486,11 +1486,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "right"
             ]
           ]
@@ -1528,7 +1528,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "other"
             ]
           ],
@@ -1538,7 +1538,7 @@
           "kind": "constructor",
           "params": [
             [
-              "ContractGuard.Model.MemberContract",
+              "ContractGuard.Core.Model.MemberContract",
               "original"
             ]
           ],
@@ -1552,15 +1552,15 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.MethodContract",
+      "type": "ContractGuard.Core.Model.MethodContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.Model.MemberContract",
+      "extends": "ContractGuard.Core.Model.MemberContract",
       "implements": [
-        "System.IEquatable<ContractGuard.Model.MethodContract>"
+        "System.IEquatable<ContractGuard.Core.Model.MethodContract>"
       ],
       "members": [
         {
@@ -1588,7 +1588,7 @@
         {
           "kind": "property",
           "name": "Modifiers",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.MemberModifier>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1608,7 +1608,7 @@
         {
           "kind": "property",
           "name": "RefKind",
-          "type": "ContractGuard.Model.ReturnRefKind?",
+          "type": "ContractGuard.Core.Model.ReturnRefKind?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1618,7 +1618,7 @@
         {
           "kind": "property",
           "name": "TypeParams",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeParamContract>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.TypeParamContract>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1628,7 +1628,7 @@
         {
           "kind": "property",
           "name": "Params",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.ParamContract>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1638,7 +1638,7 @@
         {
           "kind": "property",
           "name": "ParameterNames",
-          "type": "ContractGuard.Model.Significance?",
+          "type": "ContractGuard.Core.Model.Significance?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1699,11 +1699,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MethodContract?",
+              "ContractGuard.Core.Model.MethodContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.MethodContract?",
+              "ContractGuard.Core.Model.MethodContract?",
               "right"
             ]
           ]
@@ -1714,11 +1714,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MethodContract?",
+              "ContractGuard.Core.Model.MethodContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.MethodContract?",
+              "ContractGuard.Core.Model.MethodContract?",
               "right"
             ]
           ]
@@ -1757,7 +1757,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "other"
             ]
           ],
@@ -1769,7 +1769,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MethodContract?",
+              "ContractGuard.Core.Model.MethodContract?",
               "other"
             ]
           ],
@@ -1783,15 +1783,15 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.ConstructorMemberContract",
+      "type": "ContractGuard.Core.Model.ConstructorMemberContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.Model.MemberContract",
+      "extends": "ContractGuard.Core.Model.MemberContract",
       "implements": [
-        "System.IEquatable<ContractGuard.Model.ConstructorMemberContract>"
+        "System.IEquatable<ContractGuard.Core.Model.ConstructorMemberContract>"
       ],
       "members": [
         {
@@ -1809,7 +1809,7 @@
         {
           "kind": "property",
           "name": "Params",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.ParamContract>",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1819,7 +1819,7 @@
         {
           "kind": "property",
           "name": "ParameterNames",
-          "type": "ContractGuard.Model.Significance?",
+          "type": "ContractGuard.Core.Model.Significance?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1880,11 +1880,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ConstructorMemberContract?",
+              "ContractGuard.Core.Model.ConstructorMemberContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.ConstructorMemberContract?",
+              "ContractGuard.Core.Model.ConstructorMemberContract?",
               "right"
             ]
           ]
@@ -1895,11 +1895,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ConstructorMemberContract?",
+              "ContractGuard.Core.Model.ConstructorMemberContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.ConstructorMemberContract?",
+              "ContractGuard.Core.Model.ConstructorMemberContract?",
               "right"
             ]
           ]
@@ -1938,7 +1938,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "other"
             ]
           ],
@@ -1950,7 +1950,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ConstructorMemberContract?",
+              "ContractGuard.Core.Model.ConstructorMemberContract?",
               "other"
             ]
           ],
@@ -1964,15 +1964,15 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.PropertyContract",
+      "type": "ContractGuard.Core.Model.PropertyContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.Model.MemberContract",
+      "extends": "ContractGuard.Core.Model.MemberContract",
       "implements": [
-        "System.IEquatable<ContractGuard.Model.PropertyContract>"
+        "System.IEquatable<ContractGuard.Core.Model.PropertyContract>"
       ],
       "members": [
         {
@@ -2000,7 +2000,7 @@
         {
           "kind": "property",
           "name": "Modifiers",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.MemberModifier>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2020,7 +2020,7 @@
         {
           "kind": "property",
           "name": "RefKind",
-          "type": "ContractGuard.Model.ReturnRefKind?",
+          "type": "ContractGuard.Core.Model.ReturnRefKind?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2030,7 +2030,7 @@
         {
           "kind": "property",
           "name": "Accessors",
-          "type": "ContractGuard.Model.AccessorsContract?",
+          "type": "ContractGuard.Core.Model.AccessorsContract?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2091,11 +2091,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.PropertyContract?",
+              "ContractGuard.Core.Model.PropertyContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.PropertyContract?",
+              "ContractGuard.Core.Model.PropertyContract?",
               "right"
             ]
           ]
@@ -2106,11 +2106,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.PropertyContract?",
+              "ContractGuard.Core.Model.PropertyContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.PropertyContract?",
+              "ContractGuard.Core.Model.PropertyContract?",
               "right"
             ]
           ]
@@ -2149,7 +2149,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "other"
             ]
           ],
@@ -2161,7 +2161,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.PropertyContract?",
+              "ContractGuard.Core.Model.PropertyContract?",
               "other"
             ]
           ],
@@ -2175,15 +2175,15 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.IndexerContract",
+      "type": "ContractGuard.Core.Model.IndexerContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.Model.MemberContract",
+      "extends": "ContractGuard.Core.Model.MemberContract",
       "implements": [
-        "System.IEquatable<ContractGuard.Model.IndexerContract>"
+        "System.IEquatable<ContractGuard.Core.Model.IndexerContract>"
       ],
       "members": [
         {
@@ -2201,7 +2201,7 @@
         {
           "kind": "property",
           "name": "Modifiers",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.MemberModifier>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2221,7 +2221,7 @@
         {
           "kind": "property",
           "name": "RefKind",
-          "type": "ContractGuard.Model.ReturnRefKind?",
+          "type": "ContractGuard.Core.Model.ReturnRefKind?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2231,7 +2231,7 @@
         {
           "kind": "property",
           "name": "Params",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.ParamContract>",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2241,7 +2241,7 @@
         {
           "kind": "property",
           "name": "Accessors",
-          "type": "ContractGuard.Model.AccessorsContract?",
+          "type": "ContractGuard.Core.Model.AccessorsContract?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2251,7 +2251,7 @@
         {
           "kind": "property",
           "name": "ParameterNames",
-          "type": "ContractGuard.Model.Significance?",
+          "type": "ContractGuard.Core.Model.Significance?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2312,11 +2312,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.IndexerContract?",
+              "ContractGuard.Core.Model.IndexerContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.IndexerContract?",
+              "ContractGuard.Core.Model.IndexerContract?",
               "right"
             ]
           ]
@@ -2327,11 +2327,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.IndexerContract?",
+              "ContractGuard.Core.Model.IndexerContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.IndexerContract?",
+              "ContractGuard.Core.Model.IndexerContract?",
               "right"
             ]
           ]
@@ -2370,7 +2370,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "other"
             ]
           ],
@@ -2382,7 +2382,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.IndexerContract?",
+              "ContractGuard.Core.Model.IndexerContract?",
               "other"
             ]
           ],
@@ -2396,15 +2396,15 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.EventContract",
+      "type": "ContractGuard.Core.Model.EventContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.Model.MemberContract",
+      "extends": "ContractGuard.Core.Model.MemberContract",
       "implements": [
-        "System.IEquatable<ContractGuard.Model.EventContract>"
+        "System.IEquatable<ContractGuard.Core.Model.EventContract>"
       ],
       "members": [
         {
@@ -2432,7 +2432,7 @@
         {
           "kind": "property",
           "name": "Modifiers",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.MemberModifier>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2503,11 +2503,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.EventContract?",
+              "ContractGuard.Core.Model.EventContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.EventContract?",
+              "ContractGuard.Core.Model.EventContract?",
               "right"
             ]
           ]
@@ -2518,11 +2518,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.EventContract?",
+              "ContractGuard.Core.Model.EventContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.EventContract?",
+              "ContractGuard.Core.Model.EventContract?",
               "right"
             ]
           ]
@@ -2561,7 +2561,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "other"
             ]
           ],
@@ -2573,7 +2573,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.EventContract?",
+              "ContractGuard.Core.Model.EventContract?",
               "other"
             ]
           ],
@@ -2587,15 +2587,15 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.FieldContract",
+      "type": "ContractGuard.Core.Model.FieldContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.Model.MemberContract",
+      "extends": "ContractGuard.Core.Model.MemberContract",
       "implements": [
-        "System.IEquatable<ContractGuard.Model.FieldContract>"
+        "System.IEquatable<ContractGuard.Core.Model.FieldContract>"
       ],
       "members": [
         {
@@ -2623,7 +2623,7 @@
         {
           "kind": "property",
           "name": "Modifiers",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberModifier>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.MemberModifier>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2643,7 +2643,7 @@
         {
           "kind": "property",
           "name": "Value",
-          "type": "ContractGuard.Model.ConstantValue?",
+          "type": "ContractGuard.Core.Model.ConstantValue?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2704,11 +2704,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.FieldContract?",
+              "ContractGuard.Core.Model.FieldContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.FieldContract?",
+              "ContractGuard.Core.Model.FieldContract?",
               "right"
             ]
           ]
@@ -2719,11 +2719,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.FieldContract?",
+              "ContractGuard.Core.Model.FieldContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.FieldContract?",
+              "ContractGuard.Core.Model.FieldContract?",
               "right"
             ]
           ]
@@ -2762,7 +2762,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "other"
             ]
           ],
@@ -2774,7 +2774,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.FieldContract?",
+              "ContractGuard.Core.Model.FieldContract?",
               "other"
             ]
           ],
@@ -2788,15 +2788,15 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.OperatorContract",
+      "type": "ContractGuard.Core.Model.OperatorContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.Model.MemberContract",
+      "extends": "ContractGuard.Core.Model.MemberContract",
       "implements": [
-        "System.IEquatable<ContractGuard.Model.OperatorContract>"
+        "System.IEquatable<ContractGuard.Core.Model.OperatorContract>"
       ],
       "members": [
         {
@@ -2834,7 +2834,7 @@
         {
           "kind": "property",
           "name": "Params",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.ParamContract>",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2844,7 +2844,7 @@
         {
           "kind": "property",
           "name": "ParameterNames",
-          "type": "ContractGuard.Model.Significance?",
+          "type": "ContractGuard.Core.Model.Significance?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2905,11 +2905,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.OperatorContract?",
+              "ContractGuard.Core.Model.OperatorContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.OperatorContract?",
+              "ContractGuard.Core.Model.OperatorContract?",
               "right"
             ]
           ]
@@ -2920,11 +2920,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.OperatorContract?",
+              "ContractGuard.Core.Model.OperatorContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.OperatorContract?",
+              "ContractGuard.Core.Model.OperatorContract?",
               "right"
             ]
           ]
@@ -2963,7 +2963,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.MemberContract?",
+              "ContractGuard.Core.Model.MemberContract?",
               "other"
             ]
           ],
@@ -2975,7 +2975,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.OperatorContract?",
+              "ContractGuard.Core.Model.OperatorContract?",
               "other"
             ]
           ],
@@ -2989,14 +2989,14 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.ParamContract",
+      "type": "ContractGuard.Core.Model.ParamContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Model.ParamContract>"
+        "System.IEquatable<ContractGuard.Core.Model.ParamContract>"
       ],
       "members": [
         {
@@ -3022,7 +3022,7 @@
         {
           "kind": "property",
           "name": "Modifier",
-          "type": "ContractGuard.Model.ParamModifier?",
+          "type": "ContractGuard.Core.Model.ParamModifier?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3032,7 +3032,7 @@
         {
           "kind": "property",
           "name": "Default",
-          "type": "ContractGuard.Model.ConstantValue?",
+          "type": "ContractGuard.Core.Model.ConstantValue?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3054,11 +3054,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ParamContract?",
+              "ContractGuard.Core.Model.ParamContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.ParamContract?",
+              "ContractGuard.Core.Model.ParamContract?",
               "right"
             ]
           ]
@@ -3069,11 +3069,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ParamContract?",
+              "ContractGuard.Core.Model.ParamContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.ParamContract?",
+              "ContractGuard.Core.Model.ParamContract?",
               "right"
             ]
           ]
@@ -3108,7 +3108,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.ParamContract?",
+              "ContractGuard.Core.Model.ParamContract?",
               "other"
             ]
           ],
@@ -3122,14 +3122,14 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.TypeContract",
+      "type": "ContractGuard.Core.Model.TypeContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Model.TypeContract>"
+        "System.IEquatable<ContractGuard.Core.Model.TypeContract>"
       ],
       "members": [
         {
@@ -3145,7 +3145,7 @@
         {
           "kind": "property",
           "name": "Access",
-          "type": "ContractGuard.Model.Accessibility?",
+          "type": "ContractGuard.Core.Model.Accessibility?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3155,7 +3155,7 @@
         {
           "kind": "property",
           "name": "Kind",
-          "type": "ContractGuard.Model.TypeKind?",
+          "type": "ContractGuard.Core.Model.TypeKind?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3165,7 +3165,7 @@
         {
           "kind": "property",
           "name": "Modifiers",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeModifier>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.TypeModifier>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3205,7 +3205,7 @@
         {
           "kind": "property",
           "name": "TypeParams",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeParamContract>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.TypeParamContract>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3215,7 +3215,7 @@
         {
           "kind": "property",
           "name": "NewMembers",
-          "type": "ContractGuard.Model.AllowDeny?",
+          "type": "ContractGuard.Core.Model.AllowDeny?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3225,7 +3225,7 @@
         {
           "kind": "property",
           "name": "ParameterNames",
-          "type": "ContractGuard.Model.Significance?",
+          "type": "ContractGuard.Core.Model.Significance?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3235,7 +3235,7 @@
         {
           "kind": "property",
           "name": "Members",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.MemberContract>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.MemberContract>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3255,7 +3255,7 @@
         {
           "kind": "property",
           "name": "Params",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.ParamContract>?",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.ParamContract>?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3277,11 +3277,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.TypeContract?",
+              "ContractGuard.Core.Model.TypeContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.TypeContract?",
+              "ContractGuard.Core.Model.TypeContract?",
               "right"
             ]
           ]
@@ -3292,11 +3292,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.TypeContract?",
+              "ContractGuard.Core.Model.TypeContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.TypeContract?",
+              "ContractGuard.Core.Model.TypeContract?",
               "right"
             ]
           ]
@@ -3331,7 +3331,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.TypeContract?",
+              "ContractGuard.Core.Model.TypeContract?",
               "other"
             ]
           ],
@@ -3345,14 +3345,14 @@
       ]
     },
     {
-      "type": "ContractGuard.Model.TypeParamContract",
+      "type": "ContractGuard.Core.Model.TypeParamContract",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Model.TypeParamContract>"
+        "System.IEquatable<ContractGuard.Core.Model.TypeParamContract>"
       ],
       "members": [
         {
@@ -3368,7 +3368,7 @@
         {
           "kind": "property",
           "name": "Variance",
-          "type": "ContractGuard.Model.Variance?",
+          "type": "ContractGuard.Core.Model.Variance?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3400,11 +3400,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.TypeParamContract?",
+              "ContractGuard.Core.Model.TypeParamContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.TypeParamContract?",
+              "ContractGuard.Core.Model.TypeParamContract?",
               "right"
             ]
           ]
@@ -3415,11 +3415,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.TypeParamContract?",
+              "ContractGuard.Core.Model.TypeParamContract?",
               "left"
             ],
             [
-              "ContractGuard.Model.TypeParamContract?",
+              "ContractGuard.Core.Model.TypeParamContract?",
               "right"
             ]
           ]
@@ -3454,7 +3454,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.TypeParamContract?",
+              "ContractGuard.Core.Model.TypeParamContract?",
               "other"
             ]
           ],
@@ -3468,7 +3468,7 @@
       ]
     },
     {
-      "type": "ContractGuard.Metadata.AssemblyReader",
+      "type": "ContractGuard.Core.Metadata.AssemblyReader",
       "access": "public",
       "kind": "class",
       "modifiers": [
@@ -3481,7 +3481,7 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.Metadata.AssemblySurface",
+          "returns": "ContractGuard.Core.Metadata.AssemblySurface",
           "params": [
             [
               "string",
@@ -3496,7 +3496,7 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.Metadata.AssemblySurface",
+          "returns": "ContractGuard.Core.Metadata.AssemblySurface",
           "params": [
             [
               "System.IO.Stream",
@@ -3511,14 +3511,14 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.Metadata.AssemblySurface",
+          "returns": "ContractGuard.Core.Metadata.AssemblySurface",
           "params": [
             [
               "string",
               "path"
             ],
             [
-              "ContractGuard.Metadata.ReaderOptions",
+              "ContractGuard.Core.Metadata.ReaderOptions",
               "options"
             ]
           ],
@@ -3530,14 +3530,14 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.Metadata.AssemblySurface",
+          "returns": "ContractGuard.Core.Metadata.AssemblySurface",
           "params": [
             [
               "System.IO.Stream",
               "stream"
             ],
             [
-              "ContractGuard.Metadata.ReaderOptions",
+              "ContractGuard.Core.Metadata.ReaderOptions",
               "options"
             ]
           ],
@@ -3546,14 +3546,14 @@
       ]
     },
     {
-      "type": "ContractGuard.Metadata.AssemblySurface",
+      "type": "ContractGuard.Core.Metadata.AssemblySurface",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Metadata.AssemblySurface>"
+        "System.IEquatable<ContractGuard.Core.Metadata.AssemblySurface>"
       ],
       "members": [
         {
@@ -3569,7 +3569,7 @@
         {
           "kind": "property",
           "name": "Types",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.TypeContract>",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.TypeContract>",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3591,11 +3591,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Metadata.AssemblySurface?",
+              "ContractGuard.Core.Metadata.AssemblySurface?",
               "left"
             ],
             [
-              "ContractGuard.Metadata.AssemblySurface?",
+              "ContractGuard.Core.Metadata.AssemblySurface?",
               "right"
             ]
           ]
@@ -3606,11 +3606,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Metadata.AssemblySurface?",
+              "ContractGuard.Core.Metadata.AssemblySurface?",
               "left"
             ],
             [
-              "ContractGuard.Metadata.AssemblySurface?",
+              "ContractGuard.Core.Metadata.AssemblySurface?",
               "right"
             ]
           ]
@@ -3645,7 +3645,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Metadata.AssemblySurface?",
+              "ContractGuard.Core.Metadata.AssemblySurface?",
               "other"
             ]
           ],
@@ -3659,14 +3659,14 @@
       ]
     },
     {
-      "type": "ContractGuard.Metadata.ReaderOptions",
+      "type": "ContractGuard.Core.Metadata.ReaderOptions",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Metadata.ReaderOptions>"
+        "System.IEquatable<ContractGuard.Core.Metadata.ReaderOptions>"
       ],
       "members": [
         {
@@ -3686,7 +3686,7 @@
             "static",
             "readonly"
           ],
-          "type": "ContractGuard.Metadata.ReaderOptions",
+          "type": "ContractGuard.Core.Metadata.ReaderOptions",
           "access": "public"
         },
         {
@@ -3704,11 +3704,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Metadata.ReaderOptions?",
+              "ContractGuard.Core.Metadata.ReaderOptions?",
               "left"
             ],
             [
-              "ContractGuard.Metadata.ReaderOptions?",
+              "ContractGuard.Core.Metadata.ReaderOptions?",
               "right"
             ]
           ]
@@ -3719,11 +3719,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Metadata.ReaderOptions?",
+              "ContractGuard.Core.Metadata.ReaderOptions?",
               "left"
             ],
             [
-              "ContractGuard.Metadata.ReaderOptions?",
+              "ContractGuard.Core.Metadata.ReaderOptions?",
               "right"
             ]
           ]
@@ -3758,7 +3758,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Metadata.ReaderOptions?",
+              "ContractGuard.Core.Metadata.ReaderOptions?",
               "other"
             ]
           ],
@@ -3772,7 +3772,7 @@
       ]
     },
     {
-      "type": "ContractGuard.Comparison.ContractComparer",
+      "type": "ContractGuard.Core.Comparison.ContractComparer",
       "access": "public",
       "kind": "class",
       "modifiers": [
@@ -3785,14 +3785,14 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.Comparison.ComparisonResult",
+          "returns": "ContractGuard.Core.Comparison.ComparisonResult",
           "params": [
             [
-              "ContractGuard.Model.AssemblyContract",
+              "ContractGuard.Core.Model.AssemblyContract",
               "contract"
             ],
             [
-              "ContractGuard.Metadata.AssemblySurface",
+              "ContractGuard.Core.Metadata.AssemblySurface",
               "surface"
             ]
           ],
@@ -3801,7 +3801,7 @@
       ]
     },
     {
-      "type": "ContractGuard.Comparison.DeclarationRenderer",
+      "type": "ContractGuard.Core.Comparison.DeclarationRenderer",
       "access": "public",
       "kind": "class",
       "modifiers": [
@@ -3817,7 +3817,7 @@
           "returns": "string",
           "params": [
             [
-              "ContractGuard.Model.MemberContract",
+              "ContractGuard.Core.Model.MemberContract",
               "member"
             ],
             {
@@ -3837,7 +3837,7 @@
           "returns": "string",
           "params": [
             [
-              "ContractGuard.Model.TypeContract",
+              "ContractGuard.Core.Model.TypeContract",
               "type"
             ]
           ],
@@ -3846,7 +3846,7 @@
       ]
     },
     {
-      "type": "ContractGuard.Comparison.DiagnosticSeverity",
+      "type": "ContractGuard.Core.Comparison.DiagnosticSeverity",
       "access": "public",
       "kind": "enum",
       "underlyingType": "int",
@@ -3857,7 +3857,7 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Comparison.DiagnosticSeverity",
+          "type": "ContractGuard.Core.Comparison.DiagnosticSeverity",
           "value": 0,
           "access": "public"
         },
@@ -3867,21 +3867,21 @@
           "modifiers": [
             "const"
           ],
-          "type": "ContractGuard.Comparison.DiagnosticSeverity",
+          "type": "ContractGuard.Core.Comparison.DiagnosticSeverity",
           "value": 1,
           "access": "public"
         }
       ]
     },
     {
-      "type": "ContractGuard.Comparison.Diagnostic",
+      "type": "ContractGuard.Core.Comparison.Diagnostic",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Comparison.Diagnostic>"
+        "System.IEquatable<ContractGuard.Core.Comparison.Diagnostic>"
       ],
       "members": [
         {
@@ -3897,7 +3897,7 @@
         {
           "kind": "property",
           "name": "Severity",
-          "type": "ContractGuard.Comparison.DiagnosticSeverity",
+          "type": "ContractGuard.Core.Comparison.DiagnosticSeverity",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -3952,7 +3952,7 @@
               "Id"
             ],
             [
-              "ContractGuard.Comparison.DiagnosticSeverity",
+              "ContractGuard.Core.Comparison.DiagnosticSeverity",
               "Severity"
             ],
             [
@@ -3992,11 +3992,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Comparison.Diagnostic?",
+              "ContractGuard.Core.Comparison.Diagnostic?",
               "left"
             ],
             [
-              "ContractGuard.Comparison.Diagnostic?",
+              "ContractGuard.Core.Comparison.Diagnostic?",
               "right"
             ]
           ]
@@ -4007,11 +4007,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Comparison.Diagnostic?",
+              "ContractGuard.Core.Comparison.Diagnostic?",
               "left"
             ],
             [
-              "ContractGuard.Comparison.Diagnostic?",
+              "ContractGuard.Core.Comparison.Diagnostic?",
               "right"
             ]
           ]
@@ -4046,7 +4046,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Comparison.Diagnostic?",
+              "ContractGuard.Core.Comparison.Diagnostic?",
               "other"
             ]
           ],
@@ -4063,7 +4063,7 @@
               "modifier": "out"
             },
             {
-              "type": "ContractGuard.Comparison.DiagnosticSeverity",
+              "type": "ContractGuard.Core.Comparison.DiagnosticSeverity",
               "name": "Severity",
               "modifier": "out"
             },
@@ -4093,20 +4093,20 @@
       ]
     },
     {
-      "type": "ContractGuard.Comparison.ComparisonResult",
+      "type": "ContractGuard.Core.Comparison.ComparisonResult",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
       "implements": [
-        "System.IEquatable<ContractGuard.Comparison.ComparisonResult>"
+        "System.IEquatable<ContractGuard.Core.Comparison.ComparisonResult>"
       ],
       "members": [
         {
           "kind": "property",
           "name": "Diagnostics",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Comparison.Diagnostic>",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Comparison.Diagnostic>",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -4126,7 +4126,7 @@
           "kind": "constructor",
           "params": [
             [
-              "System.Collections.Generic.IReadOnlyList<ContractGuard.Comparison.Diagnostic>",
+              "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Comparison.Diagnostic>",
               "Diagnostics"
             ]
           ],
@@ -4147,11 +4147,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Comparison.ComparisonResult?",
+              "ContractGuard.Core.Comparison.ComparisonResult?",
               "left"
             ],
             [
-              "ContractGuard.Comparison.ComparisonResult?",
+              "ContractGuard.Core.Comparison.ComparisonResult?",
               "right"
             ]
           ]
@@ -4162,11 +4162,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Comparison.ComparisonResult?",
+              "ContractGuard.Core.Comparison.ComparisonResult?",
               "left"
             ],
             [
-              "ContractGuard.Comparison.ComparisonResult?",
+              "ContractGuard.Core.Comparison.ComparisonResult?",
               "right"
             ]
           ]
@@ -4201,7 +4201,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Comparison.ComparisonResult?",
+              "ContractGuard.Core.Comparison.ComparisonResult?",
               "other"
             ]
           ],
@@ -4213,7 +4213,7 @@
           "returns": "void",
           "params": [
             {
-              "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Comparison.Diagnostic>",
+              "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Comparison.Diagnostic>",
               "name": "Diagnostics",
               "modifier": "out"
             }
@@ -4223,7 +4223,7 @@
       ]
     },
     {
-      "type": "ContractGuard.Comparison.DiagnosticIds",
+      "type": "ContractGuard.Core.Comparison.DiagnosticIds",
       "access": "public",
       "kind": "class",
       "modifiers": [
@@ -4463,7 +4463,7 @@
       ]
     },
     {
-      "type": "ContractGuard.Comparison.ScopeFilter",
+      "type": "ContractGuard.Core.Comparison.ScopeFilter",
       "access": "public",
       "kind": "class",
       "modifiers": [
@@ -4479,11 +4479,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.Model.Accessibility",
+              "ContractGuard.Core.Model.Accessibility",
               "access"
             ],
             [
-              "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.Accessibility>",
+              "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.Accessibility>",
               "scope"
             ]
           ],
@@ -4495,14 +4495,14 @@
           "modifiers": [
             "static"
           ],
-          "returns": "ContractGuard.Metadata.AssemblySurface",
+          "returns": "ContractGuard.Core.Metadata.AssemblySurface",
           "params": [
             [
-              "ContractGuard.Metadata.AssemblySurface",
+              "ContractGuard.Core.Metadata.AssemblySurface",
               "surface"
             ],
             [
-              "System.Collections.Generic.IReadOnlyList<ContractGuard.Model.Accessibility>",
+              "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.Accessibility>",
               "scope"
             ]
           ],
@@ -4511,15 +4511,15 @@
       ]
     },
     {
-      "type": "ContractGuard.TypeNames.TypeNameNode+Named",
+      "type": "ContractGuard.Core.TypeNames.TypeNameNode+Named",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "extends": "ContractGuard.Core.TypeNames.TypeNameNode",
       "implements": [
-        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Named>"
+        "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Named>"
       ],
       "members": [
         {
@@ -4547,7 +4547,7 @@
         {
           "kind": "property",
           "name": "Args",
-          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.TypeNames.TypeNameNode>",
+          "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.TypeNames.TypeNameNode>",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -4562,7 +4562,7 @@
               "Name"
             ],
             [
-              "System.Collections.Generic.IReadOnlyList<ContractGuard.TypeNames.TypeNameNode>",
+              "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.TypeNames.TypeNameNode>",
               "Args"
             ]
           ],
@@ -4598,11 +4598,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Named?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Named?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Named?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Named?",
               "right"
             ]
           ]
@@ -4613,11 +4613,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Named?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Named?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Named?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Named?",
               "right"
             ]
           ]
@@ -4656,7 +4656,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "other"
             ]
           ],
@@ -4668,7 +4668,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Named?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Named?",
               "other"
             ]
           ],
@@ -4685,7 +4685,7 @@
               "modifier": "out"
             },
             {
-              "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.TypeNames.TypeNameNode>",
+              "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.TypeNames.TypeNameNode>",
               "name": "Args",
               "modifier": "out"
             }
@@ -4695,15 +4695,15 @@
       ]
     },
     {
-      "type": "ContractGuard.TypeNames.TypeNameNode+Array",
+      "type": "ContractGuard.Core.TypeNames.TypeNameNode+Array",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "extends": "ContractGuard.Core.TypeNames.TypeNameNode",
       "implements": [
-        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Array>"
+        "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Array>"
       ],
       "members": [
         {
@@ -4721,7 +4721,7 @@
         {
           "kind": "property",
           "name": "Element",
-          "type": "ContractGuard.TypeNames.TypeNameNode",
+          "type": "ContractGuard.Core.TypeNames.TypeNameNode",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -4742,7 +4742,7 @@
           "kind": "constructor",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode",
+              "ContractGuard.Core.TypeNames.TypeNameNode",
               "Element"
             ],
             [
@@ -4782,11 +4782,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Array?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Array?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Array?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Array?",
               "right"
             ]
           ]
@@ -4797,11 +4797,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Array?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Array?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Array?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Array?",
               "right"
             ]
           ]
@@ -4840,7 +4840,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "other"
             ]
           ],
@@ -4852,7 +4852,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Array?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Array?",
               "other"
             ]
           ],
@@ -4864,7 +4864,7 @@
           "returns": "void",
           "params": [
             {
-              "type": "ContractGuard.TypeNames.TypeNameNode",
+              "type": "ContractGuard.Core.TypeNames.TypeNameNode",
               "name": "Element",
               "modifier": "out"
             },
@@ -4879,15 +4879,15 @@
       ]
     },
     {
-      "type": "ContractGuard.TypeNames.TypeNameNode+Nullable",
+      "type": "ContractGuard.Core.TypeNames.TypeNameNode+Nullable",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "extends": "ContractGuard.Core.TypeNames.TypeNameNode",
       "implements": [
-        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Nullable>"
+        "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Nullable>"
       ],
       "members": [
         {
@@ -4905,7 +4905,7 @@
         {
           "kind": "property",
           "name": "Element",
-          "type": "ContractGuard.TypeNames.TypeNameNode",
+          "type": "ContractGuard.Core.TypeNames.TypeNameNode",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -4916,7 +4916,7 @@
           "kind": "constructor",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode",
+              "ContractGuard.Core.TypeNames.TypeNameNode",
               "Element"
             ]
           ],
@@ -4952,11 +4952,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Nullable?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Nullable?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Nullable?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Nullable?",
               "right"
             ]
           ]
@@ -4967,11 +4967,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Nullable?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Nullable?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Nullable?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Nullable?",
               "right"
             ]
           ]
@@ -5010,7 +5010,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "other"
             ]
           ],
@@ -5022,7 +5022,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Nullable?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Nullable?",
               "other"
             ]
           ],
@@ -5034,7 +5034,7 @@
           "returns": "void",
           "params": [
             {
-              "type": "ContractGuard.TypeNames.TypeNameNode",
+              "type": "ContractGuard.Core.TypeNames.TypeNameNode",
               "name": "Element",
               "modifier": "out"
             }
@@ -5044,15 +5044,15 @@
       ]
     },
     {
-      "type": "ContractGuard.TypeNames.TypeNameNode+Tuple",
+      "type": "ContractGuard.Core.TypeNames.TypeNameNode+Tuple",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "extends": "ContractGuard.Core.TypeNames.TypeNameNode",
       "implements": [
-        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Tuple>"
+        "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Tuple>"
       ],
       "members": [
         {
@@ -5070,7 +5070,7 @@
         {
           "kind": "property",
           "name": "Elements",
-          "type": "System.Collections.Generic.IReadOnlyList<(string? Name, ContractGuard.TypeNames.TypeNameNode Type)>",
+          "type": "System.Collections.Generic.IReadOnlyList<(string? Name, ContractGuard.Core.TypeNames.TypeNameNode Type)>",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -5081,7 +5081,7 @@
           "kind": "constructor",
           "params": [
             [
-              "System.Collections.Generic.IReadOnlyList<(string? Name, ContractGuard.TypeNames.TypeNameNode Type)>",
+              "System.Collections.Generic.IReadOnlyList<(string? Name, ContractGuard.Core.TypeNames.TypeNameNode Type)>",
               "Elements"
             ]
           ],
@@ -5117,11 +5117,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Tuple?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Tuple?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Tuple?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Tuple?",
               "right"
             ]
           ]
@@ -5132,11 +5132,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Tuple?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Tuple?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Tuple?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Tuple?",
               "right"
             ]
           ]
@@ -5175,7 +5175,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "other"
             ]
           ],
@@ -5187,7 +5187,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Tuple?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Tuple?",
               "other"
             ]
           ],
@@ -5199,7 +5199,7 @@
           "returns": "void",
           "params": [
             {
-              "type": "System.Collections.Generic.IReadOnlyList<(string? Name, ContractGuard.TypeNames.TypeNameNode Type)>",
+              "type": "System.Collections.Generic.IReadOnlyList<(string? Name, ContractGuard.Core.TypeNames.TypeNameNode Type)>",
               "name": "Elements",
               "modifier": "out"
             }
@@ -5209,15 +5209,15 @@
       ]
     },
     {
-      "type": "ContractGuard.TypeNames.TypeNameNode+Pointer",
+      "type": "ContractGuard.Core.TypeNames.TypeNameNode+Pointer",
       "access": "public",
       "kind": "class",
       "modifiers": [
         "sealed"
       ],
-      "extends": "ContractGuard.TypeNames.TypeNameNode",
+      "extends": "ContractGuard.Core.TypeNames.TypeNameNode",
       "implements": [
-        "System.IEquatable<ContractGuard.TypeNames.TypeNameNode+Pointer>"
+        "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Pointer>"
       ],
       "members": [
         {
@@ -5235,7 +5235,7 @@
         {
           "kind": "property",
           "name": "Element",
-          "type": "ContractGuard.TypeNames.TypeNameNode",
+          "type": "ContractGuard.Core.TypeNames.TypeNameNode",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -5246,7 +5246,7 @@
           "kind": "constructor",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode",
+              "ContractGuard.Core.TypeNames.TypeNameNode",
               "Element"
             ]
           ],
@@ -5282,11 +5282,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Pointer?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Pointer?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Pointer?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Pointer?",
               "right"
             ]
           ]
@@ -5297,11 +5297,11 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Pointer?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Pointer?",
               "left"
             ],
             [
-              "ContractGuard.TypeNames.TypeNameNode+Pointer?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Pointer?",
               "right"
             ]
           ]
@@ -5340,7 +5340,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode?",
+              "ContractGuard.Core.TypeNames.TypeNameNode?",
               "other"
             ]
           ],
@@ -5352,7 +5352,7 @@
           "returns": "bool",
           "params": [
             [
-              "ContractGuard.TypeNames.TypeNameNode+Pointer?",
+              "ContractGuard.Core.TypeNames.TypeNameNode+Pointer?",
               "other"
             ]
           ],
@@ -5364,7 +5364,7 @@
           "returns": "void",
           "params": [
             {
-              "type": "ContractGuard.TypeNames.TypeNameNode",
+              "type": "ContractGuard.Core.TypeNames.TypeNameNode",
               "name": "Element",
               "modifier": "out"
             }

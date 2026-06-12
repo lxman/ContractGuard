@@ -1,8 +1,8 @@
-using ContractGuard.Metadata;
-using ContractGuard.Model;
-using ContractGuard.TypeNames;
+using ContractGuard.Core.Metadata;
+using ContractGuard.Core.Model;
+using ContractGuard.Core.TypeNames;
 
-namespace ContractGuard.Comparison;
+namespace ContractGuard.Core.Comparison;
 
 /// <summary>
 /// Compares a contract against an observed assembly surface and produces the gate verdict.
@@ -37,9 +37,9 @@ public sealed class ContractComparer
         }
 
         var governedObserved = new HashSet<TypeContract>();
-        foreach (var governed in _contract.Types)
+        foreach (TypeContract governed in _contract.Types)
         {
-            var observed = FindObservedType(governed);
+            TypeContract? observed = FindObservedType(governed);
             if (observed is null)
             {
                 Add(DiagnosticIds.TypeMissing, DiagnosticSeverity.Error,
@@ -51,19 +51,17 @@ public sealed class ContractComparer
             CompareType(governed, observed);
         }
 
-        if (_settings.NewTypes == AllowDeny.Deny)
+        if (_settings.NewTypes != AllowDeny.Deny) return new ComparisonResult(_diagnostics);
+        foreach (TypeContract observed in _surface.Types)
         {
-            foreach (var observed in _surface.Types)
-            {
-                if (governedObserved.Contains(observed))
-                    continue;
-                if (!ScopeFilter.InScope(observed.Access ?? Accessibility.Public, _settings.Scope))
-                    continue;
+            if (governedObserved.Contains(observed))
+                continue;
+            if (!ScopeFilter.InScope(observed.Access ?? Accessibility.Public, _settings.Scope))
+                continue;
 
-                Add(DiagnosticIds.UnexpectedType, DiagnosticSeverity.Error,
-                    $"Type '{observed.Type}' is not part of the contract and settings.newTypes is 'deny'.",
-                    observed.Type);
-            }
+            Add(DiagnosticIds.UnexpectedType, DiagnosticSeverity.Error,
+                $"Type '{observed.Type}' is not part of the contract and settings.newTypes is 'deny'.",
+                observed.Type);
         }
 
         return new ComparisonResult(_diagnostics);
@@ -71,22 +69,13 @@ public sealed class ContractComparer
 
     private TypeContract? FindObservedType(TypeContract governed)
     {
-        var (name, arity) = ParseGovernedTypeName(governed);
-        foreach (var observed in _surface.Types)
-        {
-            if (string.Equals(observed.Type, name, StringComparison.Ordinal)
-                && (observed.TypeParams?.Count ?? 0) == arity)
-            {
-                return observed;
-            }
-        }
-
-        return null;
+        (string name, int arity) = ParseGovernedTypeName(governed);
+        return _surface.Types.FirstOrDefault(observed => string.Equals(observed.Type, name, StringComparison.Ordinal) && (observed.TypeParams?.Count ?? 0) == arity);
     }
 
     private static (string Name, int Arity) ParseGovernedTypeName(TypeContract governed)
     {
-        var declaredArity = governed.TypeParams?.Count ?? 0;
+        int declaredArity = governed.TypeParams?.Count ?? 0;
         try
         {
             if (TypeNameParser.Parse(governed.Type) is TypeNameNode.Named named)
@@ -101,10 +90,10 @@ public sealed class ContractComparer
 
     private void CompareType(TypeContract governed, TypeContract observed)
     {
-        var typeName = observed.Type;
-        var ns = NamespaceOf(typeName);
+        string typeName = observed.Type;
+        string ns = NamespaceOf(typeName);
 
-        var expectedAccess = governed.Access ?? Accessibility.Public;
+        Accessibility expectedAccess = governed.Access ?? Accessibility.Public;
         if (expectedAccess != (observed.Access ?? Accessibility.Public))
         {
             Add(DiagnosticIds.AccessMismatch, DiagnosticSeverity.Error,
@@ -112,7 +101,7 @@ public sealed class ContractComparer
                 typeName);
         }
 
-        if (governed.Kind is TypeKind governedKind
+        if (governed.Kind is { } governedKind
             && NormalizeKind(governedKind) != NormalizeKind(observed.Kind ?? TypeKind.Class))
         {
             Add(DiagnosticIds.TypeKindMismatch, DiagnosticSeverity.Error,
@@ -135,7 +124,7 @@ public sealed class ContractComparer
                 typeName);
         }
 
-        foreach (var iface in governed.Implements ?? [])
+        foreach (string iface in governed.Implements ?? [])
         {
             if (!(observed.Implements ?? []).Any(o => _matcher.Matches(iface, o, ns)))
             {
@@ -170,30 +159,28 @@ public sealed class ContractComparer
                 $"Delegate returns '{observed.Returns}' but the contract prescribes '{governed.Returns}'.", typeName);
         }
 
-        if (governed.Params is not null)
+        if (governed.Params is null) return;
+        if (!ParamTypesMatch(governed.Params, observed.Params ?? [], ns))
         {
-            if (!ParamTypesMatch(governed.Params, observed.Params ?? [], ns))
-            {
-                Add(DiagnosticIds.DelegateSignatureMismatch, DiagnosticSeverity.Error,
-                    "Delegate parameter list does not match the contract.", typeName);
-            }
-            else
-            {
-                CompareParamAspects(
-                    governed.Params, observed.Params ?? [],
-                    ResolveNames(null, governed), typeName, "Invoke");
-            }
+            Add(DiagnosticIds.DelegateSignatureMismatch, DiagnosticSeverity.Error,
+                "Delegate parameter list does not match the contract.", typeName);
+        }
+        else
+        {
+            CompareParamAspects(
+                governed.Params, observed.Params ?? [],
+                ResolveNames(null, governed), typeName, "Invoke");
         }
     }
 
     private void CompareMembers(TypeContract governed, TypeContract observed, string ns, string typeName)
     {
-        var observedMembers = observed.Members ?? [];
+        IReadOnlyList<MemberContract> observedMembers = observed.Members ?? [];
         var consumed = new HashSet<MemberContract>();
 
-        foreach (var entry in governed.Members ?? [])
+        foreach (MemberContract entry in governed.Members ?? [])
         {
-            var match = observedMembers.FirstOrDefault(o => !consumed.Contains(o) && IdentityMatch(entry, o, ns));
+            MemberContract? match = observedMembers.FirstOrDefault(o => !consumed.Contains(o) && IdentityMatch(entry, o, ns));
 
             if (entry.Mode == EntryMode.Forbidden)
             {
@@ -210,7 +197,7 @@ public sealed class ContractComparer
 
             if (match is null)
             {
-                var closest = ClosestCandidate(entry, observedMembers, consumed);
+                MemberContract? closest = ClosestCandidate(entry, observedMembers, consumed);
                 if (closest is not null)
                 {
                     consumed.Add(closest);
@@ -233,20 +220,18 @@ public sealed class ContractComparer
             CompareMatchedMember(entry, match, governed, ns, typeName);
         }
 
-        if ((governed.NewMembers ?? _settings.NewMembers) == AllowDeny.Deny)
+        if ((governed.NewMembers ?? _settings.NewMembers) != AllowDeny.Deny) return;
+        foreach (MemberContract extra in observedMembers)
         {
-            foreach (var extra in observedMembers)
-            {
-                if (consumed.Contains(extra))
-                    continue;
-                if (!ScopeFilter.InScope(extra.Access ?? Accessibility.Public, _settings.Scope))
-                    continue;
+            if (consumed.Contains(extra))
+                continue;
+            if (!ScopeFilter.InScope(extra.Access ?? Accessibility.Public, _settings.Scope))
+                continue;
 
-                Add(DiagnosticIds.UnexpectedMember, DiagnosticSeverity.Error,
-                    $"Member is not part of the contract and newMembers is 'deny': "
-                    + $"{DeclarationRenderer.Render(extra, ShortName(typeName))}.",
-                    typeName, extra.DisplayName);
-            }
+            Add(DiagnosticIds.UnexpectedMember, DiagnosticSeverity.Error,
+                $"Member is not part of the contract and newMembers is 'deny': "
+                + $"{DeclarationRenderer.Render(extra, ShortName(typeName))}.",
+                typeName, extra.DisplayName);
         }
     }
 
@@ -271,14 +256,14 @@ public sealed class ContractComparer
     private static MemberContract? ClosestCandidate(
         MemberContract entry, IReadOnlyList<MemberContract> observedMembers, HashSet<MemberContract> consumed)
     {
-        var candidates = observedMembers
+        List<MemberContract> candidates = observedMembers
             .Where(o => !consumed.Contains(o) && o.KindName == entry.KindName && SameName(entry, o))
             .ToList();
         if (candidates.Count == 0)
             return null;
 
         // Prefer the candidate whose parameter count is closest to the prescription.
-        var targetCount = ParamCount(entry);
+        int targetCount = ParamCount(entry);
         return candidates.OrderBy(c => Math.Abs(ParamCount(c) - targetCount)).First();
 
         static bool SameName(MemberContract a, MemberContract b) => (a, b) switch
@@ -303,12 +288,12 @@ public sealed class ContractComparer
     private void CompareMatchedMember(
         MemberContract contract, MemberContract observed, TypeContract governedType, string ns, string typeName)
     {
-        var member = contract.DisplayName;
+        string member = contract.DisplayName;
 
         if (contract is not OperatorContract)
         {
-            var expected = contract.Access ?? Accessibility.Public;
-            var actual = observed.Access ?? Accessibility.Public;
+            Accessibility expected = contract.Access ?? Accessibility.Public;
+            Accessibility actual = observed.Access ?? Accessibility.Public;
             if (expected != actual)
             {
                 Add(DiagnosticIds.AccessMismatch, DiagnosticSeverity.Error,
@@ -317,7 +302,7 @@ public sealed class ContractComparer
             }
         }
 
-        var (contractModifiers, observedModifiers) = (ModifiersOf(contract), ModifiersOf(observed));
+        (IReadOnlyList<MemberModifier> contractModifiers, IReadOnlyList<MemberModifier> observedModifiers) = (ModifiersOf(contract), ModifiersOf(observed));
         if (!SetEquals(contractModifiers, observedModifiers))
         {
             Add(DiagnosticIds.ModifiersMismatch, DiagnosticSeverity.Error,
@@ -325,7 +310,7 @@ public sealed class ContractComparer
                 typeName, member, contract.Reason);
         }
 
-        var (contractReturn, observedReturn) = (ReturnTypeOf(contract), ReturnTypeOf(observed));
+        (string? contractReturn, string? observedReturn) = (ReturnTypeOf(contract), ReturnTypeOf(observed));
         if (contractReturn is not null
             && (observedReturn is null || !_matcher.Matches(contractReturn, observedReturn, ns)))
         {
@@ -343,8 +328,8 @@ public sealed class ContractComparer
         if (contract is MethodContract cm && observed is MethodContract om)
             CompareTypeParams(cm.TypeParams, om.TypeParams, ns, typeName, member);
 
-        var contractParams = ParamsOf(contract);
-        var observedParams = ParamsOf(observed);
+        IReadOnlyList<ParamContract>? contractParams = ParamsOf(contract);
+        IReadOnlyList<ParamContract>? observedParams = ParamsOf(observed);
         if (contractParams is not null && observedParams is not null)
         {
             CompareParamAspects(
@@ -352,17 +337,20 @@ public sealed class ContractComparer
                 ResolveNames(contract, governedType), typeName, member, contract.Reason);
         }
 
-        if (contract is PropertyContract { Accessors: { } pa } && observed is PropertyContract opc)
-            CompareAccessors(pa, opc.Accessors, typeName, member, contract.Reason);
-        if (contract is IndexerContract { Accessors: { } ia } && observed is IndexerContract oic)
-            CompareAccessors(ia, oic.Accessors, typeName, member, contract.Reason);
-
-        if (contract is FieldContract { Value: { } prescribedValue } && observed is FieldContract of
-            && !prescribedValue.Equals(of.Value))
+        switch (contract)
         {
-            Add(DiagnosticIds.ConstValueChanged, DiagnosticSeverity.Error,
-                $"Constant value is {of.Value?.ToString() ?? "absent"} but the contract prescribes {prescribedValue}.",
-                typeName, member, contract.Reason);
+            case PropertyContract { Accessors: { } pa } when observed is PropertyContract opc:
+                CompareAccessors(pa, opc.Accessors, typeName, member, contract.Reason);
+                break;
+            case IndexerContract { Accessors: { } ia } when observed is IndexerContract oic:
+                CompareAccessors(ia, oic.Accessors, typeName, member, contract.Reason);
+                break;
+            case FieldContract { Value: { } prescribedValue } when observed is FieldContract of
+                                                                   && !prescribedValue.Equals(of.Value):
+                Add(DiagnosticIds.ConstValueChanged, DiagnosticSeverity.Error,
+                    $"Constant value is {of.Value?.ToString() ?? "absent"} but the contract prescribes {prescribedValue}.",
+                    typeName, member, contract.Reason);
+                break;
         }
     }
 
@@ -373,8 +361,8 @@ public sealed class ContractComparer
         if (contract is null)
             return;
 
-        var id = member is null ? DiagnosticIds.TypeParamsMismatch : DiagnosticIds.TypeParamsChanged;
-        var observedList = observed ?? [];
+        string id = member is null ? DiagnosticIds.TypeParamsMismatch : DiagnosticIds.TypeParamsChanged;
+        IReadOnlyList<TypeParamContract> observedList = observed ?? [];
         if (contract.Count != observedList.Count)
         {
             Add(id, DiagnosticSeverity.Error,
@@ -385,8 +373,8 @@ public sealed class ContractComparer
 
         for (var i = 0; i < contract.Count; i++)
         {
-            var c = contract[i];
-            var o = observedList[i];
+            TypeParamContract c = contract[i];
+            TypeParamContract o = observedList[i];
             if (c.Variance != o.Variance)
             {
                 Add(id, DiagnosticSeverity.Error,
@@ -398,9 +386,9 @@ public sealed class ContractComparer
             if (c.Constraints is null)
                 continue;
 
-            var observedConstraints = o.Constraints ?? [];
-            var matched = c.Constraints.Count == observedConstraints.Count
-                && c.Constraints.All(cc => observedConstraints.Any(oc => ConstraintMatches(cc, oc, ns)));
+            IReadOnlyList<string> observedConstraints = o.Constraints ?? [];
+            bool matched = c.Constraints.Count == observedConstraints.Count
+                           && c.Constraints.All(cc => observedConstraints.Any(oc => ConstraintMatches(cc, oc, ns)));
             if (!matched)
             {
                 Add(id, DiagnosticSeverity.Error,
@@ -422,13 +410,7 @@ public sealed class ContractComparer
         if (contract.Count != observed.Count)
             return false;
 
-        for (var i = 0; i < contract.Count; i++)
-        {
-            if (!_matcher.Matches(contract[i].Type, observed[i].Type, ns))
-                return false;
-        }
-
-        return true;
+        return !contract.Where((t, i) => !_matcher.Matches(t.Type, observed[i].Type, ns)).Any();
     }
 
     private void CompareParamAspects(
@@ -437,8 +419,8 @@ public sealed class ContractComparer
     {
         for (var i = 0; i < Math.Min(contract.Count, observed.Count); i++)
         {
-            var c = contract[i];
-            var o = observed[i];
+            ParamContract c = contract[i];
+            ParamContract o = observed[i];
 
             if (c.Modifier != o.Modifier)
             {
@@ -470,7 +452,7 @@ public sealed class ContractComparer
     private void CompareAccessors(
         AccessorsContract contract, AccessorsContract? observed, string typeName, string member, string? reason)
     {
-        var actual = observed ?? new AccessorsContract();
+        AccessorsContract actual = observed ?? new AccessorsContract();
         Check(contract.Get, actual.Get, "get");
         Check(contract.Set, actual.Set, "set");
         Check(contract.Init, actual.Init, "init");
@@ -481,7 +463,7 @@ public sealed class ContractComparer
             if (prescribed == found)
                 return;
 
-            var message = (prescribed, found) switch
+            string message = (prescribed, found) switch
             {
                 (null, not null) => $"Has a '{keyword}' accessor the contract does not prescribe.",
                 (not null, null) => $"Missing prescribed '{keyword}' accessor.",
@@ -494,7 +476,7 @@ public sealed class ContractComparer
 
     private Significance ResolveNames(MemberContract? member, TypeContract type)
     {
-        var memberSetting = member switch
+        Significance? memberSetting = member switch
         {
             MethodContract m => m.ParameterNames,
             ConstructorMemberContract c => c.ParameterNames,
@@ -554,16 +536,16 @@ public sealed class ContractComparer
 
     private static string NamespaceOf(string fullTypeName)
     {
-        var outer = fullTypeName.Split('+')[0];
-        var dot = outer.LastIndexOf('.');
+        string outer = fullTypeName.Split('+')[0];
+        int dot = outer.LastIndexOf('.');
         return dot < 0 ? string.Empty : outer[..dot];
     }
 
     private static string ShortName(string fullTypeName)
     {
-        var lastPlus = fullTypeName.LastIndexOf('+');
-        var tail = lastPlus >= 0 ? fullTypeName[(lastPlus + 1)..] : fullTypeName;
-        var dot = tail.LastIndexOf('.');
+        int lastPlus = fullTypeName.LastIndexOf('+');
+        string tail = lastPlus >= 0 ? fullTypeName[(lastPlus + 1)..] : fullTypeName;
+        int dot = tail.LastIndexOf('.');
         return dot < 0 ? tail : tail[(dot + 1)..];
     }
 
@@ -577,7 +559,7 @@ public sealed class ContractComparer
         Serialization.EnumMaps.Accessibility.NameOf(access ?? Accessibility.Public);
 
     private static string WireModifier(ParamModifier? modifier) =>
-        modifier is ParamModifier m ? Serialization.EnumMaps.ParamModifier.NameOf(m) : "none";
+        modifier is { } m ? Serialization.EnumMaps.ParamModifier.NameOf(m) : "none";
 
     private void Add(
         string id, DiagnosticSeverity severity, string message,

@@ -1,4 +1,4 @@
-namespace ContractGuard.Model;
+namespace ContractGuard.Core.Model;
 
 /// <summary>One governed type. 'Returns'/'Params' apply to delegate types only.</summary>
 public sealed record TypeContract

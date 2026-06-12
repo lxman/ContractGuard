@@ -1,6 +1,6 @@
-using ContractGuard.Model;
+using ContractGuard.Core.Model;
 
-namespace ContractGuard.Metadata;
+namespace ContractGuard.Core.Metadata;
 
 /// <summary>
 /// What the metadata reader observed in an assembly, expressed in the same shapes a contract

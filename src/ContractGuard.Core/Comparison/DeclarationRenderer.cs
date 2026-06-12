@@ -1,8 +1,8 @@
 using System.Text;
-using ContractGuard.Model;
-using ContractGuard.Serialization;
+using ContractGuard.Core.Model;
+using ContractGuard.Core.Serialization;
 
-namespace ContractGuard.Comparison;
+namespace ContractGuard.Core.Comparison;
 
 /// <summary>
 /// Renders model elements back into C#-style declarations for diagnostics and the 'show'
@@ -73,7 +73,7 @@ public static class DeclarationRenderer
     public static string Render(TypeContract type)
     {
         var sb = new StringBuilder();
-        foreach (var m in type.Modifiers ?? [])
+        foreach (TypeModifier m in type.Modifiers ?? [])
             sb.Append(Wire(EnumMaps.TypeModifier, m)).Append(' ');
 
         sb.Append(type.Kind switch
@@ -104,13 +104,13 @@ public static class DeclarationRenderer
 
     private static void AppendModifiers(StringBuilder sb, IReadOnlyList<MemberModifier>? modifiers)
     {
-        foreach (var m in modifiers ?? [])
+        foreach (MemberModifier m in modifiers ?? [])
             sb.Append(Wire(EnumMaps.MemberModifier, m)).Append(' ');
     }
 
     private static void AppendRef(StringBuilder sb, ReturnRefKind? refKind)
     {
-        if (refKind is ReturnRefKind k)
+        if (refKind is { } k)
             sb.Append(k == ReturnRefKind.RefReadonly ? "ref readonly " : "ref ");
     }
 
@@ -121,13 +121,13 @@ public static class DeclarationRenderer
 
         sb.Append('<');
         sb.Append(string.Join(", ", typeParams.Select(tp =>
-            tp.Variance is Variance v ? $"{Wire(EnumMaps.Variance, v)} {tp.Name}" : tp.Name)));
+            tp.Variance is { } v ? $"{Wire(EnumMaps.Variance, v)} {tp.Name}" : tp.Name)));
         sb.Append('>');
     }
 
     private static void AppendConstraints(StringBuilder sb, IReadOnlyList<TypeParamContract>? typeParams)
     {
-        foreach (var tp in typeParams ?? [])
+        foreach (TypeParamContract tp in typeParams ?? [])
         {
             if (tp.Constraints is { Count: > 0 } constraints)
                 sb.Append(" where ").Append(tp.Name).Append(" : ").Append(string.Join(", ", constraints));
@@ -149,12 +149,12 @@ public static class DeclarationRenderer
         sb.Append(string.Join(", ", parameters.Select(p =>
         {
             var parts = new List<string>(4);
-            if (p.Modifier is ParamModifier m)
+            if (p.Modifier is { } m)
                 parts.Add(Wire(EnumMaps.ParamModifier, m));
             parts.Add(p.Type);
             if (p.Name is not null)
                 parts.Add(p.Name);
-            var text = string.Join(" ", parts);
+            string text = string.Join(" ", parts);
             return p.Default is null ? text : $"{text} = {p.Default}";
         })));
     }
@@ -165,7 +165,7 @@ public static class DeclarationRenderer
             return;
 
         sb.Append(" {");
-        var owner = memberAccess ?? Accessibility.Public;
+        Accessibility owner = memberAccess ?? Accessibility.Public;
         Append(accessors.Get, "get");
         Append(accessors.Set, "set");
         Append(accessors.Init, "init");
@@ -183,7 +183,7 @@ public static class DeclarationRenderer
         }
     }
 
-    private static string Wire<T>(Serialization.MappedEnumConverter<T> converter, T value)
+    private static string Wire<T>(MappedEnumConverter<T> converter, T value)
         where T : struct, Enum
         => converter.NameOf(value);
 }

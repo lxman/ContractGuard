@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace ContractGuard.Metadata;
+namespace ContractGuard.Core.Metadata;
 
 /// <summary>
 /// Structured form of a decoded signature type. Signatures decode into this tree, nullable

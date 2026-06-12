@@ -1,6 +1,6 @@
 using System.Text.Json;
-using ContractGuard.Model;
-using ContractGuard.Serialization;
+using ContractGuard.Core.Model;
+using ContractGuard.Core.Serialization;
 
 namespace ContractGuard.Core.Tests;
 
@@ -19,26 +19,26 @@ public class ContractLoaderTests
     [Fact]
     public void Loads_the_sample_contract()
     {
-        var contract = ContractJson.Load(RepoPath("samples", "MyCompany.Orders.contract.json"));
+        AssemblyContract contract = ContractJson.Load(RepoPath("samples", "MyCompany.Orders.contract.json"));
 
         Assert.Equal("MyCompany.Orders", contract.Assembly);
         Assert.Equal(4, contract.Types.Count);
         Assert.Equal(Significance.Ignored, contract.Settings.NullableAnnotations);
 
-        var orderService = contract.Types.Single(t => t.Type == "MyCompany.Orders.OrderService");
+        TypeContract orderService = contract.Types.Single(t => t.Type == "MyCompany.Orders.OrderService");
         Assert.Equal(AllowDeny.Deny, orderService.NewMembers);
         Assert.Equal(8, orderService.Members!.Count);
 
-        var forbidden = orderService.Members.OfType<ConstructorMemberContract>()
+        ConstructorMemberContract forbidden = orderService.Members.OfType<ConstructorMemberContract>()
             .Single(c => c.Mode == EntryMode.Forbidden);
         Assert.Empty(forbidden.Params);
         Assert.Contains("DI", forbidden.Reason);
 
-        var find = orderService.Members.OfType<MethodContract>().Single(m => m.Name == "Find");
+        MethodContract find = orderService.Members.OfType<MethodContract>().Single(m => m.Name == "Find");
         Assert.Equal(ParamModifier.Ref, find.Params![0].Modifier);
         Assert.Equal(ConstantValue.Of(0), find.Params[1].Default);
 
-        var money = contract.Types.Single(t => t.Type == "MyCompany.Orders.Money");
+        TypeContract money = contract.Types.Single(t => t.Type == "MyCompany.Orders.Money");
         Assert.Equal([TypeModifier.Readonly], money.Modifiers);
         Assert.Equal(2, money.Members!.OfType<OperatorContract>().Count());
     }
@@ -46,7 +46,7 @@ public class ContractLoaderTests
     [Fact]
     public void Applies_defaults_for_omitted_settings()
     {
-        var contract = ContractJson.Parse("""{"assembly": "X", "types": []}""");
+        AssemblyContract contract = ContractJson.Parse("""{"assembly": "X", "types": []}""");
 
         Assert.Equal(AllowDeny.Allow, contract.Settings.NewTypes);
         Assert.Equal(Significance.Significant, contract.Settings.ParameterNames);
@@ -88,7 +88,7 @@ public class ContractLoaderTests
                              "default": {"$special": "default"}}]}]}]}
             """;
 
-        var contract = ContractJson.Parse(json);
+        AssemblyContract contract = ContractJson.Parse(json);
         var method = (MethodContract)contract.Types[0].Members![0];
         Assert.True(method.Params![0].Default!.IsDefaultSentinel);
     }
@@ -96,9 +96,9 @@ public class ContractLoaderTests
     [Fact]
     public void Serialization_round_trips_stably()
     {
-        var loaded = ContractJson.Load(RepoPath("samples", "MyCompany.Orders.contract.json"));
-        var once = ContractJson.Serialize(loaded);
-        var twice = ContractJson.Serialize(ContractJson.Parse(once));
+        AssemblyContract loaded = ContractJson.Load(RepoPath("samples", "MyCompany.Orders.contract.json"));
+        string once = ContractJson.Serialize(loaded);
+        string twice = ContractJson.Serialize(ContractJson.Parse(once));
 
         Assert.Equal(once, twice);
     }
@@ -106,13 +106,13 @@ public class ContractLoaderTests
     [Fact]
     public void Tolerates_comments_and_trailing_commas()
     {
-        var contract = ContractJson.Parse("""
-            {
-                // governance file, hand-edited
-                "assembly": "X",
-                "types": [],
-            }
-            """);
+        AssemblyContract contract = ContractJson.Parse("""
+                                                       {
+                                                           // governance file, hand-edited
+                                                           "assembly": "X",
+                                                           "types": [],
+                                                       }
+                                                       """);
 
         Assert.Equal("X", contract.Assembly);
     }

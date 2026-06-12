@@ -1,4 +1,5 @@
-using ContractGuard.Model;
+using ContractGuard.Core.Metadata;
+using ContractGuard.Core.Model;
 
 namespace ContractGuard.Core.Tests;
 
@@ -38,7 +39,7 @@ public class MetadataReaderTests
         }
         """;
 
-    private static readonly Lazy<Metadata.AssemblySurface> Surface = new(() => TestCompiler.CompileAndRead(Source));
+    private static readonly Lazy<AssemblySurface> Surface = new(() => TestCompiler.CompileAndRead(Source));
 
     private static TypeContract Type(string fullName) => Surface.Value.Types.Single(t => t.Type == fullName);
 
@@ -52,10 +53,10 @@ public class MetadataReaderTests
     [Fact]
     public void Reads_constructor_with_parameters()
     {
-        var ctor = Type("TestLib.OrderService").Members!.OfType<ConstructorMemberContract>().Single();
+        ConstructorMemberContract ctor = Type("TestLib.OrderService").Members!.OfType<ConstructorMemberContract>().Single();
 
         Assert.Equal(Accessibility.Public, ctor.Access);
-        var p = Assert.Single(ctor.Params);
+        ParamContract p = Assert.Single(ctor.Params);
         Assert.Equal("int", p.Type);
         Assert.Equal("retries", p.Name);
     }
@@ -63,7 +64,7 @@ public class MetadataReaderTests
     [Fact]
     public void Reads_method_signatures_with_full_type_names()
     {
-        var submit = Type("TestLib.OrderService").Members!
+        MethodContract submit = Type("TestLib.OrderService").Members!
             .OfType<MethodContract>().Single(m => m.Name == "SubmitAsync");
 
         Assert.Equal("System.Threading.Tasks.Task<int>", submit.Returns);
@@ -77,7 +78,7 @@ public class MetadataReaderTests
     {
         // Metadata encodes '= default' on a struct parameter as a nullref constant - the same
         // encoding as '= null' on a reference type - so equality treats the two as one.
-        var submit = Type("TestLib.OrderService").Members!
+        MethodContract submit = Type("TestLib.OrderService").Members!
             .OfType<MethodContract>().Single(m => m.Name == "SubmitAsync");
 
         Assert.Equal(ConstantValue.DefaultSentinel, submit.Params![1].Default);
@@ -86,7 +87,7 @@ public class MetadataReaderTests
     [Fact]
     public void Reads_static_and_virtual_modifiers()
     {
-        var members = Type("TestLib.OrderService").Members!.OfType<MethodContract>().ToList();
+        List<MethodContract> members = Type("TestLib.OrderService").Members!.OfType<MethodContract>().ToList();
 
         Assert.Equal([MemberModifier.Static], members.Single(m => m.Name == "Add").Modifiers);
         Assert.Equal([MemberModifier.Virtual], members.Single(m => m.Name == "Hook").Modifiers);
@@ -95,7 +96,7 @@ public class MetadataReaderTests
     [Fact]
     public void Reads_asymmetric_property_accessors()
     {
-        var property = Type("TestLib.OrderService").Members!
+        PropertyContract property = Type("TestLib.OrderService").Members!
             .OfType<PropertyContract>().Single(p => p.Name == "PendingCount");
 
         Assert.Equal("int", property.Type);
@@ -108,7 +109,7 @@ public class MetadataReaderTests
     [Fact]
     public void Reads_events_with_their_delegate_type()
     {
-        var evt = Type("TestLib.OrderService").Members!.OfType<EventContract>().Single();
+        EventContract evt = Type("TestLib.OrderService").Members!.OfType<EventContract>().Single();
 
         Assert.Equal("Completed", evt.Name);
         Assert.Equal("System.EventHandler", evt.Type);
@@ -117,7 +118,7 @@ public class MetadataReaderTests
     [Fact]
     public void Reads_const_fields_with_their_value()
     {
-        var field = Type("TestLib.OrderService").Members!.OfType<FieldContract>().Single();
+        FieldContract field = Type("TestLib.OrderService").Members!.OfType<FieldContract>().Single();
 
         Assert.Equal("MaxRetries", field.Name);
         Assert.Equal([MemberModifier.Const], field.Modifiers);
@@ -127,10 +128,10 @@ public class MetadataReaderTests
     [Fact]
     public void Reads_generic_methods_with_constraints_and_ref_params()
     {
-        var find = Type("TestLib.OrderService").Members!
+        MethodContract find = Type("TestLib.OrderService").Members!
             .OfType<MethodContract>().Single(m => m.Name == "Find");
 
-        var tp = Assert.Single(find.TypeParams!);
+        TypeParamContract tp = Assert.Single(find.TypeParams!);
         Assert.Equal("T", tp.Name);
         Assert.Contains("struct", tp.Constraints!);
         Assert.Equal(ParamModifier.Ref, find.Params![0].Modifier);
@@ -142,14 +143,14 @@ public class MetadataReaderTests
     [Fact]
     public void Reads_readonly_structs_and_operators()
     {
-        var money = Type("TestLib.Money");
+        TypeContract money = Type("TestLib.Money");
 
         Assert.Equal(TypeKind.Struct, money.Kind);
         Assert.Contains(TypeModifier.Readonly, money.Modifiers!);
 
-        var operators = money.Members!.OfType<OperatorContract>().ToList();
-        Assert.Contains(operators, o => o.Name == "+" && o.Returns == "TestLib.Money");
-        Assert.Contains(operators, o => o.Name == "implicit" && o.Returns == "TestLib.Money");
+        List<OperatorContract> operators = money.Members!.OfType<OperatorContract>().ToList();
+        Assert.Contains(operators, o => o is { Name: "+", Returns: "TestLib.Money" });
+        Assert.Contains(operators, o => o is { Name: "implicit", Returns: "TestLib.Money" });
     }
 
     [Fact]
@@ -166,19 +167,19 @@ public class MetadataReaderTests
                 }
             }
             """;
-        var surface = TestCompiler.CompileAndRead(source);
-        var inner = surface.Types.Single(t => t.Type == "TestLib.Outer+Inner");
+        AssemblySurface surface = TestCompiler.CompileAndRead(source);
+        TypeContract inner = surface.Types.Single(t => t.Type == "TestLib.Outer+Inner");
 
-        Assert.Equal(Model.Accessibility.Internal, inner.Access);
+        Assert.Equal(Accessibility.Internal, inner.Access);
     }
 
     [Fact]
     public void Reads_interface_variance()
     {
-        var projection = Type("TestLib.IProjection");
+        TypeContract projection = Type("TestLib.IProjection");
 
         Assert.Equal(TypeKind.Interface, projection.Kind);
-        var tp = Assert.Single(projection.TypeParams!);
+        TypeParamContract tp = Assert.Single(projection.TypeParams!);
         Assert.Equal(Variance.Out, tp.Variance);
 
         var method = Assert.IsType<MethodContract>(Assert.Single(projection.Members!));

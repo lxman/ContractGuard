@@ -1,8 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using ContractGuard.Model;
+using ContractGuard.Core.Model;
 
-namespace ContractGuard.Serialization;
+namespace ContractGuard.Core.Serialization;
 
 /// <summary>
 /// Enum converter with an explicit string map. Several contract enums need JSON forms no
@@ -26,8 +26,8 @@ internal sealed class MappedEnumConverter<T> : JsonConverter<T>
         if (reader.TokenType != JsonTokenType.String)
             throw new JsonException($"Expected a string for {typeof(T).Name}.");
 
-        var text = reader.GetString()!;
-        if (_fromJson.TryGetValue(text, out var value))
+        string text = reader.GetString()!;
+        if (_fromJson.TryGetValue(text, out T value))
             return value;
 
         throw new JsonException(

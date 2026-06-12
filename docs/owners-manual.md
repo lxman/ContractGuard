@@ -116,6 +116,33 @@ error:
   "reason": "Construct through DI; this bypasses validation." }
 ```
 
+## Authoring from C# instead of JSON
+
+If you'd rather write C# than JSON, the authoring verbs decompose it for you. `add` takes
+member declarations on the command line:
+
+```
+contractguard add --contract Shop.contract.json --type OrderService "public Task<Result> Submit(Order order)"
+contractguard add --contract Shop.contract.json --type OrderService --forbidden --reason "construct via DI" "public OrderService()"
+```
+
+`import` takes whole scaffold files - write the interfaces you're prescribing as a .cs
+file and import it (`--assembly <name>` creates the contract if it doesn't exist yet):
+
+```
+contractguard import --contract Shop.contract.json --assembly Shop IOrderContract.cs
+```
+
+Both print the decomposed result so you can see what landed. Duplicates are skipped, the
+file's usings carry over, and asking for `async` gets you the lecture about it not being
+a signature concept. One syntax caveat on `import`: a base list can't reveal whether
+`class Foo : Bar` extends a class or implements an interface, so the conventional
+I-prefix decides - check the result if your interfaces are named unconventionally.
+
+`normalize` rewrites a contract to canonical form, and `normalize --check` exits 1 when
+the file isn't canonical, which makes it a cheap CI lint. Note that `//` comments don't
+survive normalization.
+
 ## Writing members by hand
 
 You'll mostly edit what `extract` produced, but here's the vocabulary. A parameter is

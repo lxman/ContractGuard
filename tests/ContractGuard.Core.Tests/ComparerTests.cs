@@ -1,5 +1,5 @@
-using ContractGuard.Comparison;
-using ContractGuard.Serialization;
+using ContractGuard.Core.Comparison;
+using ContractGuard.Core.Serialization;
 
 namespace ContractGuard.Core.Tests;
 
@@ -42,7 +42,7 @@ public class ComparerTests
     [Fact]
     public void Passes_when_the_assembly_honors_the_contract()
     {
-        var result = Compare(BaselineContract, BaselineSource);
+        ComparisonResult result = Compare(BaselineContract, BaselineSource);
 
         Assert.True(result.Passed, string.Join("; ", result.Diagnostics));
         Assert.Empty(result.Diagnostics);
@@ -51,7 +51,7 @@ public class ComparerTests
     [Fact]
     public void Fails_when_the_assembly_name_does_not_match()
     {
-        var result = Compare(BaselineContract, BaselineSource, assemblyName: "OtherAssembly");
+        ComparisonResult result = Compare(BaselineContract, BaselineSource, assemblyName: "OtherAssembly");
 
         Assert.Equal([DiagnosticIds.AssemblyNameMismatch], Ids(result));
     }
@@ -59,9 +59,9 @@ public class ComparerTests
     [Fact]
     public void Detects_a_changed_return_type()
     {
-        var source = BaselineSource.Replace("public int Add", "public long Add");
+        string source = BaselineSource.Replace("public int Add", "public long Add");
 
-        var result = Compare(BaselineContract, source);
+        ComparisonResult result = Compare(BaselineContract, source);
 
         Assert.Equal([DiagnosticIds.ReturnTypeMismatch], Ids(result));
     }
@@ -69,13 +69,13 @@ public class ComparerTests
     [Fact]
     public void Detects_a_changed_parameter_type_and_names_the_culprit()
     {
-        var source = BaselineSource.Replace(
+        string source = BaselineSource.Replace(
             "public int Add(int a, int b) => a + b;",
             "public int Add(int a, long b) => a + (int)b;");
 
-        var result = Compare(BaselineContract, source);
+        ComparisonResult result = Compare(BaselineContract, source);
 
-        var diagnostic = Assert.Single(result.Diagnostics);
+        Diagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(DiagnosticIds.MemberSignatureChanged, diagnostic.Id);
         Assert.Contains("found: public int Add(int a, long b)", diagnostic.Message);
     }
@@ -83,9 +83,9 @@ public class ComparerTests
     [Fact]
     public void Detects_a_missing_member()
     {
-        var source = BaselineSource.Replace("public int Add(int a, int b) => a + b;", "");
+        string source = BaselineSource.Replace("public int Add(int a, int b) => a + b;", "");
 
-        var result = Compare(BaselineContract, source);
+        ComparisonResult result = Compare(BaselineContract, source);
 
         Assert.Equal([DiagnosticIds.MemberMissing], Ids(result));
     }
@@ -108,9 +108,9 @@ public class ComparerTests
             }
             """;
 
-        var result = Compare(contract, BaselineSource);
+        ComparisonResult result = Compare(contract, BaselineSource);
 
-        var diagnostic = Assert.Single(result.Diagnostics);
+        Diagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(DiagnosticIds.ForbiddenMemberPresent, diagnostic.Id);
         Assert.Equal("construct via DI", diagnostic.Reason);
     }
@@ -118,11 +118,11 @@ public class ComparerTests
     [Fact]
     public void Denying_new_members_flags_unprescribed_surface()
     {
-        var contract = BaselineContract.Replace("\"kind\": \"class\",", "\"kind\": \"class\", \"newMembers\": \"deny\",");
+        string contract = BaselineContract.Replace("\"kind\": \"class\",", "\"kind\": \"class\", \"newMembers\": \"deny\",");
 
-        var result = Compare(contract, BaselineSource);
+        ComparisonResult result = Compare(contract, BaselineSource);
 
-        var diagnostic = Assert.Single(result.Diagnostics);
+        Diagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(DiagnosticIds.UnexpectedMember, diagnostic.Id);
         Assert.Contains("Name", diagnostic.Message);
     }
@@ -130,11 +130,11 @@ public class ComparerTests
     [Fact]
     public void Denying_new_members_ignores_out_of_scope_members()
     {
-        var contract = BaselineContract.Replace("\"kind\": \"class\",", "\"kind\": \"class\", \"newMembers\": \"deny\",");
-        var source = BaselineSource
+        string contract = BaselineContract.Replace("\"kind\": \"class\",", "\"kind\": \"class\", \"newMembers\": \"deny\",");
+        string source = BaselineSource
             .Replace("public string Name => \"calc\";", "internal string Name => \"calc\";");
 
-        var result = Compare(contract, source);
+        ComparisonResult result = Compare(contract, source);
 
         Assert.True(result.Passed, string.Join("; ", result.Diagnostics));
     }
@@ -142,14 +142,14 @@ public class ComparerTests
     [Fact]
     public void Parameter_renames_follow_the_significance_switch()
     {
-        var source = BaselineSource.Replace(
+        string source = BaselineSource.Replace(
             "public int Add(int a, int b) => a + b;",
             "public int Add(int x, int b) => x + b;");
 
-        var strict = Compare(BaselineContract, source);
+        ComparisonResult strict = Compare(BaselineContract, source);
         Assert.Equal([DiagnosticIds.ParameterNamesChanged], Ids(strict));
 
-        var relaxed = BaselineContract.Replace(
+        string relaxed = BaselineContract.Replace(
             "\"assembly\": \"Shop\",",
             "\"assembly\": \"Shop\", \"settings\": { \"parameterNames\": \"ignored\" },");
         Assert.True(Compare(relaxed, source).Passed);
@@ -158,16 +158,16 @@ public class ComparerTests
     [Fact]
     public void Denying_new_types_flags_unprescribed_types()
     {
-        var contract = BaselineContract.Replace(
+        string contract = BaselineContract.Replace(
             "\"assembly\": \"Shop\",",
             "\"assembly\": \"Shop\", \"settings\": { \"newTypes\": \"deny\" },");
-        var source = BaselineSource.Replace(
+        string source = BaselineSource.Replace(
             "public class Calc",
             "public class Extra { } public class Calc");
 
-        var result = Compare(contract, source);
+        ComparisonResult result = Compare(contract, source);
 
-        var diagnostic = Assert.Single(result.Diagnostics);
+        Diagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(DiagnosticIds.UnexpectedType, diagnostic.Id);
         Assert.Contains("Shop.Extra", diagnostic.Message);
     }
@@ -175,9 +175,9 @@ public class ComparerTests
     [Fact]
     public void Detects_demoted_type_accessibility()
     {
-        var source = BaselineSource.Replace("public class Calc", "internal class Calc");
+        string source = BaselineSource.Replace("public class Calc", "internal class Calc");
 
-        var result = Compare(BaselineContract, source);
+        ComparisonResult result = Compare(BaselineContract, source);
 
         Assert.Contains(DiagnosticIds.AccessMismatch, Ids(result));
     }
@@ -201,12 +201,12 @@ public class ComparerTests
                 ]
             }
             """;
-        var conforming = BaselineSource.Replace(
+        string conforming = BaselineSource.Replace(
             "public string Name => \"calc\";",
             "internal int Hook() => 1;");
         Assert.True(Compare(contract, conforming).Passed);
 
-        var drifted = BaselineSource.Replace(
+        string drifted = BaselineSource.Replace(
             "public string Name => \"calc\";",
             "internal long Hook() => 1;");
         Assert.Equal([DiagnosticIds.ReturnTypeMismatch], Ids(Compare(contract, drifted)));
@@ -215,17 +215,17 @@ public class ComparerTests
     [Fact]
     public void Widened_scope_makes_internal_additions_visible_to_deny_sweeps()
     {
-        var contract = BaselineContract
+        string contract = BaselineContract
             .Replace("\"assembly\": \"Shop\",",
                 "\"assembly\": \"Shop\", \"settings\": { \"scope\": [\"public\", \"protected\", \"internal\"] },")
             .Replace("\"kind\": \"class\",", "\"kind\": \"class\", \"newMembers\": \"deny\",");
-        var source = BaselineSource.Replace(
+        string source = BaselineSource.Replace(
             "public string Name => \"calc\";",
             "internal string Name => \"calc\";");
 
-        var result = Compare(contract, source);
+        ComparisonResult result = Compare(contract, source);
 
-        var diagnostic = Assert.Single(result.Diagnostics);
+        Diagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(DiagnosticIds.UnexpectedMember, diagnostic.Id);
     }
 
@@ -248,7 +248,7 @@ public class ComparerTests
             """;
         var source = "namespace Shop { public static class Limits { public const int Max = 12; } }";
 
-        var result = Compare(contract, source);
+        ComparisonResult result = Compare(contract, source);
 
         Assert.Equal([DiagnosticIds.ConstValueChanged], Ids(result));
     }

@@ -54,9 +54,12 @@ changing policy means changing the reviewed file.
 **CLI** (`dotnet tool install -g ContractGuard --prerelease`):
 
 ```
-contractguard extract --assembly Shop.Domain.dll --output Shop.Domain.contract.json
-contractguard verify  --contract Shop.Domain.contract.json --assembly Shop.Domain.dll
-contractguard show    --contract Shop.Domain.contract.json
+contractguard extract   --assembly Shop.Domain.dll --output Shop.Domain.contract.json
+contractguard verify    --contract Shop.Domain.contract.json --assembly Shop.Domain.dll
+contractguard show      --contract Shop.Domain.contract.json
+contractguard add       --contract Shop.Domain.contract.json --type OrderService "public Task<Result> Submit(Order order)"
+contractguard import    --contract Shop.Domain.contract.json IOrderContract.cs
+contractguard normalize --contract Shop.Domain.contract.json --check
 ```
 
 `extract` takes `--scope public,protected,internal,private` to pull out more than the
@@ -64,7 +67,11 @@ default public+protected surface — prescribed members of any accessibility are
 either way; scope governs what the deny sweeps and extraction consider surface.
 
 `extract` bootstraps a contract from a golden build; `verify` is the gate (exit 0 pass,
-1 violations, 2 errors); `show` renders the elements back as C# declarations.
+1 violations, 2 errors); `show` renders the elements back as C# declarations. The
+authoring verbs go the other way: `add` decomposes a C# declaration string into elements
+(the contract file never stores C# text), `import` decomposes a whole scaffold file - an
+interface control document the architect wrote - and `normalize` rewrites a contract to
+canonical form (`--check` makes it a CI lint).
 
 **MSBuild package** (the drop-in):
 

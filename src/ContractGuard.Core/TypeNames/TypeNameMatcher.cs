@@ -1,6 +1,6 @@
-using ContractGuard.Model;
+using ContractGuard.Core.Model;
 
-namespace ContractGuard.TypeNames;
+namespace ContractGuard.Core.TypeNames;
 
 /// <summary>
 /// Decides whether a contract-side type name (shorthand, resolved via usings and the governed
@@ -85,7 +85,7 @@ public sealed class TypeNameMatcher(
         if (contract.Elements.Count != observed.Elements.Count)
             return false;
 
-        foreach (var (c, o) in contract.Elements.Zip(observed.Elements))
+        foreach (((string? Name, TypeNameNode Type) c, (string? Name, TypeNameNode Type) o) in contract.Elements.Zip(observed.Elements))
         {
             if (!MatchNode(c.Type, o.Type, ns))
                 return false;
@@ -106,29 +106,29 @@ public sealed class TypeNameMatcher(
 
     private bool NameMatches(string contractName, string observedName, string ns)
     {
-        var observed = Canonicalize(observedName);
+        string observed = Canonicalize(observedName);
         if (contractName.Contains('.'))
             return string.Equals(Canonicalize(contractName), observed, StringComparison.Ordinal);
 
-        if (BuiltinAliases.TryGetValue(contractName, out var aliased))
+        if (BuiltinAliases.TryGetValue(contractName, out string? aliased))
             return string.Equals(aliased, observed, StringComparison.Ordinal);
 
         if (string.Equals(contractName, observed, StringComparison.Ordinal))
             return true;
 
-        foreach (var u in usings)
+        foreach (string u in usings)
         {
             if (string.Equals($"{u}.{contractName}", observed, StringComparison.Ordinal))
                 return true;
         }
 
         // C#-like outward walk through the governed type's namespace and its ancestors.
-        var candidate = ns;
+        string candidate = ns;
         while (candidate.Length > 0)
         {
             if (string.Equals($"{candidate}.{contractName}", observed, StringComparison.Ordinal))
                 return true;
-            var dot = candidate.LastIndexOf('.');
+            int dot = candidate.LastIndexOf('.');
             candidate = dot < 0 ? string.Empty : candidate[..dot];
         }
 
@@ -136,5 +136,5 @@ public sealed class TypeNameMatcher(
     }
 
     private static string Canonicalize(string name) =>
-        BuiltinAliases.TryGetValue(name, out var aliased) ? aliased : name;
+        BuiltinAliases.GetValueOrDefault(name, name);
 }

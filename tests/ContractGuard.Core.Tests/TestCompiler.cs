@@ -1,6 +1,7 @@
-using ContractGuard.Metadata;
+using ContractGuard.Core.Metadata;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 
 namespace ContractGuard.Core.Tests;
 
@@ -33,10 +34,10 @@ internal static class TestCompiler
                 nullableContextOptions: nullableEnable ? NullableContextOptions.Enable : NullableContextOptions.Disable));
 
         using var stream = new MemoryStream();
-        var emit = compilation.Emit(stream);
+        EmitResult emit = compilation.Emit(stream);
         if (!emit.Success)
         {
-            var errors = string.Join(Environment.NewLine,
+            string errors = string.Join(Environment.NewLine,
                 emit.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error));
             throw new InvalidOperationException($"Test snippet failed to compile:{Environment.NewLine}{errors}");
         }

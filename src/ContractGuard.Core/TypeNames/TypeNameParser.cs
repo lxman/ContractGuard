@@ -1,4 +1,4 @@
-namespace ContractGuard.TypeNames;
+namespace ContractGuard.Core.TypeNames;
 
 /// <summary>
 /// Recursive-descent parser for type reference names. Grammar:
@@ -14,18 +14,17 @@ public static class TypeNameParser
     public static TypeNameNode Parse(string text)
     {
         var cursor = new Cursor(text);
-        var node = ParseType(ref cursor);
+        TypeNameNode node = ParseType(ref cursor);
         cursor.SkipWhitespace();
-        if (!cursor.AtEnd)
-            throw new FormatException($"Unexpected '{cursor.Current}' at position {cursor.Position} in type name '{text}'.");
-
-        return node;
+        return !cursor.AtEnd
+            ? throw new FormatException($"Unexpected '{cursor.Current}' at position {cursor.Position} in type name '{text}'.")
+            : node;
     }
 
     private static TypeNameNode ParseType(ref Cursor cursor)
     {
         cursor.SkipWhitespace();
-        var node = cursor.Current == '(' ? ParseTuple(ref cursor) : ParseNamed(ref cursor);
+        TypeNameNode node = cursor.Current == '(' ? ParseTuple(ref cursor) : ParseNamed(ref cursor);
 
         while (true)
         {
@@ -59,7 +58,7 @@ public static class TypeNameParser
         var elements = new List<(string? Name, TypeNameNode Type)>();
         while (true)
         {
-            var type = ParseType(ref cursor);
+            TypeNameNode type = ParseType(ref cursor);
             cursor.SkipWhitespace();
             string? name = null;
             if (cursor.AtIdentifierStart)
@@ -73,15 +72,14 @@ public static class TypeNameParser
             break;
         }
 
-        if (elements.Count < 2)
-            throw new FormatException("A tuple type needs at least two elements.");
-
-        return new TypeNameNode.Tuple(elements);
+        return elements.Count < 2
+            ? throw new FormatException("A tuple type needs at least two elements.")
+            : new TypeNameNode.Tuple(elements);
     }
 
     private static TypeNameNode ParseNamed(ref Cursor cursor)
     {
-        var name = cursor.ReadIdentifier();
+        string name = cursor.ReadIdentifier();
         while (true)
         {
             cursor.SkipWhitespace();
@@ -114,10 +112,9 @@ public static class TypeNameParser
         }
 
         cursor.SkipWhitespace();
-        if (cursor.Current == '.')
-            throw new FormatException("Members of constructed generic types (A<B>.C) are not supported in contracts.");
-
-        return new TypeNameNode.Named(name, args);
+        return cursor.Current == '.'
+            ? throw new FormatException("Members of constructed generic types (A<B>.C) are not supported in contracts.")
+            : new TypeNameNode.Named(name, args);
     }
 
     private struct Cursor(string text)
@@ -159,7 +156,7 @@ public static class TypeNameParser
             if (!AtIdentifierStart)
                 throw new FormatException($"Expected an identifier at position {Position} in type name '{_text}'.");
 
-            var start = Position;
+            int start = Position;
             if (Current == '@')
                 Position++;
             while (!AtEnd && (char.IsLetterOrDigit(Current) || Current == '_'))

@@ -1,4 +1,4 @@
-namespace ContractGuard.Model;
+namespace ContractGuard.Core.Model;
 
 /// <summary>
 /// Contract-wide policy. Lives inside the contract file deliberately: CLI flags and MSBuild
