@@ -48,13 +48,44 @@ public sealed class ConstantValue : IEquatable<ConstantValue>
         if (thisNullish || otherNullish)
             return thisNullish && otherNullish;
 
+        // Numeric values bridge representations: JSON may parse 9.99 where metadata decoded
+        // the decimal 9.99m. Compare through decimal when both sides are numeric.
+        if (TryAsDecimal(Value, out decimal a) && TryAsDecimal(other.Value, out decimal b))
+            return a == b;
+
         return Equals(Value, other.Value);
     }
 
     public override bool Equals(object? obj) => Equals(obj as ConstantValue);
 
-    public override int GetHashCode() =>
-        IsDefaultSentinel || Value is null ? 0 : Value.GetHashCode();
+    public override int GetHashCode()
+    {
+        if (IsDefaultSentinel || Value is null)
+            return 0;
+        if (TryAsDecimal(Value, out decimal d))
+            return d.GetHashCode();
+        return Value.GetHashCode();
+    }
+
+    private static bool TryAsDecimal(object? value, out decimal result)
+    {
+        switch (value)
+        {
+            case long l:
+                result = l;
+                return true;
+            case decimal m:
+                result = m;
+                return true;
+            case double d when !double.IsNaN(d) && !double.IsInfinity(d)
+                && d is >= (double)decimal.MinValue and <= (double)decimal.MaxValue:
+                result = (decimal)d;
+                return true;
+            default:
+                result = 0;
+                return false;
+        }
+    }
 
     public override string ToString() => IsDefaultSentinel
         ? "default"

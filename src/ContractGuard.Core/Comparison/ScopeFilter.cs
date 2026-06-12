@@ -5,8 +5,9 @@ namespace ContractGuard.Core.Comparison;
 
 public static class ScopeFilter
 {
-    /// <summary>Combined accessibility levels count as in scope if either side is listed.
-    /// TODO: refine private protected (currently treated as internal).</summary>
+    /// <summary>'protected internal' (the union) counts if either side is listed;
+    /// 'private protected' (the intersection, narrower than both) counts only when both
+    /// are listed - or when private itself is in scope.</summary>
     public static bool InScope(Accessibility access, IReadOnlyList<Accessibility> scope) => access switch
     {
         Accessibility.Public => scope.Contains(Accessibility.Public),
@@ -14,7 +15,9 @@ public static class ScopeFilter
         Accessibility.Internal => scope.Contains(Accessibility.Internal),
         Accessibility.ProtectedInternal =>
             scope.Contains(Accessibility.Protected) || scope.Contains(Accessibility.Internal),
-        Accessibility.PrivateProtected => scope.Contains(Accessibility.Internal),
+        Accessibility.PrivateProtected =>
+            scope.Contains(Accessibility.Private)
+            || (scope.Contains(Accessibility.Protected) && scope.Contains(Accessibility.Internal)),
         _ => scope.Contains(Accessibility.Private),
     };
 

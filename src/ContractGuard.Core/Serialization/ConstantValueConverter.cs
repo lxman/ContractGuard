@@ -26,7 +26,13 @@ internal sealed class ConstantValueConverter : JsonConverter<ConstantValue>
             case JsonTokenType.False:
                 return ConstantValue.Of(false);
             case JsonTokenType.Number:
-                return reader.TryGetInt64(out long l) ? ConstantValue.Of(l) : ConstantValue.Of(reader.GetDouble());
+                // Integers stay longs; fractional literals prefer decimal so they compare
+                // exactly against DecimalConstantAttribute-decoded values.
+                if (reader.TryGetInt64(out long l))
+                    return ConstantValue.Of(l);
+                return reader.TryGetDecimal(out decimal m)
+                    ? ConstantValue.Of(m)
+                    : ConstantValue.Of(reader.GetDouble());
             case JsonTokenType.StartObject:
                 JsonObject node = JsonNode.Parse(ref reader)!.AsObject();
                 return ReadSpecial(node);
@@ -48,7 +54,9 @@ internal sealed class ConstantValueConverter : JsonConverter<ConstantValue>
                 JsonValueKind.False => ConstantValue.Of(false),
                 JsonValueKind.Number => node.AsValue().TryGetValue<long>(out long l)
                     ? ConstantValue.Of(l)
-                    : ConstantValue.Of(node.GetValue<double>()),
+                    : node.AsValue().TryGetValue<decimal>(out decimal m)
+                        ? ConstantValue.Of(m)
+                        : ConstantValue.Of(node.GetValue<double>()),
                 var kind => throw new JsonException($"Unexpected '{kind}' for a constant value."),
             }
         };

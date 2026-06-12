@@ -84,6 +84,7 @@ public static class SymbolSurfaceReader
             TypeParams = NullIfEmpty(ReadTypeParams(type.TypeParameters, options)),
             Extends = extends,
             Implements = NullIfEmpty(implements),
+            Attributes = CollectAttributes(type, options),
             SourceLocation = LocationOf(type),
         };
 
@@ -398,14 +399,14 @@ public static class SymbolSurfaceReader
     }
 
     /// <summary>Mimics what metadata can represent: struct '= default' compiles to a nullref
-    /// constant (read as null), and attribute-encoded constants (decimal, DateTime) have no
-    /// constant row, so the metadata front-end sees only the optional flag - the sentinel.</summary>
+    /// constant (read as null); decimal constants decode from DecimalConstantAttribute on
+    /// both sides; DateTime constants (interop-only) stay the sentinel.</summary>
     private static ConstantValue? MapDefault(IParameterSymbol p)
     {
         if (!p.HasExplicitDefaultValue)
             return null;
 
-        if (p.Type.SpecialType is SpecialType.System_Decimal or SpecialType.System_DateTime)
+        if (p.Type.SpecialType == SpecialType.System_DateTime)
             return ConstantValue.DefaultSentinel;
 
         return ConstantValue.Of(p.ExplicitDefaultValue);
@@ -426,9 +427,9 @@ public static class SymbolSurfaceReader
                     : "class");
             }
 
-            // 'unmanaged' renders as 'struct': the metadata front-end does not decode the
-            // modreq yet, and the two must agree.
-            if (tp.HasValueTypeConstraint || tp.HasUnmanagedTypeConstraint)
+            if (tp.HasUnmanagedTypeConstraint)
+                constraints.Add("unmanaged");
+            else if (tp.HasValueTypeConstraint)
                 constraints.Add("struct");
 
             if (decode && tp.HasNotNullConstraint)
@@ -461,6 +462,16 @@ public static class SymbolSurfaceReader
         var result = new List<MemberModifier>();
         if (method.IsStatic)
             result.Add(MemberModifier.Static);
+
+        // Mirror of the metadata side: static interface members keep their abstract/virtual
+        // distinction; instance interface members are implicitly abstract and stay unmarked.
+        if (isInterface && method.IsStatic)
+        {
+            if (method.IsAbstract)
+                result.Add(MemberModifier.Abstract);
+            else if (method.IsVirtual)
+                result.Add(MemberModifier.Virtual);
+        }
 
         if (!isInterface)
         {

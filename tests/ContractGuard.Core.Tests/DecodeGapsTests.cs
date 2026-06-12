@@ -33,6 +33,21 @@ public class DecodeGapsTests
                 public static void NotNull<T>(T value) where T : notnull { }
                 public static void NullableClass<T>(T value) where T : class? { }
                 public static void Plain<T>(T value) { }
+                public static void Blit<T>(T value) where T : unmanaged { }
+            }
+
+            public class Pricing
+            {
+                public const decimal Tax = 0.07m;
+                public decimal Total(decimal price = 9.99m) => price + Tax;
+            }
+
+            public interface ICalculator<TSelf> where TSelf : ICalculator<TSelf>
+            {
+                static abstract TSelf Zero { get; }
+                static abstract TSelf Parse(string text);
+                static virtual int Precision => 2;
+                int Evaluate();
             }
 
             public enum Color { Red, Green = 5, Blue }
@@ -97,6 +112,84 @@ public class DecodeGapsTests
         Assert.Equal(["notnull"], methods.Single(m => m.Name == "NotNull").TypeParams!.Single().Constraints);
         Assert.Equal(["class?"], methods.Single(m => m.Name == "NullableClass").TypeParams!.Single().Constraints);
         Assert.Null(methods.Single(m => m.Name == "Plain").TypeParams!.Single().Constraints);
+    }
+
+    [Fact]
+    public void Decodes_unmanaged_constraints()
+    {
+        var blit = Type("Gaps.Constrained").Members!.OfType<MethodContract>().Single(m => m.Name == "Blit");
+
+        Assert.Equal(["unmanaged"], blit.TypeParams!.Single().Constraints);
+    }
+
+    [Fact]
+    public void Decodes_decimal_constants_in_fields_and_defaults()
+    {
+        TypeContract pricing = Type("Gaps.Pricing");
+
+        var tax = pricing.Members!.OfType<FieldContract>().Single(f => f.Name == "Tax");
+        Assert.Equal([MemberModifier.Const], tax.Modifiers);
+        Assert.Equal(ConstantValue.Of(0.07m), tax.Value);
+
+        var total = pricing.Members!.OfType<MethodContract>().Single(m => m.Name == "Total");
+        Assert.Equal(ConstantValue.Of(9.99m), total.Params![0].Default);
+    }
+
+    [Fact]
+    public void Distinguishes_static_abstract_from_static_virtual_interface_members()
+    {
+        TypeContract calculator = Type("Gaps.ICalculator");
+        var members = calculator.Members!;
+
+        Assert.Equal([MemberModifier.Static, MemberModifier.Abstract],
+            members.OfType<PropertyContract>().Single(p => p.Name == "Zero").Modifiers);
+        Assert.Equal([MemberModifier.Static, MemberModifier.Abstract],
+            members.OfType<MethodContract>().Single(m => m.Name == "Parse").Modifiers);
+        Assert.Equal([MemberModifier.Static, MemberModifier.Virtual],
+            members.OfType<PropertyContract>().Single(p => p.Name == "Precision").Modifiers);
+        Assert.Null(members.OfType<MethodContract>().Single(m => m.Name == "Evaluate").Modifiers);
+    }
+
+    [Fact]
+    public void Json_fractional_defaults_compare_equal_to_decoded_decimals()
+    {
+        var contract = ContractJson.Parse("""
+            {
+                "assembly": "Gaps",
+                "types": [
+                    {
+                        "type": "Gaps.Pricing",
+                        "members": [
+                            { "kind": "field", "name": "Tax", "type": "decimal",
+                              "modifiers": ["const"], "value": 0.07 },
+                            { "kind": "method", "name": "Total", "returns": "decimal",
+                              "params": [{ "type": "decimal", "name": "price", "default": 9.99 }] }
+                        ]
+                    }
+                ]
+            }
+            """);
+
+        ComparisonResult result = ContractComparer.Compare(contract, Surface.Value);
+        Assert.True(result.Passed, string.Join("; ", result.Diagnostics));
+
+        var drifted = ContractJson.Parse("""
+            {
+                "assembly": "Gaps",
+                "types": [
+                    {
+                        "type": "Gaps.Pricing",
+                        "members": [
+                            { "kind": "field", "name": "Tax", "type": "decimal",
+                              "modifiers": ["const"], "value": 0.08 }
+                        ]
+                    }
+                ]
+            }
+            """);
+
+        Assert.Contains(DiagnosticIds.ConstValueChanged,
+            ContractComparer.Compare(drifted, Surface.Value).Diagnostics.Select(d => d.Id));
     }
 
     [Fact]

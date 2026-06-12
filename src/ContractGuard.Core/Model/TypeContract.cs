@@ -39,6 +39,10 @@ public sealed record TypeContract
     /// <summary>Overrides settings.parameterNames for this type's members.</summary>
     public Significance? ParameterNames { get; init; }
 
+    /// <summary>Attribute type names prescribed on this type. Compared only against the
+    /// attributes listed in settings.significantAttributes.</summary>
+    public IReadOnlyList<string>? Attributes { get; init; }
+
     public IReadOnlyList<MemberContract>? Members { get; init; }
 
     /// <summary>Delegate types only: the delegate's return type.</summary>

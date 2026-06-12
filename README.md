@@ -80,7 +80,7 @@ canonical form (`--check` makes it a CI lint).
 **MSBuild package** (the drop-in):
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.5-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.6-alpha" PrivateAssets="all" />
 ```
 
 After every build, `<project>/<AssemblyName>.contract.json` is verified automatically —
@@ -92,7 +92,7 @@ the build instead of silently removing the gate.
 **Roslyn analyzer** (editor-time assistance):
 
 ```xml
-<PackageReference Include="ContractGuard.Analyzers" Version="0.0.5-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.Analyzers" Version="0.0.6-alpha" PrivateAssets="all" />
 ```
 
 The same comparison engine the gate runs, inside the compiler: violations appear as you
@@ -140,12 +140,21 @@ The gate reads assembly metadata, so its enforcement boundary is metadata's boun
 - **Enum parameter defaults** written as `"OrderStatus.Pending"` resolve against enums
   defined in the scanned assembly. Enums from *other* assemblies still need the underlying
   numeric value — the gate never loads foreign assemblies.
+- **Decimal constants** decode from `DecimalConstantAttribute` — `const decimal` fields
+  surface as the consts they are in source, and `= 9.99m` defaults compare exactly against
+  `"default": 9.99` in the contract. (`DateTime` constants are interop-only and stay
+  unenforced.)
+- **`unmanaged` constraints** decode from their modreq and compare as written.
+- **`static abstract` vs `static virtual` interface members** keep their distinction
+  (instance interface members are implicitly abstract and stay unmarked; the abstractness
+  of static *operators* is not yet distinguished).
 - **Explicit interface implementations** are governed via `explicitInterface` on a member
   (`{ "kind": "method", "name": "Dispose", "explicitInterface": "IDisposable", ... }`);
   an implicit implementation never satisfies a prescribed explicit one, and vice versa.
-- **`significantAttributes`** is enforced: within the listed attribute universe, presence
-  must match the prescription exactly in both directions. Unlisted attributes stay
-  invisible to the gate.
+- **`significantAttributes`** is enforced on members *and types*: within the listed
+  attribute universe, presence must match the prescription exactly in both directions.
+  Unlisted attributes stay invisible to the gate, and attribute *arguments* are not
+  compared yet — presence only.
 - **Source locations**: when a portable PDB is present (embedded or alongside the
   assembly), violations point at the offending file and line; without one they point at
   the contract file.

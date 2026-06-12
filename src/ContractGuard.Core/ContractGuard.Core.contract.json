@@ -3051,6 +3051,16 @@
         },
         {
           "kind": "property",
+          "name": "Attributes",
+          "type": "System.Collections.Generic.IReadOnlyList<string>?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
           "name": "Members",
           "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.MemberContract>?",
           "accessors": {

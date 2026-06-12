@@ -390,6 +390,10 @@
           "default": "public",
           "description": "The type's accessibility; defaults to public. A public type silently becoming internal is a violation."
         },
+        "attributes": {
+          "$ref": "#/definitions/attributeList",
+          "description": "Attribute type names prescribed on this type, compared only against settings.significantAttributes."
+        },
         "kind": {
           "enum": ["class", "struct", "interface", "record", "record-struct", "enum", "delegate"],
           "description": "When present, the type's kind is part of the contract (a class silently becoming a struct is a violation). Omit to govern members only."

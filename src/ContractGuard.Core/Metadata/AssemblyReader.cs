@@ -45,6 +45,8 @@ public static class AssemblyReader
         private const string InModifier = "System.Runtime.InteropServices.InAttribute";
         private const string RequiresLocationModifier = "System.Runtime.CompilerServices.RequiresLocationAttribute";
         private const string VolatileModifier = "System.Runtime.CompilerServices.IsVolatile";
+        private const string DecimalConstantAttribute = "System.Runtime.CompilerServices.DecimalConstantAttribute";
+        private const string UnmanagedTypeModifier = "System.Runtime.InteropServices.UnmanagedType";
 
         private readonly NullabilityDecoder _decoder = new(md);
 
@@ -113,6 +115,7 @@ public static class AssemblyReader
                 TypeParams = NullIfEmpty(typeParams),
                 Extends = extends,
                 Implements = NullIfEmpty(implements),
+                Attributes = CollectAttributes(td.GetCustomAttributes()),
             };
 
             switch (kind)
@@ -434,8 +437,13 @@ public static class AssemblyReader
             if (name.StartsWith('<') || name == "value__")
                 return null;
 
+            // 'const decimal' cannot be a metadata literal; the compiler emits a static
+            // readonly field carrying DecimalConstantAttribute. Surface it as the const
+            // it is in source.
+            ConstantValue? decimalConstant = TryDecodeDecimalConstant(fd.GetCustomAttributes());
+
             var modifiers = new List<MemberModifier>();
-            bool isConst = (fd.Attributes & FieldAttributes.Literal) != 0;
+            bool isConst = (fd.Attributes & FieldAttributes.Literal) != 0 || decimalConstant is not null;
             if (isConst)
             {
                 modifiers.Add(MemberModifier.Const);
@@ -453,15 +461,44 @@ public static class AssemblyReader
             if (typeMeta.HasRequiredModifier(VolatileModifier))
                 modifiers.Add(MemberModifier.Volatile);
 
+            ConstantValue? value = decimalConstant;
+            if (value is null && isConst && !fd.GetDefaultValue().IsNil)
+                value = ReadConstant(fd.GetDefaultValue());
+
             return new FieldContract
             {
                 Name = name,
                 Access = FieldAccessibility(fd.Attributes),
                 Modifiers = NullIfEmpty(modifiers),
                 Type = MetaTypeRenderer.Render(typeMeta),
-                Value = isConst && !fd.GetDefaultValue().IsNil ? ReadConstant(fd.GetDefaultValue()) : null,
+                Value = value,
                 Attributes = CollectAttributes(fd.GetCustomAttributes()),
             };
+        }
+
+        /// <summary>DecimalConstantAttribute(scale, sign, hi, mid, low) - both the uint and
+        /// the int constructor variants have identical blob widths.</summary>
+        private ConstantValue? TryDecodeDecimalConstant(CustomAttributeHandleCollection attributes)
+        {
+            foreach (CustomAttributeHandle h in attributes)
+            {
+                CustomAttribute ca = md.GetCustomAttribute(h);
+                if (MetadataNames.AttributeTypeName(md, ca) != DecimalConstantAttribute)
+                    continue;
+
+                BlobReader blob = md.GetBlobReader(ca.Value);
+                if (blob.ReadUInt16() != 1)
+                    return null;
+
+                byte scale = blob.ReadByte();
+                byte sign = blob.ReadByte();
+                int hi = unchecked((int)blob.ReadUInt32());
+                int mid = unchecked((int)blob.ReadUInt32());
+                int low = unchecked((int)blob.ReadUInt32());
+                return ConstantValue.Of(new decimal(low, mid, hi, sign != 0, scale));
+            }
+
+            return null;
         }
 
         /// <summary>Full attribute type names on a member, when the reader is asked to
@@ -541,7 +578,7 @@ public static class AssemblyReader
                     if ((p.Attributes & ParameterAttributes.HasDefault) != 0 && !p.GetDefaultValue().IsNil)
                         defaultValue = ReadConstant(p.GetDefaultValue());
                     else if ((p.Attributes & ParameterAttributes.Optional) != 0)
-                        defaultValue = ConstantValue.DefaultSentinel;
+                        defaultValue = TryDecodeDecimalConstant(p.GetCustomAttributes()) ?? ConstantValue.DefaultSentinel;
                 }
 
                 result.Add(new ParamContract
@@ -627,11 +664,23 @@ public static class AssemblyReader
                         : nullableContext;
                 }
 
+                // 'unmanaged' is the struct flag plus a modreq on the ValueType constraint row.
+                var isUnmanaged = false;
+                foreach (GenericParameterConstraintHandle ch in gp.GetConstraints())
+                {
+                    GenericParameterConstraint constraint = md.GetGenericParameterConstraint(ch);
+                    if (MetaTypeFromEntity(constraint.Type, context).HasModifier(UnmanagedTypeModifier))
+                    {
+                        isUnmanaged = true;
+                        break;
+                    }
+                }
+
                 var constraints = new List<string>();
                 if (isClass)
                     constraints.Add(gpNullability == 2 ? "class?" : "class");
                 if (isStruct)
-                    constraints.Add("struct");
+                    constraints.Add(isUnmanaged ? "unmanaged" : "struct");
                 if (!isClass && !isStruct && gpNullability == 1)
                     constraints.Add("notnull");
 
@@ -727,6 +776,17 @@ public static class AssemblyReader
             MethodAttributes attrs = def.Attributes;
             if ((attrs & MethodAttributes.Static) != 0)
                 result.Add(MemberModifier.Static);
+
+            // Instance interface members are implicitly abstract and stay unmarked, but
+            // static interface members carry a real distinction: static abstract (must be
+            // provided) vs static virtual (has a default).
+            if (isInterface && (attrs & MethodAttributes.Static) != 0)
+            {
+                if ((attrs & MethodAttributes.Abstract) != 0)
+                    result.Add(MemberModifier.Abstract);
+                else if ((attrs & MethodAttributes.Virtual) != 0 && (attrs & MethodAttributes.Final) == 0)
+                    result.Add(MemberModifier.Virtual);
+            }
 
             if (!isInterface)
             {

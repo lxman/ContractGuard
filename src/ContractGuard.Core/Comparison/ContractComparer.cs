@@ -149,6 +149,9 @@ public sealed class ContractComparer
                 typeName);
         }
 
+        if (_settings.SignificantAttributes is { Count: > 0 } significant)
+            CompareAttributes(governed.Attributes, observed.Attributes, significant, ns, typeName, member: null, reason: null);
+
         if (governed.Kind == TypeKind.Delegate)
             CompareDelegate(governed, observed, ns, typeName);
 
@@ -330,7 +333,7 @@ public sealed class ContractComparer
         }
 
         if (_settings.SignificantAttributes is { Count: > 0 } significant)
-            CompareAttributes(contract, observed, significant, ns, typeName, member);
+            CompareAttributes(contract.Attributes, observed.Attributes, significant, ns, typeName, member, contract.Reason);
 
         (IReadOnlyList<MemberModifier> contractModifiers, IReadOnlyList<MemberModifier> observedModifiers) = (ModifiersOf(contract), ModifiersOf(observed));
         if (!SetEquals(contractModifiers, observedModifiers))
@@ -623,13 +626,13 @@ public sealed class ContractComparer
     /// prescribed attributes must exist, and significant attributes on the member must be
     /// prescribed.</summary>
     private void CompareAttributes(
-        MemberContract contract, MemberContract observed, IReadOnlyList<string> significant,
-        string ns, string typeName, string member)
+        IReadOnlyList<string>? contractAttributes, IReadOnlyList<string>? observedAttributes,
+        IReadOnlyList<string> significant, string ns, string typeName, string? member, string? reason)
     {
-        List<string> observedSignificant = (observed.Attributes ?? [])
+        List<string> observedSignificant = (observedAttributes ?? [])
             .Where(full => significant.Any(s => AttributeMatches(s, full, ns)))
             .ToList();
-        IReadOnlyList<string> prescribed = contract.Attributes ?? [];
+        IReadOnlyList<string> prescribed = contractAttributes ?? [];
 
         List<string> missing = prescribed
             .Where(p => !observedSignificant.Any(o => AttributeMatches(p, o, ns)))
@@ -649,7 +652,7 @@ public sealed class ContractComparer
 
         Add(DiagnosticIds.AttributesMismatch, DiagnosticSeverity.Error,
             $"Significant attributes do not match the contract: {string.Join("; ", parts)}.",
-            typeName, member, contract.Reason);
+            typeName, member, reason);
     }
 
     /// <summary>Attribute names tolerate the conventional suffix: "Obsolete" matches

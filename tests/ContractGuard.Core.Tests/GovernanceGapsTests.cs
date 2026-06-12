@@ -59,6 +59,33 @@ public class GovernanceGapsTests
     }
 
     [Fact]
+    public void Significant_attributes_apply_to_types_too()
+    {
+        var surface = TestCompiler.CompileAndRead("""
+            using System;
+            namespace Shop
+            {
+                [Obsolete]
+                public class Legacy { }
+            }
+            """, "Shop", new ReaderOptions { CollectAttributes = true });
+
+        var prescribed = """
+            {
+                "assembly": "Shop",
+                "usings": ["System"],
+                "settings": { "significantAttributes": ["Obsolete"] },
+                "types": [ { "type": "Shop.Legacy", "attributes": ["Obsolete"] } ]
+            }
+            """;
+        Assert.True(Compare(prescribed, surface).Passed);
+
+        var unprescribed = prescribed.Replace(", \"attributes\": [\"Obsolete\"]", "");
+        ComparisonResult result = Compare(unprescribed, surface);
+        Assert.Contains(DiagnosticIds.AttributesMismatch, result.Diagnostics.Select(d => d.Id));
+    }
+
+    [Fact]
     public void Insignificant_attributes_are_invisible()
     {
         var surface = TestCompiler.CompileAndRead("""
