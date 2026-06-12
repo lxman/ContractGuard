@@ -1,4 +1,4 @@
-Okay, # ContractGuard Owner's Manual
+# ContractGuard Owner's Manual
 
 This is the practical guide. It assumes you want a working gate, not a tour of the design.
 If you only read one section, read "Getting a gate running" and "Trim the contract."
