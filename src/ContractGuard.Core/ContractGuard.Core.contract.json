@@ -1380,6 +1380,16 @@
         },
         {
           "kind": "property",
+          "name": "SourceLocation",
+          "type": "string?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
           "name": "KindName",
           "modifiers": [
             "abstract"
@@ -1513,6 +1523,16 @@
           "kind": "property",
           "name": "Name",
           "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "ExplicitInterface",
+          "type": "string?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -1879,6 +1899,16 @@
         },
         {
           "kind": "property",
+          "name": "ExplicitInterface",
+          "type": "string?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
           "name": "Modifiers",
           "type": "System.Collections.Generic.IReadOnlyList<ContractGuard.Core.Model.MemberModifier>?",
           "accessors": {
@@ -2051,6 +2081,16 @@
         "System.IEquatable<ContractGuard.Core.Model.IndexerContract>"
       ],
       "members": [
+        {
+          "kind": "property",
+          "name": "ExplicitInterface",
+          "type": "string?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
         {
           "kind": "property",
           "name": "Modifiers",
@@ -2249,6 +2289,16 @@
           "kind": "property",
           "name": "Name",
           "type": "string",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "ExplicitInterface",
+          "type": "string?",
           "accessors": {
             "get": "public",
             "init": "public"
@@ -2891,6 +2941,16 @@
       "members": [
         {
           "kind": "property",
+          "name": "SourceLocation",
+          "type": "string?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
           "name": "Type",
           "type": "string",
           "accessors": {
@@ -3437,6 +3497,26 @@
           "access": "public"
         },
         {
+          "kind": "property",
+          "name": "CollectAttributes",
+          "type": "bool",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
+          "kind": "property",
+          "name": "IncludeSourceLocations",
+          "type": "bool",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
           "kind": "field",
           "name": "Default",
           "modifiers": [
@@ -3702,6 +3782,16 @@
           "access": "public"
         },
         {
+          "kind": "property",
+          "name": "SourceLocation",
+          "type": "string?",
+          "accessors": {
+            "get": "public",
+            "init": "public"
+          },
+          "access": "public"
+        },
+        {
           "kind": "constructor",
           "params": [
             [
@@ -3750,7 +3840,7 @@
           "params": [
             [
               "string",
-              "origin"
+              "fallbackOrigin"
             ]
           ],
           "access": "public"
@@ -4197,6 +4287,16 @@
           ],
           "type": "string",
           "value": "CG0210",
+          "access": "public"
+        },
+        {
+          "kind": "field",
+          "name": "AttributesMismatch",
+          "modifiers": [
+            "const"
+          ],
+          "type": "string",
+          "value": "CG0211",
           "access": "public"
         },
         {

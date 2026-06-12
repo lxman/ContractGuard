@@ -17,8 +17,14 @@ public abstract record MemberContract
     /// <summary>Surfaced verbatim in gate diagnostics when this entry is violated.</summary>
     public string? Reason { get; init; }
 
-    /// <summary>Attribute type names prescribed on this member.</summary>
+    /// <summary>Attribute type names prescribed on this member. Compared only against the
+    /// attributes listed in settings.significantAttributes.</summary>
     public IReadOnlyList<string>? Attributes { get; init; }
+
+    /// <summary>Source file/line from the portable PDB, observed-side only. Never part of
+    /// the contract file.</summary>
+    [JsonIgnore]
+    public string? SourceLocation { get; init; }
 
     [JsonIgnore]
     public abstract string KindName { get; }
@@ -30,6 +36,10 @@ public abstract record MemberContract
 public sealed record MethodContract : MemberContract
 {
     public required string Name { get; init; }
+
+    /// <summary>The interface this member explicitly implements ("System.IDisposable"),
+    /// resolved through usings like any type name.</summary>
+    public string? ExplicitInterface { get; init; }
 
     public IReadOnlyList<MemberModifier>? Modifiers { get; init; }
 
@@ -47,7 +57,7 @@ public sealed record MethodContract : MemberContract
     public override string KindName => "method";
 
     [JsonIgnore]
-    public override string DisplayName => Name;
+    public override string DisplayName => ExplicitInterface is null ? Name : $"{ExplicitInterface}.{Name}";
 }
 
 public sealed record ConstructorMemberContract : MemberContract
@@ -68,6 +78,9 @@ public sealed record PropertyContract : MemberContract
 {
     public required string Name { get; init; }
 
+    /// <summary>The interface this member explicitly implements.</summary>
+    public string? ExplicitInterface { get; init; }
+
     public IReadOnlyList<MemberModifier>? Modifiers { get; init; }
 
     public required string Type { get; init; }
@@ -80,11 +93,14 @@ public sealed record PropertyContract : MemberContract
     public override string KindName => "property";
 
     [JsonIgnore]
-    public override string DisplayName => Name;
+    public override string DisplayName => ExplicitInterface is null ? Name : $"{ExplicitInterface}.{Name}";
 }
 
 public sealed record IndexerContract : MemberContract
 {
+    /// <summary>The interface this member explicitly implements.</summary>
+    public string? ExplicitInterface { get; init; }
+
     public IReadOnlyList<MemberModifier>? Modifiers { get; init; }
 
     public required string Type { get; init; }
@@ -101,12 +117,15 @@ public sealed record IndexerContract : MemberContract
     public override string KindName => "indexer";
 
     [JsonIgnore]
-    public override string DisplayName => "this[]";
+    public override string DisplayName => ExplicitInterface is null ? "this[]" : $"{ExplicitInterface}.this[]";
 }
 
 public sealed record EventContract : MemberContract
 {
     public required string Name { get; init; }
+
+    /// <summary>The interface this member explicitly implements.</summary>
+    public string? ExplicitInterface { get; init; }
 
     public IReadOnlyList<MemberModifier>? Modifiers { get; init; }
 
@@ -117,7 +136,7 @@ public sealed record EventContract : MemberContract
     public override string KindName => "event";
 
     [JsonIgnore]
-    public override string DisplayName => Name;
+    public override string DisplayName => ExplicitInterface is null ? Name : $"{ExplicitInterface}.{Name}";
 }
 
 public sealed record FieldContract : MemberContract

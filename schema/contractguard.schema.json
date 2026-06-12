@@ -186,6 +186,10 @@
       "required": ["kind", "name", "returns"],
       "properties": {
         "kind": { "const": "method" },
+        "explicitInterface": {
+          "$ref": "#/definitions/typeName",
+          "description": "The interface this member explicitly implements. Explicit implementations carry no accessibility of their own."
+        },
         "name": { "$ref": "#/definitions/identifier" },
         "access": {
           "$ref": "#/definitions/accessibility",
@@ -237,6 +241,10 @@
       "required": ["kind", "name", "type"],
       "properties": {
         "kind": { "const": "property" },
+        "explicitInterface": {
+          "$ref": "#/definitions/typeName",
+          "description": "The interface this member explicitly implements. Explicit implementations carry no accessibility of their own."
+        },
         "name": { "$ref": "#/definitions/identifier" },
         "access": {
           "$ref": "#/definitions/accessibility",
@@ -264,6 +272,10 @@
       "required": ["kind", "type", "params"],
       "properties": {
         "kind": { "const": "indexer" },
+        "explicitInterface": {
+          "$ref": "#/definitions/typeName",
+          "description": "The interface this member explicitly implements. Explicit implementations carry no accessibility of their own."
+        },
         "access": {
           "$ref": "#/definitions/accessibility",
           "default": "public"
@@ -295,6 +307,10 @@
       "required": ["kind", "name", "type"],
       "properties": {
         "kind": { "const": "event" },
+        "explicitInterface": {
+          "$ref": "#/definitions/typeName",
+          "description": "The interface this member explicitly implements. Explicit implementations carry no accessibility of their own."
+        },
         "name": { "$ref": "#/definitions/identifier" },
         "access": {
           "$ref": "#/definitions/accessibility",

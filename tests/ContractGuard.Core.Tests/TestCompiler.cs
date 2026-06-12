@@ -27,14 +27,19 @@ internal static class TestCompiler
     {
         var compilation = CSharpCompilation.Create(
             assemblyName,
-            [CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Latest))],
+            [CSharpSyntaxTree.ParseText(
+                Microsoft.CodeAnalysis.Text.SourceText.From(source, System.Text.Encoding.UTF8),
+                new CSharpParseOptions(LanguageVersion.Latest),
+                path: "TestSnippet.cs")],
             References.Value,
             new CSharpCompilationOptions(
                 OutputKind.DynamicallyLinkedLibrary,
                 nullableContextOptions: nullableEnable ? NullableContextOptions.Enable : NullableContextOptions.Disable));
 
         using var stream = new MemoryStream();
-        EmitResult emit = compilation.Emit(stream);
+        // Embedded portable PDB so SourceLocator resolves member locations in tests.
+        EmitResult emit = compilation.Emit(stream,
+            options: new EmitOptions(debugInformationFormat: DebugInformationFormat.Embedded));
         if (!emit.Success)
         {
             string errors = string.Join(Environment.NewLine,

@@ -15,6 +15,10 @@ public sealed class ContractComparer
     private readonly TypeNameMatcher _matcher;
     private readonly List<Diagnostic> _diagnostics = [];
 
+    /// <summary>Ambient PDB location for the entity currently under comparison; flows into
+    /// every diagnostic so violations can point at source.</summary>
+    private string? _location;
+
     private ContractComparer(AssemblyContract contract, AssemblySurface surface)
     {
         _contract = contract;
@@ -92,6 +96,7 @@ public sealed class ContractComparer
     {
         string typeName = observed.Type;
         string ns = NamespaceOf(typeName);
+        _location = observed.SourceLocation;
 
         Accessibility expectedAccess = governed.Access ?? Accessibility.Public;
         if (expectedAccess != (observed.Access ?? Accessibility.Public))
@@ -180,6 +185,7 @@ public sealed class ContractComparer
 
         foreach (MemberContract entry in governed.Members ?? [])
         {
+            _location = observed.SourceLocation;
             MemberContract? match = observedMembers.FirstOrDefault(o => !consumed.Contains(o) && IdentityMatch(entry, o, ns));
 
             if (entry.Mode == EntryMode.Forbidden)
@@ -187,6 +193,7 @@ public sealed class ContractComparer
                 if (match is not null)
                 {
                     consumed.Add(match);
+                    _location = match.SourceLocation ?? _location;
                     Add(DiagnosticIds.ForbiddenMemberPresent, DiagnosticSeverity.Error,
                         $"Forbidden member is present: {DeclarationRenderer.Render(entry, ShortName(typeName))}.",
                         typeName, entry.DisplayName, entry.Reason);
@@ -201,6 +208,7 @@ public sealed class ContractComparer
                 if (closest is not null)
                 {
                     consumed.Add(closest);
+                    _location = closest.SourceLocation ?? _location;
                     Add(DiagnosticIds.MemberSignatureChanged, DiagnosticSeverity.Error,
                         $"Prescribed: {DeclarationRenderer.Render(entry, ShortName(typeName))}; "
                         + $"found: {DeclarationRenderer.Render(closest, ShortName(typeName))}.",
@@ -228,6 +236,7 @@ public sealed class ContractComparer
             if (!ScopeFilter.InScope(extra.Access ?? Accessibility.Public, _settings.Scope))
                 continue;
 
+            _location = extra.SourceLocation ?? observed.SourceLocation;
             Add(DiagnosticIds.UnexpectedMember, DiagnosticSeverity.Error,
                 $"Member is not part of the contract and newMembers is 'deny': "
                 + $"{DeclarationRenderer.Render(extra, ShortName(typeName))}.",
@@ -240,16 +249,31 @@ public sealed class ContractComparer
         {
             (MethodContract c, MethodContract o) =>
                 c.Name == o.Name
+                && ExplicitInterfaceMatches(c.ExplicitInterface, o.ExplicitInterface, ns)
                 && (c.TypeParams?.Count ?? 0) == (o.TypeParams?.Count ?? 0)
                 && ParamTypesMatch(c.Params ?? [], o.Params ?? [], ns),
             (ConstructorMemberContract c, ConstructorMemberContract o) =>
                 ParamTypesMatch(c.Params, o.Params, ns),
-            (PropertyContract c, PropertyContract o) => c.Name == o.Name,
-            (IndexerContract c, IndexerContract o) => ParamTypesMatch(c.Params, o.Params, ns),
-            (EventContract c, EventContract o) => c.Name == o.Name,
+            (PropertyContract c, PropertyContract o) =>
+                c.Name == o.Name && ExplicitInterfaceMatches(c.ExplicitInterface, o.ExplicitInterface, ns),
+            (IndexerContract c, IndexerContract o) =>
+                ExplicitInterfaceMatches(c.ExplicitInterface, o.ExplicitInterface, ns)
+                && ParamTypesMatch(c.Params, o.Params, ns),
+            (EventContract c, EventContract o) =>
+                c.Name == o.Name && ExplicitInterfaceMatches(c.ExplicitInterface, o.ExplicitInterface, ns),
             (FieldContract c, FieldContract o) => c.Name == o.Name,
             (OperatorContract c, OperatorContract o) =>
                 c.Name == o.Name && ParamTypesMatch(c.Params, o.Params, ns),
+            _ => false,
+        };
+
+    /// <summary>An explicit implementation never matches an ordinary member; when both
+    /// sides are explicit, the interface names resolve like any other type name.</summary>
+    private bool ExplicitInterfaceMatches(string? contract, string? observed, string ns) =>
+        (contract, observed) switch
+        {
+            (null, null) => true,
+            ({ } c, { } o) => _matcher.Matches(c, o, ns),
             _ => false,
         };
 
@@ -289,8 +313,11 @@ public sealed class ContractComparer
         MemberContract contract, MemberContract observed, TypeContract governedType, string ns, string typeName)
     {
         string member = contract.DisplayName;
+        _location = observed.SourceLocation ?? _location;
 
-        if (contract is not OperatorContract)
+        // Operators are implicitly public static; explicit implementations are implicitly
+        // private. Neither has a meaningful accessibility to prescribe.
+        if (contract is not OperatorContract && ExplicitInterfaceOf(contract) is null)
         {
             Accessibility expected = contract.Access ?? Accessibility.Public;
             Accessibility actual = observed.Access ?? Accessibility.Public;
@@ -301,6 +328,9 @@ public sealed class ContractComparer
                     typeName, member, contract.Reason);
             }
         }
+
+        if (_settings.SignificantAttributes is { Count: > 0 } significant)
+            CompareAttributes(contract, observed, significant, ns, typeName, member);
 
         (IReadOnlyList<MemberModifier> contractModifiers, IReadOnlyList<MemberModifier> observedModifiers) = (ModifiersOf(contract), ModifiersOf(observed));
         if (!SetEquals(contractModifiers, observedModifiers))
@@ -589,8 +619,60 @@ public sealed class ContractComparer
     private static string WireModifier(ParamModifier? modifier) =>
         modifier is { } m ? Serialization.EnumMaps.ParamModifier.NameOf(m) : "none";
 
+    /// <summary>Within the significant-attribute universe, presence must match exactly:
+    /// prescribed attributes must exist, and significant attributes on the member must be
+    /// prescribed.</summary>
+    private void CompareAttributes(
+        MemberContract contract, MemberContract observed, IReadOnlyList<string> significant,
+        string ns, string typeName, string member)
+    {
+        List<string> observedSignificant = (observed.Attributes ?? [])
+            .Where(full => significant.Any(s => AttributeMatches(s, full, ns)))
+            .ToList();
+        IReadOnlyList<string> prescribed = contract.Attributes ?? [];
+
+        List<string> missing = prescribed
+            .Where(p => !observedSignificant.Any(o => AttributeMatches(p, o, ns)))
+            .ToList();
+        List<string> unexpected = observedSignificant
+            .Where(o => !prescribed.Any(p => AttributeMatches(p, o, ns)))
+            .ToList();
+
+        if (missing.Count == 0 && unexpected.Count == 0)
+            return;
+
+        var parts = new List<string>(2);
+        if (missing.Count > 0)
+            parts.Add($"missing [{string.Join(", ", missing)}]");
+        if (unexpected.Count > 0)
+            parts.Add($"unprescribed [{string.Join(", ", unexpected)}]");
+
+        Add(DiagnosticIds.AttributesMismatch, DiagnosticSeverity.Error,
+            $"Significant attributes do not match the contract: {string.Join("; ", parts)}.",
+            typeName, member, contract.Reason);
+    }
+
+    /// <summary>Attribute names tolerate the conventional suffix: "Obsolete" matches
+    /// "System.ObsoleteAttribute" through the usual type-name resolution.</summary>
+    private bool AttributeMatches(string contractName, string observedFullName, string ns) =>
+        _matcher.Matches(contractName, observedFullName, ns)
+        || (!contractName.EndsWith("Attribute", StringComparison.Ordinal)
+            && _matcher.Matches(contractName + "Attribute", observedFullName, ns));
+
+    private static string? ExplicitInterfaceOf(MemberContract m) => m switch
+    {
+        MethodContract x => x.ExplicitInterface,
+        PropertyContract x => x.ExplicitInterface,
+        IndexerContract x => x.ExplicitInterface,
+        EventContract x => x.ExplicitInterface,
+        _ => null,
+    };
+
     private void Add(
         string id, DiagnosticSeverity severity, string message,
         string? typeName = null, string? member = null, string? reason = null) =>
-        _diagnostics.Add(new Diagnostic(id, severity, message, typeName, member, reason));
+        _diagnostics.Add(new Diagnostic(id, severity, message, typeName, member, reason)
+        {
+            SourceLocation = _location,
+        });
 }

@@ -87,8 +87,7 @@ the build instead of silently removing the gate.
 
 ## What the gate can and can't see
 
-The gate reads assembly metadata, so its enforcement boundary is metadata's boundary. Two
-kinds of limits apply — ones that are permanent, and ones that are just not built yet.
+The gate reads assembly metadata, so its enforcement boundary is metadata's boundary.
 
 ### Identical in metadata — by design, permanent
 
@@ -118,18 +117,21 @@ kinds of limits apply — ones that are permanent, and ones that are just not bu
   are. Record *structs* have no metadata marker and stay `struct`.
 - **`ref readonly`** returns and parameters and **`volatile`** fields decode from their
   modreqs/attributes.
-- **`notnull` and `class?` constraints** decode when `nullableAnnotations` is significant.
+- **Constraint and inheritance nullability** — `notnull`, `class?`, `where T : IFoo?`, and
+  annotations on base types and implemented interfaces — decode when `nullableAnnotations`
+  is significant.
 - **Enum parameter defaults** written as `"OrderStatus.Pending"` resolve against enums
   defined in the scanned assembly. Enums from *other* assemblies still need the underlying
   numeric value — the gate never loads foreign assemblies.
-
-### Not decoded yet — accepted by the schema, but not enforced
-
-- **Nullability on constraint types and inheritance.** `where T : IFoo?` and annotations
-  on base types and implemented interfaces are not decoded.
-- **Explicit interface implementations** are skipped and cannot be governed yet.
-- **`significantAttributes`** is accepted by the schema but attribute comparison is not
-  implemented.
+- **Explicit interface implementations** are governed via `explicitInterface` on a member
+  (`{ "kind": "method", "name": "Dispose", "explicitInterface": "IDisposable", ... }`);
+  an implicit implementation never satisfies a prescribed explicit one, and vice versa.
+- **`significantAttributes`** is enforced: within the listed attribute universe, presence
+  must match the prescription exactly in both directions. Unlisted attributes stay
+  invisible to the gate.
+- **Source locations**: when a portable PDB is present (embedded or alongside the
+  assembly), violations point at the offending file and line; without one they point at
+  the contract file.
 
 ## Building
 

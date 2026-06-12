@@ -20,17 +20,22 @@ public static class AssemblyReader
     public static AssemblySurface Read(string path, ReaderOptions options)
     {
         using FileStream stream = File.OpenRead(path);
-        return Read(stream, options);
+        return Read(stream, options, path);
     }
 
-    public static AssemblySurface Read(Stream stream, ReaderOptions options)
+    public static AssemblySurface Read(Stream stream, ReaderOptions options) => Read(stream, options, null);
+
+    private static AssemblySurface Read(Stream stream, ReaderOptions options, string? assemblyPath)
     {
         using var pe = new PEReader(stream, PEStreamOptions.LeaveOpen);
         MetadataReader md = pe.GetMetadataReader();
-        return new Session(md, options).ReadAssembly();
+        using SourceLocator? locator = options.IncludeSourceLocations
+            ? SourceLocator.TryCreate(pe, assemblyPath)
+            : null;
+        return new Session(md, options, locator).ReadAssembly();
     }
 
-    private sealed class Session(MetadataReader md, ReaderOptions options)
+    private sealed class Session(MetadataReader md, ReaderOptions options, SourceLocator? locator)
     {
         private const string ReadOnlyAttribute = "System.Runtime.CompilerServices.IsReadOnlyAttribute";
         private const string ByRefLikeAttribute = "System.Runtime.CompilerServices.IsByRefLikeAttribute";
@@ -79,20 +84,24 @@ public static class AssemblyReader
                 kind = TypeKind.Record;
             List<TypeParamContract> typeParams = ReadGenericParams(td.GetGenericParameters(), context, typeContext);
 
+            // Base-type annotations ride on a NullableAttribute on the type itself.
             string? extends = null;
             if (kind is TypeKind.Class or TypeKind.Record
                 && baseTypeName is not null && baseTypeName != "System.Object")
             {
-                extends = baseTypeName;
+                MetaType baseMeta = ApplyAnnotations(
+                    MetaTypeFromEntity(td.BaseType, context), td.GetCustomAttributes(), typeContext);
+                extends = MetaTypeRenderer.Render(baseMeta);
             }
 
-            // TODO: base type / interface nullable annotations (NullableAttribute on the
-            // InterfaceImpl rows) are not decoded.
+            // Interface annotations ride on the InterfaceImpl rows.
             var implements = new List<string>();
             foreach (InterfaceImplementationHandle ih in td.GetInterfaceImplementations())
             {
                 InterfaceImplementation impl = md.GetInterfaceImplementation(ih);
-                implements.Add(RenderEntity(impl.Interface, context));
+                MetaType ifaceMeta = ApplyAnnotations(
+                    MetaTypeFromEntity(impl.Interface, context), impl.GetCustomAttributes(), typeContext);
+                implements.Add(MetaTypeRenderer.Render(ifaceMeta));
             }
 
             var contract = new TypeContract
@@ -130,9 +139,11 @@ public static class AssemblyReader
 
                     return contract;
                 default:
+                    List<MemberContract> members = ReadMembers(td, context, typeContext, isRecord);
                     return contract with
                     {
-                        Members = NullIfEmpty(ReadMembers(td, context, typeContext, isRecord)),
+                        Members = NullIfEmpty(members),
+                        SourceLocation = members.Select(m => m.SourceLocation).FirstOrDefault(l => l is not null),
                     };
             }
         }
@@ -220,7 +231,7 @@ public static class AssemblyReader
                 if (isRecord && md.GetString(def.Name) == "PrintMembers")
                     continue; // record plumbing, like EqualityContract
 
-                MemberContract? method = ReadMethod(def, typeContext, nullableContext, isInterface);
+                MemberContract? method = ReadMethod(mh, def, typeContext, nullableContext, isInterface);
                 if (method is not null)
                     members.Add(method);
             }
@@ -229,16 +240,23 @@ public static class AssemblyReader
         }
 
         private MemberContract? ReadMethod(
-            MethodDefinition def, GenericContext typeContext, byte typeNullableContext, bool isInterface)
+            MethodDefinitionHandle handle, MethodDefinition def, GenericContext typeContext,
+            byte typeNullableContext, bool isInterface)
         {
             string name = md.GetString(def.Name);
             if (name.StartsWith('<') || name == ".cctor")
                 return null;
 
-            // Explicit interface implementations ("Namespace.IFoo.Bar") are not part of the
-            // public surface shape. TODO: govern them explicitly.
+            // Explicit interface implementations carry the interface in their metadata name
+            // ("Namespace.IFoo.Bar"); the last dot separates member from interface, and dots
+            // inside generic arguments always precede a closing '>'.
+            string? explicitInterface = null;
             if (name.Contains('.') && name is not (".ctor"))
-                return null;
+            {
+                int split = name.LastIndexOf('.');
+                explicitInterface = name[..split];
+                name = name[(split + 1)..];
+            }
 
             List<string> methodParamNames = def.GetGenericParameters()
                 .Select(h => md.GetString(md.GetGenericParameter(h).Name))
@@ -247,6 +265,8 @@ public static class AssemblyReader
             MethodSignature<MetaType> sig = def.DecodeSignature(MetaTypeProvider.Instance, context);
             Accessibility access = MemberAccessibility(def.Attributes);
             byte nullableContext = MethodContext(def, typeNullableContext);
+            string? location = locator?.Find(handle);
+            IReadOnlyList<string>? attributes = CollectAttributes(def.GetCustomAttributes());
 
             if (name == ".ctor")
             {
@@ -254,6 +274,8 @@ public static class AssemblyReader
                 {
                     Access = access,
                     Params = BuildParams(def, sig.ParameterTypes, nullableContext),
+                    Attributes = attributes,
+                    SourceLocation = location,
                 };
             }
 
@@ -265,6 +287,8 @@ public static class AssemblyReader
                     Name = OperatorSymbol(name),
                     Returns = operatorReturn,
                     Params = BuildParams(def, sig.ParameterTypes, nullableContext),
+                    Attributes = attributes,
+                    SourceLocation = location,
                 };
             }
 
@@ -280,12 +304,17 @@ public static class AssemblyReader
             return new MethodContract
             {
                 Name = name,
+                ExplicitInterface = explicitInterface,
                 Access = access,
-                Modifiers = NullIfEmpty(MethodModifiers(def, isInterface)),
+                // Explicit implementations are virtual+final+newslot plumbing; C# allows no
+                // modifiers on them, so none are reported.
+                Modifiers = explicitInterface is null ? NullIfEmpty(MethodModifiers(def, isInterface)) : null,
                 Returns = returns,
                 RefKind = refKind,
                 TypeParams = NullIfEmpty(ReadGenericParams(def.GetGenericParameters(), context, nullableContext)),
                 Params = parameters.Count == 0 ? null : parameters,
+                Attributes = attributes,
+                SourceLocation = location,
             };
         }
 
@@ -294,8 +323,13 @@ public static class AssemblyReader
             byte typeNullableContext, bool isInterface)
         {
             string name = md.GetString(pd.Name);
+            string? explicitInterface = null;
             if (name.Contains('.'))
-                return null; // explicit interface implementation
+            {
+                int split = name.LastIndexOf('.');
+                explicitInterface = name[..split];
+                name = name[(split + 1)..];
+            }
 
             MethodDefinition? getter = accessors.Getter.IsNil ? null : md.GetMethodDefinition(accessors.Getter);
             MethodDefinition? setter = accessors.Setter.IsNil ? null : md.GetMethodDefinition(accessors.Setter);
@@ -329,26 +363,35 @@ public static class AssemblyReader
                 Init = isInit ? setterAccess : null,
             };
 
+            string? location = locator?.Find(!accessors.Getter.IsNil ? accessors.Getter : accessors.Setter);
+            IReadOnlyList<string>? attributes = CollectAttributes(pd.GetCustomAttributes());
+
             if (sig.ParameterTypes.Length <= 0)
                 return new PropertyContract
                 {
                     Name = name,
+                    ExplicitInterface = explicitInterface,
                     Access = access,
-                    Modifiers = NullIfEmpty(MethodModifiers(primary, isInterface)),
+                    Modifiers = explicitInterface is null ? NullIfEmpty(MethodModifiers(primary, isInterface)) : null,
                     Type = type,
                     RefKind = refKind,
                     Accessors = accessorsContract,
+                    Attributes = attributes,
+                    SourceLocation = location,
                 };
             // Indexer: index parameters come from the getter, or the setter minus 'value'.
             MethodDefinition paramSource = getter ?? setter!.Value;
             return new IndexerContract
             {
+                ExplicitInterface = explicitInterface,
                 Access = access,
-                Modifiers = NullIfEmpty(MethodModifiers(primary, isInterface)),
+                Modifiers = explicitInterface is null ? NullIfEmpty(MethodModifiers(primary, isInterface)) : null,
                 Type = type,
                 RefKind = refKind,
                 Params = BuildParams(paramSource, sig.ParameterTypes, nullableContext),
                 Accessors = accessorsContract,
+                Attributes = attributes,
+                SourceLocation = location,
             };
 
         }
@@ -358,8 +401,13 @@ public static class AssemblyReader
             byte typeNullableContext, bool isInterface)
         {
             string name = md.GetString(ed.Name);
+            string? explicitInterface = null;
             if (name.Contains('.'))
-                return null;
+            {
+                int split = name.LastIndexOf('.');
+                explicitInterface = name[..split];
+                name = name[(split + 1)..];
+            }
 
             if (accessors.Adder.IsNil)
                 return null;
@@ -371,9 +419,12 @@ public static class AssemblyReader
             return new EventContract
             {
                 Name = name,
+                ExplicitInterface = explicitInterface,
                 Access = MemberAccessibility(adder.Attributes),
-                Modifiers = NullIfEmpty(MethodModifiers(adder, isInterface)),
+                Modifiers = explicitInterface is null ? NullIfEmpty(MethodModifiers(adder, isInterface)) : null,
                 Type = MetaTypeRenderer.Render(typeMeta),
+                Attributes = CollectAttributes(ed.GetCustomAttributes()),
+                SourceLocation = locator?.Find(accessors.Adder),
             };
         }
 
@@ -409,7 +460,25 @@ public static class AssemblyReader
                 Modifiers = NullIfEmpty(modifiers),
                 Type = MetaTypeRenderer.Render(typeMeta),
                 Value = isConst && !fd.GetDefaultValue().IsNil ? ReadConstant(fd.GetDefaultValue()) : null,
+                Attributes = CollectAttributes(fd.GetCustomAttributes()),
             };
+        }
+
+        /// <summary>Full attribute type names on a member, when the reader is asked to
+        /// collect them (the comparer filters to settings.significantAttributes).</summary>
+        private IReadOnlyList<string>? CollectAttributes(CustomAttributeHandleCollection attributes)
+        {
+            if (!options.CollectAttributes)
+                return null;
+
+            var names = new List<string>();
+            foreach (CustomAttributeHandle h in attributes)
+            {
+                if (MetadataNames.AttributeTypeName(md, md.GetCustomAttribute(h)) is { } name)
+                    names.Add(name);
+            }
+
+            return NullIfEmpty(names);
         }
 
         private List<MemberContract> ReadEnumMembers(TypeDefinition td, GenericContext context, byte nullableContext)
@@ -569,10 +638,14 @@ public static class AssemblyReader
                 foreach (GenericParameterConstraintHandle ch in gp.GetConstraints())
                 {
                     GenericParameterConstraint constraint = md.GetGenericParameterConstraint(ch);
-                    string typeName = RenderEntity(constraint.Type, context);
-                    if (typeName is "System.ValueType" or "System.Object")
+                    MetaType constraintMeta = MetaTypeFromEntity(constraint.Type, context);
+                    if (MetaTypeRenderer.Render(constraintMeta) is "System.ValueType" or "System.Object")
                         continue;
-                    constraints.Add(typeName);
+
+                    // Constraint-type annotations (where T : IFoo?) ride on the constraint row.
+                    MetaType annotated = ApplyAnnotations(
+                        constraintMeta, constraint.GetCustomAttributes(), nullableContext);
+                    constraints.Add(MetaTypeRenderer.Render(annotated));
                 }
 
                 if (!isStruct && (attrs & GenericParameterAttributes.DefaultConstructorConstraint) != 0)

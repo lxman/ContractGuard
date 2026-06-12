@@ -42,6 +42,7 @@ try
     var readerOptions = new ReaderOptions
     {
         DecodeNullableAnnotations = contract.Settings.NullableAnnotations == Significance.Significant,
+        CollectAttributes = contract.Settings.SignificantAttributes is { Count: > 0 },
     };
     AssemblySurface surface = AssemblyReader.Read(assemblyPath, readerOptions);
     ComparisonResult result = ContractComparer.Compare(contract, surface);

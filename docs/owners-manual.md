@@ -62,7 +62,7 @@ from CI config, a developer who can't touch the contract could still weaken the 
 | `nullableAnnotations` | Is `string?` vs `string` a violation? | `ignored` |
 | `tupleElementNames` | Is `(int x, int y)` vs `(int a, int b)` a violation? | `significant` |
 | `scope` | Which accessibility levels the deny sweeps treat as surface | `["public", "protected"]` |
-| `significantAttributes` | Which attributes the gate pays attention to | none (not enforced yet) |
+| `significantAttributes` | Which attributes the gate pays attention to | none |
 
 `defaultValues` deserves a word: default values compile into the *caller's* code, so
 changing one silently changes behavior for everyone who recompiles. That's why it
@@ -202,8 +202,12 @@ contract or assembly couldn't be loaded. `--format json` if you're feeding a das
 A violation looks like this:
 
 ```
-CG0204: Type is 'long' but the contract prescribes 'int'. [Shop.Calc.Add]
+CG0204: Type is 'long' but the contract prescribes 'int'. [Shop.Calc.Add] @ Services/Calc.cs(12)
 ```
+
+The `@ file(line)` part appears when a portable PDB is available and points at the
+offending member; in the IDE error list that location is what you click. Without a PDB,
+errors point at the contract file instead.
 
 The fix is one of two things: revert the code, or change the contract — and changing the
 contract is a normal PR touching a file your repo can protect with CODEOWNERS. That's the
@@ -216,7 +220,7 @@ whole governance model.
 | CG0101–CG0107 | Type-level drift: kind, modifiers, base type, interface, generic params, enum underlying type, delegate signature |
 | CG0200 | Prescribed member is missing entirely |
 | CG0201 | Member found but signature changed (the closest match is shown) |
-| CG0202–CG0210 | Member-level drift: accessibility, modifiers, type, parameter names, defaults, accessors, const value, generic params, parameter modifiers |
+| CG0202–CG0211 | Member-level drift: accessibility, modifiers, type, parameter names, defaults, accessors, const value, generic params, parameter modifiers, significant attributes |
 | CG0300 | A forbidden member exists |
 | CG0400 | Member not in the contract, and `newMembers` is `deny` |
 | CG0500 | Type not in the contract, and `newTypes` is `deny` |

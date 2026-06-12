@@ -16,10 +16,13 @@ public static class DeclarationRenderer
         switch (member)
         {
             case MethodContract m:
-                AppendAccess(sb, m.Access);
+                if (m.ExplicitInterface is null)
+                    AppendAccess(sb, m.Access); // explicit implementations take no accessibility
                 AppendModifiers(sb, m.Modifiers);
                 AppendRef(sb, m.RefKind);
-                sb.Append(m.Returns).Append(' ').Append(m.Name);
+                sb.Append(m.Returns).Append(' ');
+                AppendExplicit(sb, m.ExplicitInterface);
+                sb.Append(m.Name);
                 AppendTypeParams(sb, m.TypeParams);
                 AppendParams(sb, m.Params);
                 AppendConstraints(sb, m.TypeParams);
@@ -30,25 +33,34 @@ public static class DeclarationRenderer
                 AppendParams(sb, c.Params);
                 break;
             case PropertyContract p:
-                AppendAccess(sb, p.Access);
+                if (p.ExplicitInterface is null)
+                    AppendAccess(sb, p.Access);
                 AppendModifiers(sb, p.Modifiers);
                 AppendRef(sb, p.RefKind);
-                sb.Append(p.Type).Append(' ').Append(p.Name);
+                sb.Append(p.Type).Append(' ');
+                AppendExplicit(sb, p.ExplicitInterface);
+                sb.Append(p.Name);
                 AppendAccessors(sb, p.Accessors, p.Access);
                 break;
             case IndexerContract i:
-                AppendAccess(sb, i.Access);
+                if (i.ExplicitInterface is null)
+                    AppendAccess(sb, i.Access);
                 AppendModifiers(sb, i.Modifiers);
                 AppendRef(sb, i.RefKind);
-                sb.Append(i.Type).Append(" this[");
+                sb.Append(i.Type).Append(' ');
+                AppendExplicit(sb, i.ExplicitInterface);
+                sb.Append("this[");
                 AppendParamList(sb, i.Params);
                 sb.Append(']');
                 AppendAccessors(sb, i.Accessors, i.Access);
                 break;
             case EventContract e:
-                AppendAccess(sb, e.Access);
+                if (e.ExplicitInterface is null)
+                    AppendAccess(sb, e.Access);
                 AppendModifiers(sb, e.Modifiers);
-                sb.Append("event ").Append(e.Type).Append(' ').Append(e.Name);
+                sb.Append("event ").Append(e.Type).Append(' ');
+                AppendExplicit(sb, e.ExplicitInterface);
+                sb.Append(e.Name);
                 break;
             case FieldContract f:
                 AppendAccess(sb, f.Access);
@@ -97,6 +109,12 @@ public static class DeclarationRenderer
             sb.Append(" : ").Append(string.Join(", ", bases));
 
         return sb.ToString();
+    }
+
+    private static void AppendExplicit(StringBuilder sb, string? explicitInterface)
+    {
+        if (explicitInterface is not null)
+            sb.Append(explicitInterface).Append('.');
     }
 
     private static void AppendAccess(StringBuilder sb, Accessibility? access) =>

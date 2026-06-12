@@ -1,8 +1,15 @@
+using System.Text.Json.Serialization;
+
 namespace ContractGuard.Core.Model;
 
 /// <summary>One governed type. 'Returns'/'Params' apply to delegate types only.</summary>
 public sealed record TypeContract
 {
+    /// <summary>Source file/line from the portable PDB, observed-side only. Never part of
+    /// the contract file.</summary>
+    [JsonIgnore]
+    public string? SourceLocation { get; init; }
+
     /// <summary>Full type name including namespace; nested types use '+'. Generic types may
     /// carry their arity either as type-parameter syntax ("Repo&lt;T&gt;") or via TypeParams.</summary>
     public required string Type { get; init; }

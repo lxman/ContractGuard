@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <!-- Dogfood: this assembly's public surface is governed by its own published gate. -->
-    <PackageReference Include="ContractGuard.MSBuild" Version="0.0.2-alpha" PrivateAssets="all" />
+    <PackageReference Include="ContractGuard.MSBuild" Version="0.0.3-alpha" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

@@ -49,6 +49,7 @@ public static class Cli
         {
             // 'ignored' is implemented by not decoding annotations; see ReaderOptions.
             DecodeNullableAnnotations = contract.Settings.NullableAnnotations == Significance.Significant,
+            CollectAttributes = contract.Settings.SignificantAttributes is { Count: > 0 },
         };
         AssemblySurface surface = AssemblyReader.Read(assemblyPath, readerOptions);
         ComparisonResult result = ContractComparer.Compare(contract, surface);
@@ -75,6 +76,7 @@ public static class Cli
                         type = d.TypeName,
                         member = d.Member,
                         reason = d.Reason,
+                        source = d.SourceLocation,
                     }),
                 },
                 new JsonSerializerOptions { WriteIndented = true }));

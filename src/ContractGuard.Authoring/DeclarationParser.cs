@@ -53,13 +53,11 @@ public static class DeclarationParser
 
     private static MethodContract MapMethod(MethodDeclarationSyntax m)
     {
-        if (m.ExplicitInterfaceSpecifier is not null)
-            throw new FormatException("Explicit interface implementations cannot be governed yet.");
-
         (string returns, ReturnRefKind? refKind) = SplitRef(m.ReturnType);
         return new MethodContract
         {
             Name = m.Identifier.Text,
+            ExplicitInterface = ExplicitInterfaceName(m.ExplicitInterfaceSpecifier),
             Access = MapAccess(m.Modifiers),
             Modifiers = MapMemberModifiers(m.Modifiers),
             Returns = returns,
@@ -69,6 +67,9 @@ public static class DeclarationParser
             Mode = EntryMode.Required,
         };
     }
+
+    private static string? ExplicitInterfaceName(ExplicitInterfaceSpecifierSyntax? specifier) =>
+        specifier?.Name.NormalizeWhitespace().ToString();
 
     private static ConstructorMemberContract MapConstructor(ConstructorDeclarationSyntax c)
     {
@@ -84,14 +85,12 @@ public static class DeclarationParser
 
     private static PropertyContract MapProperty(PropertyDeclarationSyntax p)
     {
-        if (p.ExplicitInterfaceSpecifier is not null)
-            throw new FormatException("Explicit interface implementations cannot be governed yet.");
-
         Accessibility? access = MapAccess(p.Modifiers);
         (string type, ReturnRefKind? refKind) = SplitRef(p.Type);
         return new PropertyContract
         {
             Name = p.Identifier.Text,
+            ExplicitInterface = ExplicitInterfaceName(p.ExplicitInterfaceSpecifier),
             Access = access,
             Modifiers = MapMemberModifiers(p.Modifiers),
             Type = type,
@@ -106,6 +105,7 @@ public static class DeclarationParser
         (string type, ReturnRefKind? refKind) = SplitRef(i.Type);
         return new IndexerContract
         {
+            ExplicitInterface = ExplicitInterfaceName(i.ExplicitInterfaceSpecifier),
             Access = access,
             Modifiers = MapMemberModifiers(i.Modifiers),
             Type = type,
@@ -130,6 +130,7 @@ public static class DeclarationParser
     private static EventContract MapEvent(EventDeclarationSyntax e) => new()
     {
         Name = e.Identifier.Text,
+        ExplicitInterface = ExplicitInterfaceName(e.ExplicitInterfaceSpecifier),
         Access = MapAccess(e.Modifiers),
         Modifiers = MapMemberModifiers(e.Modifiers),
         Type = Canonical(e.Type),

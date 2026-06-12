@@ -14,6 +14,10 @@ public sealed record Diagnostic(
     string? Member = null,
     string? Reason = null)
 {
+    /// <summary>Source file/line of the offending member ("path(line)"), resolved from the
+    /// portable PDB when available.</summary>
+    public string? SourceLocation { get; init; }
+
     public override string ToString()
     {
         string location = (TypeName, Member) switch
@@ -24,18 +28,27 @@ public sealed record Diagnostic(
         };
 
         string reason = Reason is null ? string.Empty : $" ({Reason})";
-        return $"{Id}: {Message}{location}{reason}";
+        string source = SourceLocation is null ? string.Empty : $" @ {SourceLocation}";
+        return $"{Id}: {Message}{location}{reason}{source}";
     }
 
     /// <summary>
     /// MSBuild-canonical line ("origin : category code: text"), recognized by Exec and
-    /// surfaced in the IDE error list with the given origin (the contract file) as the
-    /// clickable location. Lives here so the CLI and the gate executable cannot drift.
+    /// surfaced in the IDE error list. The origin is the offending source location when the
+    /// PDB provided one, else the given fallback (the contract file). Lives here so the CLI
+    /// and the gate executable cannot drift.
     /// </summary>
-    public string ToMsBuildString(string origin)
+    public string ToMsBuildString(string fallbackOrigin)
     {
         string severity = Severity == DiagnosticSeverity.Error ? "error" : "warning";
-        return $"{origin} : {severity} {Id}: {ToString()[(Id.Length + 2)..]}";
+        string context = (TypeName, Member) switch
+        {
+            (null, _) => string.Empty,
+            (var t, null) => $" [{t}]",
+            (var t, var m) => $" [{t}.{m}]",
+        };
+        string reason = Reason is null ? string.Empty : $" ({Reason})";
+        return $"{SourceLocation ?? fallbackOrigin} : {severity} {Id}: {Message}{context}{reason}";
     }
 }
 
@@ -68,6 +81,7 @@ public static class DiagnosticIds
     public const string ConstValueChanged = "CG0208";
     public const string TypeParamsChanged = "CG0209";
     public const string ParameterModifiersChanged = "CG0210";
+    public const string AttributesMismatch = "CG0211";
 
     public const string ForbiddenMemberPresent = "CG0300";
 
