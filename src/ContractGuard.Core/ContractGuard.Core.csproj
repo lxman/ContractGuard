@@ -1,14 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- netstandard2.0 because the Roslyn analyzer must run inside Visual Studio's
+         .NET Framework-hosted compiler; net8.0 stays the first-class target. -->
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <PackageId>ContractGuard.Core</PackageId>
     <Description>Core engine for ContractGuard: the neutral signature model, contract JSON serialization, assembly metadata reader, and comparison engine.</Description>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Polyfills (Index/Range, init, required, ...) for the netstandard2.0 target;
+         generates nothing on net8.0. -->
+    <PackageReference Include="PolySharp" Version="1.14.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Reflection.Metadata" Version="8.0.1" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ContractGuard.Analyzers" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- Dogfood: this assembly's public surface is governed by its own published gate. -->
-    <PackageReference Include="ContractGuard.MSBuild" Version="0.0.3-alpha" PrivateAssets="all" />
+    <PackageReference Include="ContractGuard.MSBuild" Version="0.0.4-alpha" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

@@ -13,6 +13,7 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/ContractGuard.Analyzers/ContractGuard.Analyzers.csproj" />
     <Project Path="src/ContractGuard.Authoring/ContractGuard.Authoring.csproj" />
     <Project Path="src/ContractGuard.Cli/ContractGuard.Cli.csproj" />
     <Project Path="src/ContractGuard.Core/ContractGuard.Core.csproj" />

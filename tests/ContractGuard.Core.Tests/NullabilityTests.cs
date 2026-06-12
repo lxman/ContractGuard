@@ -11,7 +11,7 @@ namespace ContractGuard.Core.Tests;
 /// </summary>
 public class NullabilityTests
 {
-    private const string Source = """
+    internal const string Source = """
         using System;
         using System.Collections.Generic;
 

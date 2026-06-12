@@ -5,7 +5,7 @@ namespace ContractGuard.Core.Tests;
 
 public class MetadataReaderTests
 {
-    private const string Source = """
+    internal const string Source = """
         using System;
         using System.Threading;
         using System.Threading.Tasks;

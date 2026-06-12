@@ -12,7 +12,7 @@ namespace ContractGuard.Core.Tests;
 /// </summary>
 public class DecodeGapsTests
 {
-    private const string Source = """
+    internal const string Source = """
         #pragma warning disable CS0414
         namespace Gaps
         {

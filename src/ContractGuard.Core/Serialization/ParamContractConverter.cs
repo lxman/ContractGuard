@@ -71,7 +71,7 @@ internal sealed class ParamContractConverter : JsonConverter<ParamContract>
 
         return string.IsNullOrEmpty(type)
             ? throw new JsonException("A parameter object requires a non-empty 'type'.")
-            : new ParamContract { Type = type, Name = name, Modifier = modifier, Default = defaultValue };
+            : new ParamContract { Type = type!, Name = name, Modifier = modifier, Default = defaultValue };
     }
 
     private static ParamModifier ParseModifier(string? text) => text switch

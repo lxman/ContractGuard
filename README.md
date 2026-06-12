@@ -15,9 +15,13 @@ settings in plain language, and what the diagnostic IDs mean.
 
 ## Status
 
-Early scaffold. Core engine, CLI, and MSBuild gate work end to end. See
-[What the gate can and can't see](#what-the-gate-can-and-cant-see) for the current
-enforcement boundary; the master list of gaps lives as TODOs in code.
+Core engine, CLI, and MSBuild gate work end to end. The Roslyn analyzer exists as a
+second front-end over the same comparison engine — same CG diagnostic ids, contract via
+AdditionalFiles, errors on the offending source line — and a consistency harness asserts
+the symbol and metadata front-ends produce identical models, so the analyzer and the gate
+cannot disagree. Analyzer packaging is the next step. See
+[What the gate can and can't see](#what-the-gate-can-and-cant-see) for the enforcement
+boundary.
 
 ## How it works
 
@@ -141,9 +145,10 @@ dotnet test
 dotnet pack src/ContractGuard.MSBuild -c Release
 ```
 
-Requires the .NET 8 SDK or later. Tests compile C# snippets in-memory with Roslyn and read
-the emitted PE bytes back through the metadata reader — the same harness that will pin
-metadata-vs-ISymbol front-end consistency when the Roslyn analyzer (phase 2) lands.
+Requires the .NET 8 SDK or later. Tests compile C# snippets in-memory with Roslyn, read
+the emitted PE bytes back through the metadata reader, and extract the same model from the
+Compilation through the symbol reader — asserting the two front-ends agree over the whole
+edge-case zoo, which makes analyzer-vs-gate drift structurally impossible to ship.
 
 ContractGuard eats its own cooking: `ContractGuard.Core`'s public surface is governed by
 [its own contract](src/ContractGuard.Core/ContractGuard.Core.contract.json) through the

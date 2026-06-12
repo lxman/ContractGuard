@@ -254,7 +254,7 @@ public static class AssemblyReader
             if (name.Contains('.') && name is not (".ctor"))
             {
                 int split = name.LastIndexOf('.');
-                explicitInterface = name[..split];
+                explicitInterface = TypeNames.TypeNameCanonicalizer.Canonicalize(name[..split]);
                 name = name[(split + 1)..];
             }
 
@@ -284,7 +284,7 @@ public static class AssemblyReader
                 (string operatorReturn, _) = RenderReturn(def, sig.ReturnType, nullableContext);
                 return new OperatorContract
                 {
-                    Name = OperatorSymbol(name),
+                    Name = OperatorNames.Symbol(name),
                     Returns = operatorReturn,
                     Params = BuildParams(def, sig.ParameterTypes, nullableContext),
                     Attributes = attributes,
@@ -327,7 +327,7 @@ public static class AssemblyReader
             if (name.Contains('.'))
             {
                 int split = name.LastIndexOf('.');
-                explicitInterface = name[..split];
+                explicitInterface = TypeNames.TypeNameCanonicalizer.Canonicalize(name[..split]);
                 name = name[(split + 1)..];
             }
 
@@ -405,7 +405,7 @@ public static class AssemblyReader
             if (name.Contains('.'))
             {
                 int split = name.LastIndexOf('.');
-                explicitInterface = name[..split];
+                explicitInterface = TypeNames.TypeNameCanonicalizer.Canonicalize(name[..split]);
                 name = name[(split + 1)..];
             }
 
@@ -893,35 +893,6 @@ public static class AssemblyReader
             _ => 0,
         };
 
-        private static string OperatorSymbol(string metadataName) => metadataName switch
-        {
-            "op_Addition" or "op_UnaryPlus" => "+",
-            "op_Subtraction" or "op_UnaryNegation" => "-",
-            "op_Multiply" => "*",
-            "op_Division" => "/",
-            "op_Modulus" => "%",
-            "op_Equality" => "==",
-            "op_Inequality" => "!=",
-            "op_LessThan" => "<",
-            "op_GreaterThan" => ">",
-            "op_LessThanOrEqual" => "<=",
-            "op_GreaterThanOrEqual" => ">=",
-            "op_BitwiseAnd" => "&",
-            "op_BitwiseOr" => "|",
-            "op_ExclusiveOr" => "^",
-            "op_LogicalNot" => "!",
-            "op_OnesComplement" => "~",
-            "op_Increment" => "++",
-            "op_Decrement" => "--",
-            "op_LeftShift" => "<<",
-            "op_RightShift" => ">>",
-            "op_UnsignedRightShift" => ">>>",
-            "op_True" => "true",
-            "op_False" => "false",
-            "op_Implicit" => "implicit",
-            "op_Explicit" => "explicit",
-            _ => metadataName,
-        };
 
         private static IReadOnlyList<T>? NullIfEmpty<T>(List<T> list) => list.Count == 0 ? null : list;
     }

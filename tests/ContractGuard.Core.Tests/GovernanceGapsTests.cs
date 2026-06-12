@@ -84,7 +84,7 @@ public class GovernanceGapsTests
         Assert.True(Compare(contract, surface).Passed);
     }
 
-    private const string ExplicitSource = """
+    internal const string ExplicitSource = """
         using System;
         namespace Shop
         {

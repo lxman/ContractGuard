@@ -25,7 +25,12 @@ internal static class TestCompiler
         ReaderOptions? readerOptions = null,
         bool nullableEnable = true)
     {
-        var compilation = CSharpCompilation.Create(
+        using MemoryStream stream = Emit(Compile(source, assemblyName, nullableEnable));
+        return AssemblyReader.Read(stream, readerOptions ?? ReaderOptions.Default);
+    }
+
+    public static CSharpCompilation Compile(string source, string assemblyName = "TestLib", bool nullableEnable = true) =>
+        CSharpCompilation.Create(
             assemblyName,
             [CSharpSyntaxTree.ParseText(
                 Microsoft.CodeAnalysis.Text.SourceText.From(source, System.Text.Encoding.UTF8),
@@ -36,7 +41,9 @@ internal static class TestCompiler
                 OutputKind.DynamicallyLinkedLibrary,
                 nullableContextOptions: nullableEnable ? NullableContextOptions.Enable : NullableContextOptions.Disable));
 
-        using var stream = new MemoryStream();
+    public static MemoryStream Emit(CSharpCompilation compilation)
+    {
+        var stream = new MemoryStream();
         // Embedded portable PDB so SourceLocator resolves member locations in tests.
         EmitResult emit = compilation.Emit(stream,
             options: new EmitOptions(debugInformationFormat: DebugInformationFormat.Embedded));
@@ -48,6 +55,6 @@ internal static class TestCompiler
         }
 
         stream.Position = 0;
-        return AssemblyReader.Read(stream, readerOptions ?? ReaderOptions.Default);
+        return stream;
     }
 }
