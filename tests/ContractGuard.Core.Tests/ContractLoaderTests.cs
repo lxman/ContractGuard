@@ -51,6 +51,8 @@ public class ContractLoaderTests
         Assert.Equal(AllowDeny.Allow, contract.Settings.NewTypes);
         Assert.Equal(Significance.Significant, contract.Settings.ParameterNames);
         Assert.Equal(Significance.Significant, contract.Settings.DefaultValues);
+        Assert.Equal(Significance.Ignored, contract.Settings.NullableAnnotations);
+        Assert.Equal(Significance.Ignored, contract.Settings.TupleElementNames);
         Assert.Equal([Accessibility.Public, Accessibility.Protected], contract.Settings.Scope);
     }
 

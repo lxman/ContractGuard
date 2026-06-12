@@ -183,6 +183,53 @@ public class ComparerTests
     }
 
     [Fact]
+    public void Prescribed_members_are_enforced_regardless_of_scope()
+    {
+        // Scope gates the deny sweeps (what counts as new surface); it never exempts a
+        // member the architect explicitly prescribed, whatever its accessibility.
+        var contract = """
+            {
+                "assembly": "Shop",
+                "types": [
+                    {
+                        "type": "Shop.Calc",
+                        "members": [
+                            { "kind": "method", "name": "Hook", "access": "internal",
+                              "returns": "int", "params": [] }
+                        ]
+                    }
+                ]
+            }
+            """;
+        var conforming = BaselineSource.Replace(
+            "public string Name => \"calc\";",
+            "internal int Hook() => 1;");
+        Assert.True(Compare(contract, conforming).Passed);
+
+        var drifted = BaselineSource.Replace(
+            "public string Name => \"calc\";",
+            "internal long Hook() => 1;");
+        Assert.Equal([DiagnosticIds.ReturnTypeMismatch], Ids(Compare(contract, drifted)));
+    }
+
+    [Fact]
+    public void Widened_scope_makes_internal_additions_visible_to_deny_sweeps()
+    {
+        var contract = BaselineContract
+            .Replace("\"assembly\": \"Shop\",",
+                "\"assembly\": \"Shop\", \"settings\": { \"scope\": [\"public\", \"protected\", \"internal\"] },")
+            .Replace("\"kind\": \"class\",", "\"kind\": \"class\", \"newMembers\": \"deny\",");
+        var source = BaselineSource.Replace(
+            "public string Name => \"calc\";",
+            "internal string Name => \"calc\";");
+
+        var result = Compare(contract, source);
+
+        var diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal(DiagnosticIds.UnexpectedMember, diagnostic.Id);
+    }
+
+    [Fact]
     public void Detects_a_changed_const_value()
     {
         var contract = """

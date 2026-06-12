@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <PackageId>ContractGuard.MSBuild</PackageId>
+    <Description>Drop-in build gate: verifies the built assembly against its ContractGuard API contract after every build, locally and in CI.</Description>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <!-- Build-logic-only package: no lib/, no dependencies; the CLI ships under tools/. -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <NoWarn>$(NoWarn);NU5128;NU5100</NoWarn>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_PackContractGuardTool</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="build\ContractGuard.MSBuild.targets" Pack="true" PackagePath="build/" />
+  </ItemGroup>
+
+  <Target Name="_PackContractGuardTool">
+    <MSBuild Projects="$(MSBuildThisFileDirectory)..\ContractGuard.Cli\ContractGuard.Cli.csproj"
+             Targets="Publish"
+             Properties="Configuration=$(Configuration);PublishDir=$(MSBuildThisFileDirectory)obj\cli-publish\" />
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(MSBuildThisFileDirectory)obj\cli-publish\**\*"
+                              PackagePath="tools/net8.0/any/" />
+    </ItemGroup>
+  </Target>
+
+</Project>

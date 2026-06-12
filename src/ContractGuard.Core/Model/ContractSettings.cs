@@ -16,7 +16,9 @@ public sealed record ContractSettings
 
     public Significance NullableAnnotations { get; init; } = Significance.Ignored;
 
-    public Significance TupleElementNames { get; init; } = Significance.Significant;
+    /// <summary>Defaults to ignored until the reader decodes TupleElementNamesAttribute -
+    /// a default of significant would promise enforcement that does not happen yet.</summary>
+    public Significance TupleElementNames { get; init; } = Significance.Ignored;
 
     /// <summary>Accessibility levels the gate scans. Combined levels count if either side is listed.</summary>
     public IReadOnlyList<Accessibility> Scope { get; init; } = [Accessibility.Public, Accessibility.Protected];

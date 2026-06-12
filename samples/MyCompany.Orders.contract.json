@@ -9,7 +9,7 @@
     "parameterNames": "significant",
     "defaultValues": "significant",
     "nullableAnnotations": "ignored",
-    "tupleElementNames": "significant",
+    "tupleElementNames": "ignored",
     "scope": ["public", "protected"]
   },
   "usings": [

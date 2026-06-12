@@ -470,8 +470,8 @@
         },
         "tupleElementNames": {
           "$ref": "#/definitions/significance",
-          "default": "significant",
-          "description": "Whether tuple element names ((int x, int y) vs (int a, int b)) are part of the contract."
+          "default": "ignored",
+          "description": "Whether tuple element names ((int x, int y) vs (int a, int b)) are part of the contract. Not enforced yet: the reader does not decode TupleElementNamesAttribute, so this defaults to ignored rather than over-promise."
         },
         "scope": {
           "type": "array",
@@ -479,7 +479,7 @@
           "minItems": 1,
           "items": { "enum": ["public", "protected", "internal", "private"] },
           "default": ["public", "protected"],
-          "description": "Accessibility levels the gate scans and governs. 'protected internal' members are in scope if either level is listed."
+          "description": "Accessibility levels the newTypes/newMembers deny sweeps treat as surface, and that 'extract' pulls out. Prescribed members are enforced regardless of their accessibility. 'protected internal' members are in scope if either level is listed."
         },
         "significantAttributes": {
           "$ref": "#/definitions/attributeList",

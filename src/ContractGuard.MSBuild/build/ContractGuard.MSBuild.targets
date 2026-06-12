@@ -1,0 +1,38 @@
+<Project>
+
+  <!--
+    ContractGuard build gate.
+
+    After every build, the produced assembly is verified against its contract file. The
+    default contract location is <project dir>/<AssemblyName>.contract.json; projects with
+    no contract file are skipped, so the package can be referenced solution-wide (e.g. via
+    Directory.Build.props) with contracts added only to governed projects.
+
+    Properties (all operational - contract SEMANTICS live inside the contract file itself
+    and cannot be weakened from here):
+      ContractGuardEnabled          true|false   skip the gate entirely (default true)
+      ContractGuardContract         path         contract file location override
+      ContractGuardRequireContract  true|false   fail the build when the contract file is
+                                                 missing (default false; recommended true in
+                                                 CI so deleting the contract cannot silently
+                                                 remove the gate)
+  -->
+
+  <PropertyGroup>
+    <ContractGuardEnabled Condition="'$(ContractGuardEnabled)' == ''">true</ContractGuardEnabled>
+    <ContractGuardRequireContract Condition="'$(ContractGuardRequireContract)' == ''">false</ContractGuardRequireContract>
+    <ContractGuardContract Condition="'$(ContractGuardContract)' == ''">$(MSBuildProjectDirectory)/$(AssemblyName).contract.json</ContractGuardContract>
+    <ContractGuardToolDll Condition="'$(ContractGuardToolDll)' == ''">$(MSBuildThisFileDirectory)../tools/net8.0/any/contractguard.dll</ContractGuardToolDll>
+  </PropertyGroup>
+
+  <Target Name="ContractGuardRequireContractCheck" AfterTargets="Build"
+          Condition="'$(ContractGuardEnabled)' == 'true' and '$(ContractGuardRequireContract)' == 'true' and !Exists('$(ContractGuardContract)')">
+    <Error Text="ContractGuard: required contract file '$(ContractGuardContract)' does not exist (ContractGuardRequireContract=true)." />
+  </Target>
+
+  <Target Name="ContractGuardVerify" AfterTargets="Build"
+          Condition="'$(ContractGuardEnabled)' == 'true' and '$(TargetPath)' != '' and Exists('$(ContractGuardContract)')">
+    <Exec Command="dotnet exec &quot;$(ContractGuardToolDll)&quot; verify --contract &quot;$(ContractGuardContract)&quot; --assembly &quot;$(TargetPath)&quot; --format msbuild" />
+  </Target>
+
+</Project>

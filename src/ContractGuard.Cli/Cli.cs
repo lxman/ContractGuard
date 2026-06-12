@@ -42,7 +42,21 @@ public static class Cli
         var surface = AssemblyReader.Read(assemblyPath);
         var result = ContractComparer.Compare(contract, surface);
 
-        if (options.Get("format") == "json")
+        if (options.Get("format") == "msbuild")
+        {
+            // MSBuild-canonical lines ("origin : category code: text") are recognized by
+            // Exec and surface in the IDE error list with the contract file as the origin.
+            foreach (var d in result.Diagnostics)
+            {
+                var severity = d.Severity == DiagnosticSeverity.Error ? "error" : "warning";
+                var text = d.ToString()[(d.Id.Length + 2)..];
+                Console.WriteLine($"{contractPath} : {severity} {d.Id}: {text}");
+            }
+
+            if (result.Passed)
+                Console.WriteLine($"ContractGuard: PASS ({contract.Types.Count} governed types)");
+        }
+        else if (options.Get("format") == "json")
         {
             Console.WriteLine(JsonSerializer.Serialize(
                 new
@@ -78,8 +92,9 @@ public static class Cli
         var assemblyPath = options.Require("assembly");
         var surface = AssemblyReader.Read(assemblyPath);
 
-        var settings = new ContractSettings();
-        var scoped = ScopeFilter.Apply(surface, settings.Scope);
+        var scope = ParseScope(options.Get("scope"));
+        var settings = new ContractSettings { Scope = scope };
+        var scoped = ScopeFilter.Apply(surface, scope);
         var contract = new AssemblyContract
         {
             Schema = SchemaUrl,
@@ -127,8 +142,8 @@ public static class Cli
             ContractGuard - verifies built assemblies against a prescribed API contract.
 
             usage:
-              contractguard verify  --contract <file> --assembly <dll> [--format text|json]
-              contractguard extract --assembly <dll> [--output <file>]
+              contractguard verify  --contract <file> --assembly <dll> [--format text|json|msbuild]
+              contractguard extract --assembly <dll> [--output <file>] [--scope public,protected,internal,private]
               contractguard show    --contract <file>
 
             exit codes: 0 pass, 1 contract violations, 2 usage/load errors
@@ -140,6 +155,26 @@ public static class Cli
     {
         var tail = fullTypeName[(fullTypeName.LastIndexOf('+') + 1)..];
         return tail[(tail.LastIndexOf('.') + 1)..];
+    }
+
+    /// <summary>Parses a comma-separated scope list; the emitted contract's settings carry
+    /// the same scope so the deny sweeps stay consistent with what was extracted.</summary>
+    private static IReadOnlyList<Accessibility> ParseScope(string? text)
+    {
+        if (text is null)
+            return new ContractSettings().Scope;
+
+        return text.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Select(level => level switch
+            {
+                "public" => Accessibility.Public,
+                "protected" => Accessibility.Protected,
+                "internal" => Accessibility.Internal,
+                "private" => Accessibility.Private,
+                _ => throw new InvalidDataException(
+                    $"'{level}' is not a scope level. Allowed: public, protected, internal, private."),
+            })
+            .ToList();
     }
 
     private sealed class Options
