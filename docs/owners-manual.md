@@ -24,15 +24,16 @@ That emits a contract covering every public and protected type in the assembly. 
 next to the csproj, named `<AssemblyName>.contract.json`, and add the build gate:
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.1.0" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.1-alpha" PrivateAssets="all" />
 ```
 
 Build again. You'll see `ContractGuard: PASS` in the output. Change any prescribed
 signature and the build fails with an error pointing at the contract file.
 
-While the packages aren't on nuget.org yet, you can produce them from this repo:
-`dotnet pack src/ContractGuard.MSBuild -c Release` for the build gate, and
-`dotnet run --project src/ContractGuard.Cli --` in place of the `contractguard` command.
+The CLI installs as a dotnet tool: `dotnet tool install -g ContractGuard --prerelease`
+(the `--prerelease` flag matters while releases are alphas). Working from this repo
+instead, `dotnet run --project src/ContractGuard.Cli --` stands in for the
+`contractguard` command.
 
 ## Trim the contract
 

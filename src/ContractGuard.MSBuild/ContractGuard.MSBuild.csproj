@@ -20,7 +20,7 @@
   <Target Name="_PackContractGuardTool">
     <MSBuild Projects="$(MSBuildThisFileDirectory)..\ContractGuard.Cli\ContractGuard.Cli.csproj"
              Targets="Publish"
-             Properties="Configuration=$(Configuration);PublishDir=$(MSBuildThisFileDirectory)obj\cli-publish\" />
+             Properties="Configuration=$(Configuration);Version=$(Version);PublishDir=$(MSBuildThisFileDirectory)obj\cli-publish\" />
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(MSBuildThisFileDirectory)obj\cli-publish\**\*"
                               PackagePath="tools/net8.0/any/" />

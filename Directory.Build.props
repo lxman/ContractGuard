@@ -6,4 +6,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <PropertyGroup Label="Package metadata">
+    <Authors>Michael Jordan</Authors>
+    <PackageProjectUrl>https://github.com/lxman/ContractGuard</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lxman/ContractGuard</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>api-contract;ci;build-gate;governance;signatures;msbuild</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
 </Project>

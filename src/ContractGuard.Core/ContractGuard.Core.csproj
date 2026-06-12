@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <PackageId>ContractGuard.Core</PackageId>
+    <Description>Core engine for ContractGuard: the neutral signature model, contract JSON serialization, assembly metadata reader, and comparison engine.</Description>
   </PropertyGroup>
 
 </Project>

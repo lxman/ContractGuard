@@ -7,7 +7,9 @@
     <AssemblyName>contractguard</AssemblyName>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>contractguard</ToolCommandName>
-    <PackageId>ContractGuard.Cli</PackageId>
+    <!-- The flagship ID goes to the most user-facing artifact: dotnet tool install -g ContractGuard -->
+    <PackageId>ContractGuard</PackageId>
+    <Description>ContractGuard CLI: verifies built .NET assemblies against a prescribed API contract, extracts contracts from golden DLLs, and renders contracts as C# declarations.</Description>
   </PropertyGroup>
 
   <ItemGroup>

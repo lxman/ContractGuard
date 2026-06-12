@@ -51,7 +51,7 @@ changing policy means changing the reviewed file.
 
 ## Use it
 
-**CLI** (packs as the `contractguard` dotnet tool):
+**CLI** (`dotnet tool install -g ContractGuard --prerelease`):
 
 ```
 contractguard extract --assembly Shop.Domain.dll --output Shop.Domain.contract.json
@@ -69,7 +69,7 @@ either way; scope governs what the deny sweeps and extraction consider surface.
 **MSBuild package** (the drop-in):
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.1.0" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.1-alpha" PrivateAssets="all" />
 ```
 
 After every build, `<project>/<AssemblyName>.contract.json` is verified automatically —
