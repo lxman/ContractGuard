@@ -55,14 +55,8 @@ public static class Cli
 
         if (options.Get("format") == "msbuild")
         {
-            // MSBuild-canonical lines ("origin : category code: text") are recognized by
-            // Exec and surface in the IDE error list with the contract file as the origin.
             foreach (Diagnostic d in result.Diagnostics)
-            {
-                string severity = d.Severity == DiagnosticSeverity.Error ? "error" : "warning";
-                string text = d.ToString()[(d.Id.Length + 2)..];
-                Console.WriteLine($"{contractPath} : {severity} {d.Id}: {text}");
-            }
+                Console.WriteLine(d.ToMsBuildString(contractPath));
 
             if (result.Passed)
                 Console.WriteLine($"ContractGuard: PASS ({contract.Types.Count} governed types)");

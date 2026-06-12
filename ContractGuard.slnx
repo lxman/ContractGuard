@@ -16,6 +16,7 @@
     <Project Path="src/ContractGuard.Authoring/ContractGuard.Authoring.csproj" />
     <Project Path="src/ContractGuard.Cli/ContractGuard.Cli.csproj" />
     <Project Path="src/ContractGuard.Core/ContractGuard.Core.csproj" />
+    <Project Path="src/ContractGuard.Gate/ContractGuard.Gate.csproj" />
     <Project Path="src/ContractGuard.MSBuild/ContractGuard.MSBuild.csproj" />
   </Folder>
   <Folder Name="/tests/">

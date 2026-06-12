@@ -37,6 +37,9 @@ public static class AssemblyReader
         private const string ExtensionAttribute = "System.Runtime.CompilerServices.ExtensionAttribute";
         private const string ParamArrayAttribute = "System.ParamArrayAttribute";
         private const string ExternalInitModifier = "System.Runtime.CompilerServices.IsExternalInit";
+        private const string InModifier = "System.Runtime.InteropServices.InAttribute";
+        private const string RequiresLocationModifier = "System.Runtime.CompilerServices.RequiresLocationAttribute";
+        private const string VolatileModifier = "System.Runtime.CompilerServices.IsVolatile";
 
         private readonly NullabilityDecoder _decoder = new(md);
 
@@ -71,11 +74,17 @@ public static class AssemblyReader
             var context = new GenericContext(typeParamNames, []);
 
             TypeKind kind = ClassifyType(td, context, out string? baseTypeName);
-            List<TypeParamContract> typeParams = ReadGenericParams(td.GetGenericParameters(), context);
+            var isRecord = kind == TypeKind.Class && IsRecordClass(td, context);
+            if (isRecord)
+                kind = TypeKind.Record;
+            List<TypeParamContract> typeParams = ReadGenericParams(td.GetGenericParameters(), context, typeContext);
 
             string? extends = null;
-            if (kind == TypeKind.Class && baseTypeName is not null && baseTypeName != "System.Object")
+            if (kind is TypeKind.Class or TypeKind.Record
+                && baseTypeName is not null && baseTypeName != "System.Object")
+            {
                 extends = baseTypeName;
+            }
 
             // TODO: base type / interface nullable annotations (NullableAttribute on the
             // InterfaceImpl rows) are not decoded.
@@ -123,12 +132,39 @@ public static class AssemblyReader
                 default:
                     return contract with
                     {
-                        Members = NullIfEmpty(ReadMembers(td, context, typeContext)),
+                        Members = NullIfEmpty(ReadMembers(td, context, typeContext, isRecord)),
                     };
             }
         }
 
-        private List<MemberContract> ReadMembers(TypeDefinition td, GenericContext typeContext, byte nullableContext)
+        /// <summary>The compiler pattern for record classes: a protected virtual
+        /// EqualityContract property returning System.Type. Record structs have no marker
+        /// and stay classified as struct.</summary>
+        private bool IsRecordClass(TypeDefinition td, GenericContext context)
+        {
+            foreach (PropertyDefinitionHandle ph in td.GetProperties())
+            {
+                PropertyDefinition pd = md.GetPropertyDefinition(ph);
+                if (md.GetString(pd.Name) != "EqualityContract")
+                    continue;
+
+                MethodDefinitionHandle getter = pd.GetAccessors().Getter;
+                if (getter.IsNil)
+                    return false;
+
+                MethodDefinition g = md.GetMethodDefinition(getter);
+                if ((g.Attributes & MethodAttributes.MemberAccessMask) != MethodAttributes.Family)
+                    return false;
+
+                MethodSignature<MetaType> sig = pd.DecodeSignature(MetaTypeProvider.Instance, context);
+                return MetaTypeRenderer.Render(sig.ReturnType.Unwrap()) == "System.Type";
+            }
+
+            return false;
+        }
+
+        private List<MemberContract> ReadMembers(
+            TypeDefinition td, GenericContext typeContext, byte nullableContext, bool isRecord)
         {
             var members = new List<MemberContract>();
             var accessorHandles = new HashSet<MethodDefinitionHandle>();
@@ -143,6 +179,11 @@ public static class AssemblyReader
                     accessorHandles.Add(accessors.Getter);
                 if (!accessors.Setter.IsNil)
                     accessorHandles.Add(accessors.Setter);
+
+                // Record plumbing the compiler synthesizes is not governable surface;
+                // public synthesized members (Equals, operators, Deconstruct) are.
+                if (isRecord && md.GetString(pd.Name) == "EqualityContract")
+                    continue;
 
                 MemberContract? property = ReadProperty(pd, accessors, typeContext, nullableContext, isInterface);
                 if (property is not null)
@@ -175,7 +216,11 @@ public static class AssemblyReader
                 if (accessorHandles.Contains(mh))
                     continue;
 
-                MemberContract? method = ReadMethod(md.GetMethodDefinition(mh), typeContext, nullableContext, isInterface);
+                MethodDefinition def = md.GetMethodDefinition(mh);
+                if (isRecord && md.GetString(def.Name) == "PrintMembers")
+                    continue; // record plumbing, like EqualityContract
+
+                MemberContract? method = ReadMethod(def, typeContext, nullableContext, isInterface);
                 if (method is not null)
                     members.Add(method);
             }
@@ -239,7 +284,7 @@ public static class AssemblyReader
                 Modifiers = NullIfEmpty(MethodModifiers(def, isInterface)),
                 Returns = returns,
                 RefKind = refKind,
-                TypeParams = NullIfEmpty(ReadGenericParams(def.GetGenericParameters(), context)),
+                TypeParams = NullIfEmpty(ReadGenericParams(def.GetGenericParameters(), context, nullableContext)),
                 Params = parameters.Count == 0 ? null : parameters,
             };
         }
@@ -354,6 +399,8 @@ public static class AssemblyReader
 
             MetaType typeMeta = ApplyAnnotations(
                 fd.DecodeSignature(MetaTypeProvider.Instance, context), fd.GetCustomAttributes(), typeNullableContext);
+            if (typeMeta.HasRequiredModifier(VolatileModifier))
+                modifiers.Add(MemberModifier.Volatile);
 
             return new FieldContract
             {
@@ -398,16 +445,20 @@ public static class AssemblyReader
 
                 Parameter? row = bySequence.TryGetValue(i + 1, out Parameter found) ? found : null;
                 meta = ApplyAnnotations(meta, row?.GetCustomAttributes(), nullableContext);
-                bool byRef = meta is MetaType.ByRef;
-                if (meta is MetaType.ByRef br)
+                // 'ref readonly' params: RequiresLocation rides as a row attribute on
+                // ordinary methods and as a modopt on virtual/interface signatures.
+                bool requiresLocation = meta.HasModifier(RequiresLocationModifier)
+                    || (row is { } loc && MetadataNames.HasAttribute(md, loc.GetCustomAttributes(), RequiresLocationModifier));
+                bool byRef = meta.Unwrap() is MetaType.ByRef;
+                if (meta.Unwrap() is MetaType.ByRef br)
                     meta = br.Element;
                 if (byRef)
-                    modifier = ParamModifier.Ref;
+                    modifier = requiresLocation ? ParamModifier.RefReadonly : ParamModifier.Ref;
 
                 if (row is { } p)
                 {
                     name = p.Name.IsNil ? null : md.GetString(p.Name);
-                    if (byRef)
+                    if (byRef && !requiresLocation)
                     {
                         bool isOut = (p.Attributes & ParameterAttributes.Out) != 0;
                         bool isIn = (p.Attributes & ParameterAttributes.In) != 0;
@@ -455,9 +506,13 @@ public static class AssemblyReader
 
         private static (string Type, ReturnRefKind? RefKind) SplitByRef(MetaType meta)
         {
-            // TODO: distinguish ref readonly returns (modreq InAttribute).
             if (meta.Unwrap() is MetaType.ByRef byRef)
-                return (MetaTypeRenderer.Render(byRef.Element), ReturnRefKind.Ref);
+            {
+                ReturnRefKind kind = meta.HasModifier(InModifier)
+                    ? ReturnRefKind.RefReadonly
+                    : ReturnRefKind.Ref;
+                return (MetaTypeRenderer.Render(byRef.Element), kind);
+            }
 
             return (MetaTypeRenderer.Render(meta), null);
         }
@@ -481,21 +536,35 @@ public static class AssemblyReader
             _decoder.FindNullableContext(def.GetCustomAttributes()) ?? typeContext;
 
         private List<TypeParamContract> ReadGenericParams(
-            GenericParameterHandleCollection handles, GenericContext context)
+            GenericParameterHandleCollection handles, GenericContext context, byte nullableContext)
         {
             var result = new List<TypeParamContract>();
             foreach (GenericParameterHandle h in handles)
             {
                 GenericParameter gp = md.GetGenericParameter(h);
                 GenericParameterAttributes attrs = gp.Attributes;
+                bool isClass = (attrs & GenericParameterAttributes.ReferenceTypeConstraint) != 0;
                 bool isStruct = (attrs & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0;
 
-                // TODO: constraint nullability ('class?', 'notnull') is not decoded.
+                // Constraint nullability rides on a NullableAttribute on the generic
+                // parameter row (context-compressed like everything else): 'class' + flag 2
+                // is 'class?'; flag 1 with no class/struct constraint is 'notnull'.
+                // TODO: annotations on constraint TYPES (IFoo?).
+                byte? gpNullability = null;
+                if (options.DecodeNullableAnnotations)
+                {
+                    gpNullability = _decoder.FindNullableFlags(gp.GetCustomAttributes()) is { } gpFlags
+                        ? gpFlags.At(0)
+                        : nullableContext;
+                }
+
                 var constraints = new List<string>();
-                if ((attrs & GenericParameterAttributes.ReferenceTypeConstraint) != 0)
-                    constraints.Add("class");
+                if (isClass)
+                    constraints.Add(gpNullability == 2 ? "class?" : "class");
                 if (isStruct)
                     constraints.Add("struct");
+                if (!isClass && !isStruct && gpNullability == 1)
+                    constraints.Add("notnull");
 
                 foreach (GenericParameterConstraintHandle ch in gp.GetConstraints())
                 {
@@ -532,8 +601,8 @@ public static class AssemblyReader
             if ((td.Attributes & TypeAttributes.Interface) != 0)
                 return TypeKind.Interface;
 
-            // TODO: detect records (EqualityContract heuristic); they currently classify as
-            // class/struct, and the comparer treats record~class, record-struct~struct.
+            // Record classes are detected separately via IsRecordClass; record structs have
+            // no metadata marker and the comparer treats record-struct~struct.
             return baseTypeName switch
             {
                 "System.Enum" => TypeKind.Enum,
@@ -548,7 +617,7 @@ public static class AssemblyReader
             var result = new List<TypeModifier>();
             switch (kind)
             {
-                case TypeKind.Class:
+                case TypeKind.Class or TypeKind.Record:
                 {
                     bool isAbstract = (td.Attributes & TypeAttributes.Abstract) != 0;
                     bool isSealed = (td.Attributes & TypeAttributes.Sealed) != 0;

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RollForward>LatestMajor</RollForward>
+    <AssemblyName>contractguard-gate</AssemblyName>
+    <!-- The verify-only executable the MSBuild package bundles: Core and nothing else, so
+         the drop-in gate stays small. The full CLI (with Roslyn-backed authoring) ships
+         separately as the ContractGuard dotnet tool. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ContractGuard.Core\ContractGuard.Core.csproj" />
+  </ItemGroup>
+
+</Project>

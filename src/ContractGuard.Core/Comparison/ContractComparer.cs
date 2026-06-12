@@ -400,7 +400,7 @@ public sealed class ContractComparer
     }
 
     private bool ConstraintMatches(string contract, string observed, string ns) =>
-        contract is "class" or "struct" or "notnull" or "unmanaged" or "new()"
+        contract is "class" or "class?" or "struct" or "notnull" or "unmanaged" or "new()"
             ? string.Equals(contract, observed, StringComparison.Ordinal)
             : _matcher.Matches(contract, observed, ns);
 
@@ -439,7 +439,7 @@ public sealed class ContractComparer
                     typeName, member, reason);
             }
 
-            if (_settings.DefaultValues == Significance.Significant && !Equals(c.Default, o.Default))
+            if (_settings.DefaultValues == Significance.Significant && !DefaultsMatch(c, o))
             {
                 Add(DiagnosticIds.ParameterDefaultsChanged, DiagnosticSeverity.Error,
                     $"Parameter {i + 1} default is {o.Default?.ToString() ?? "absent"} but the contract "
@@ -447,6 +447,34 @@ public sealed class ContractComparer
                     typeName, member, reason);
             }
         }
+    }
+
+    /// <summary>
+    /// A contract default written as "EnumType.Member" resolves against the enum's members
+    /// when the enum is defined in the scanned assembly; cross-assembly enums still need
+    /// the underlying numeric value.
+    /// </summary>
+    private bool DefaultsMatch(ParamContract contract, ParamContract observed)
+    {
+        if (Equals(contract.Default, observed.Default))
+            return true;
+
+        if (contract.Default?.Value is not string written || !written.Contains('.')
+            || observed.Default?.Value is not long observedValue)
+        {
+            return false;
+        }
+
+        var lastDot = written.LastIndexOf('.');
+        var memberName = written[(lastDot + 1)..];
+        TypeContract? enumType = _surface.Types.FirstOrDefault(t =>
+            t.Kind == TypeKind.Enum && t.Type == observed.Type);
+        if (enumType is null)
+            return false;
+
+        FieldContract? enumMember = enumType.Members?.OfType<FieldContract>()
+            .FirstOrDefault(f => f.Name == memberName);
+        return enumMember?.Value is { } value && value.Equals(ConstantValue.Of(observedValue));
     }
 
     private void CompareAccessors(
@@ -528,8 +556,8 @@ public sealed class ContractComparer
 
     private static TypeKind NormalizeKind(TypeKind kind) => kind switch
     {
-        // TODO: the reader cannot yet distinguish records from classes.
-        TypeKind.Record => TypeKind.Class,
+        // Record classes are detected from metadata (EqualityContract pattern) and compare
+        // exactly; record structs have no metadata marker, so they normalize to struct.
         TypeKind.RecordStruct => TypeKind.Struct,
         var k => k,
     };

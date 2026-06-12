@@ -76,7 +76,7 @@ canonical form (`--check` makes it a CI lint).
 **MSBuild package** (the drop-in):
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.2-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.3-alpha" PrivateAssets="all" />
 ```
 
 After every build, `<project>/<AssemblyName>.contract.json` is verified automatically —
@@ -112,19 +112,21 @@ kinds of limits apply — ones that are permanent, and ones that are just not bu
 - **Tuple element names** (`TupleElementNamesAttribute`) are decoded and significant by
   default — renaming `(int x, int y)` to `(int a, int b)` breaks consumers using named
   access.
+- **Record classes** are detected (the `EqualityContract` compiler pattern) and compare as
+  `"kind": "record"`; the synthesized plumbing (`EqualityContract`, `PrintMembers`) is not
+  governable surface, while public synthesized members (`Equals`, operators, `Deconstruct`)
+  are. Record *structs* have no metadata marker and stay `struct`.
+- **`ref readonly`** returns and parameters and **`volatile`** fields decode from their
+  modreqs/attributes.
+- **`notnull` and `class?` constraints** decode when `nullableAnnotations` is significant.
+- **Enum parameter defaults** written as `"OrderStatus.Pending"` resolve against enums
+  defined in the scanned assembly. Enums from *other* assemblies still need the underlying
+  numeric value — the gate never loads foreign assemblies.
 
 ### Not decoded yet — accepted by the schema, but not enforced
 
-- **Constraint and inheritance nullability.** `where T : class?` / `notnull` constraints
-  and annotations on base types and implemented interfaces are not decoded.
-- **Enum parameter defaults.** Write them as the underlying numeric value
-  (`"default": 0`); `"default": "OrderStatus.Pending"` strings are not resolved yet and
-  will report a mismatch.
-- **Records.** Classify as class/struct in metadata; `"kind": "record"` is accepted and
-  matched as `class` (`record-struct` as `struct`). Compiler-synthesized record members are
-  visible to the gate like any other member.
-- **`ref readonly` returns and parameters, `volatile` fields.** The modreqs are not decoded;
-  `ref readonly` currently reads as plain `ref`.
+- **Nullability on constraint types and inheritance.** `where T : IFoo?` and annotations
+  on base types and implemented interfaces are not decoded.
 - **Explicit interface implementations** are skipped and cannot be governed yet.
 - **`significantAttributes`** is accepted by the schema but attribute comparison is not
   implemented.

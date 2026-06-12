@@ -217,7 +217,8 @@ public static class DeclarationParser
             {
                 constraints.Add(constraint switch
                 {
-                    ClassOrStructConstraintSyntax cs => cs.ClassOrStructKeyword.Text,
+                    ClassOrStructConstraintSyntax cs => cs.ClassOrStructKeyword.Text
+                        + (cs.QuestionToken.IsKind(SyntaxKind.QuestionToken) ? "?" : string.Empty),
                     ConstructorConstraintSyntax => "new()",
                     TypeConstraintSyntax tc => Canonical(tc.Type),
                     _ => throw new FormatException($"Constraint '{constraint}' is not supported."),
@@ -301,8 +302,9 @@ public static class DeclarationParser
         LiteralExpressionSyntax literal => ConstantValue.Of(literal.Token.Value),
         PrefixUnaryExpressionSyntax { RawKind: (int)SyntaxKind.UnaryMinusExpression, Operand: LiteralExpressionSyntax operand } =>
             Negate(operand.Token.Value),
-        MemberAccessExpressionSyntax => throw new FormatException(
-            "Enum constants are not resolved from names yet; write the underlying numeric value."),
+        // "EnumType.Member" stores as written; the comparer resolves it against enums
+        // defined in the scanned assembly.
+        MemberAccessExpressionSyntax memberAccess => ConstantValue.Of(memberAccess.ToString()),
         _ => throw new FormatException($"'{expression}' is not a representable constant."),
     };
 

@@ -65,7 +65,7 @@
     {
       "type": "ContractGuard.Core.TypeNames.TypeNameNode",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "abstract"
       ],
@@ -74,18 +74,6 @@
       ],
       "members": [
         {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "virtual"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
-        {
           "kind": "method",
           "name": "ToString",
           "modifiers": [
@@ -93,21 +81,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "virtual"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -1357,7 +1330,7 @@
     {
       "type": "ContractGuard.Core.Model.MemberContract",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "abstract"
       ],
@@ -1365,18 +1338,6 @@
         "System.IEquatable<ContractGuard.Core.Model.MemberContract>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "virtual"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Access",
@@ -1449,21 +1410,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "virtual"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -1554,7 +1500,7 @@
     {
       "type": "ContractGuard.Core.Model.MethodContract",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -1563,18 +1509,6 @@
         "System.IEquatable<ContractGuard.Core.Model.MethodContract>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Name",
@@ -1679,21 +1613,6 @@
           "access": "public"
         },
         {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
-        },
-        {
           "kind": "operator",
           "name": "!=",
           "returns": "bool",
@@ -1785,7 +1704,7 @@
     {
       "type": "ContractGuard.Core.Model.ConstructorMemberContract",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -1794,18 +1713,6 @@
         "System.IEquatable<ContractGuard.Core.Model.ConstructorMemberContract>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Params",
@@ -1858,21 +1765,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -1966,7 +1858,7 @@
     {
       "type": "ContractGuard.Core.Model.PropertyContract",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -1975,18 +1867,6 @@
         "System.IEquatable<ContractGuard.Core.Model.PropertyContract>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Name",
@@ -2069,21 +1949,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -2177,7 +2042,7 @@
     {
       "type": "ContractGuard.Core.Model.IndexerContract",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -2186,18 +2051,6 @@
         "System.IEquatable<ContractGuard.Core.Model.IndexerContract>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Modifiers",
@@ -2292,21 +2145,6 @@
           "access": "public"
         },
         {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
-        },
-        {
           "kind": "operator",
           "name": "!=",
           "returns": "bool",
@@ -2398,7 +2236,7 @@
     {
       "type": "ContractGuard.Core.Model.EventContract",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -2407,18 +2245,6 @@
         "System.IEquatable<ContractGuard.Core.Model.EventContract>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Name",
@@ -2481,21 +2307,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -2589,7 +2400,7 @@
     {
       "type": "ContractGuard.Core.Model.FieldContract",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -2598,18 +2409,6 @@
         "System.IEquatable<ContractGuard.Core.Model.FieldContract>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Name",
@@ -2682,21 +2481,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -2790,7 +2574,7 @@
     {
       "type": "ContractGuard.Core.Model.OperatorContract",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -2799,18 +2583,6 @@
         "System.IEquatable<ContractGuard.Core.Model.OperatorContract>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Name",
@@ -2883,21 +2655,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -3987,6 +3744,18 @@
           "access": "public"
         },
         {
+          "kind": "method",
+          "name": "ToMsBuildString",
+          "returns": "string",
+          "params": [
+            [
+              "string",
+              "origin"
+            ]
+          ],
+          "access": "public"
+        },
+        {
           "kind": "operator",
           "name": "!=",
           "returns": "bool",
@@ -4513,7 +4282,7 @@
     {
       "type": "ContractGuard.Core.TypeNames.TypeNameNode+Named",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -4522,18 +4291,6 @@
         "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Named>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Name",
@@ -4576,21 +4333,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -4697,7 +4439,7 @@
     {
       "type": "ContractGuard.Core.TypeNames.TypeNameNode+Array",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -4706,18 +4448,6 @@
         "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Array>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Element",
@@ -4760,21 +4490,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -4881,7 +4596,7 @@
     {
       "type": "ContractGuard.Core.TypeNames.TypeNameNode+Nullable",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -4890,18 +4605,6 @@
         "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Nullable>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Element",
@@ -4930,21 +4633,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -5046,7 +4734,7 @@
     {
       "type": "ContractGuard.Core.TypeNames.TypeNameNode+Tuple",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -5055,18 +4743,6 @@
         "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Tuple>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Elements",
@@ -5095,21 +4771,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",
@@ -5211,7 +4872,7 @@
     {
       "type": "ContractGuard.Core.TypeNames.TypeNameNode+Pointer",
       "access": "public",
-      "kind": "class",
+      "kind": "record",
       "modifiers": [
         "sealed"
       ],
@@ -5220,18 +4881,6 @@
         "System.IEquatable<ContractGuard.Core.TypeNames.TypeNameNode+Pointer>"
       ],
       "members": [
-        {
-          "kind": "property",
-          "name": "EqualityContract",
-          "modifiers": [
-            "override"
-          ],
-          "type": "System.Type",
-          "accessors": {
-            "get": "protected"
-          },
-          "access": "protected"
-        },
         {
           "kind": "property",
           "name": "Element",
@@ -5260,21 +4909,6 @@
           ],
           "returns": "string",
           "access": "public"
-        },
-        {
-          "kind": "method",
-          "name": "PrintMembers",
-          "modifiers": [
-            "override"
-          ],
-          "returns": "bool",
-          "params": [
-            [
-              "System.Text.StringBuilder",
-              "builder"
-            ]
-          ],
-          "access": "protected"
         },
         {
           "kind": "operator",

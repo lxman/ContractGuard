@@ -18,11 +18,13 @@
   </ItemGroup>
 
   <Target Name="_PackContractGuardTool">
-    <MSBuild Projects="$(MSBuildThisFileDirectory)..\ContractGuard.Cli\ContractGuard.Cli.csproj"
+    <!-- The bundle is the verify-only gate, not the full CLI: authoring drags Roslyn in,
+         and the drop-in package should stay small. -->
+    <MSBuild Projects="$(MSBuildThisFileDirectory)..\ContractGuard.Gate\ContractGuard.Gate.csproj"
              Targets="Publish"
-             Properties="Configuration=$(Configuration);Version=$(Version);PublishDir=$(MSBuildThisFileDirectory)obj\cli-publish\" />
+             Properties="Configuration=$(Configuration);Version=$(Version);PublishDir=$(MSBuildThisFileDirectory)obj\gate-publish\" />
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(MSBuildThisFileDirectory)obj\cli-publish\**\*"
+      <TfmSpecificPackageFile Include="$(MSBuildThisFileDirectory)obj\gate-publish\**\*"
                               PackagePath="tools/net8.0/any/" />
     </ItemGroup>
   </Target>

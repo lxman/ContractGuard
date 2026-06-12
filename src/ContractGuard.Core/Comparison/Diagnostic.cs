@@ -26,6 +26,17 @@ public sealed record Diagnostic(
         string reason = Reason is null ? string.Empty : $" ({Reason})";
         return $"{Id}: {Message}{location}{reason}";
     }
+
+    /// <summary>
+    /// MSBuild-canonical line ("origin : category code: text"), recognized by Exec and
+    /// surfaced in the IDE error list with the given origin (the contract file) as the
+    /// clickable location. Lives here so the CLI and the gate executable cannot drift.
+    /// </summary>
+    public string ToMsBuildString(string origin)
+    {
+        string severity = Severity == DiagnosticSeverity.Error ? "error" : "warning";
+        return $"{origin} : {severity} {Id}: {ToString()[(Id.Length + 2)..]}";
+    }
 }
 
 public sealed record ComparisonResult(IReadOnlyList<Diagnostic> Diagnostics)

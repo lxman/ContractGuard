@@ -45,4 +45,13 @@ internal abstract record MetaType
     public bool HasRequiredModifier(string modifierFullName) =>
         this is Modified m && (m.IsRequired && m.ModifierFullName == modifierFullName
             || m.Inner.HasRequiredModifier(modifierFullName));
+
+    /// <summary>Modifier presence regardless of required/optional - and through a ByRef,
+    /// since C# emits modifiers on either side of the byref depending on the construct.</summary>
+    public bool HasModifier(string modifierFullName) => this switch
+    {
+        Modified m => m.ModifierFullName == modifierFullName || m.Inner.HasModifier(modifierFullName),
+        ByRef b => b.Element.HasModifier(modifierFullName),
+        _ => false,
+    };
 }

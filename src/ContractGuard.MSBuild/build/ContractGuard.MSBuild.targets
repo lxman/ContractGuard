@@ -22,7 +22,7 @@
     <ContractGuardEnabled Condition="'$(ContractGuardEnabled)' == ''">true</ContractGuardEnabled>
     <ContractGuardRequireContract Condition="'$(ContractGuardRequireContract)' == ''">false</ContractGuardRequireContract>
     <ContractGuardContract Condition="'$(ContractGuardContract)' == ''">$(MSBuildProjectDirectory)/$(AssemblyName).contract.json</ContractGuardContract>
-    <ContractGuardToolDll Condition="'$(ContractGuardToolDll)' == ''">$(MSBuildThisFileDirectory)../tools/net8.0/any/contractguard.dll</ContractGuardToolDll>
+    <ContractGuardToolDll Condition="'$(ContractGuardToolDll)' == ''">$(MSBuildThisFileDirectory)../tools/net8.0/any/contractguard-gate.dll</ContractGuardToolDll>
   </PropertyGroup>
 
   <Target Name="ContractGuardRequireContractCheck" AfterTargets="Build"

@@ -80,12 +80,13 @@ public class AuthoringTests
     }
 
     [Fact]
-    public void Rejects_enum_member_constants_with_guidance()
+    public void Stores_enum_member_constants_as_written()
     {
-        var ex = Assert.Throws<FormatException>(() =>
-            DeclarationParser.ParseMember("public void M(OrderStatus status = OrderStatus.Pending)"));
+        var method = (MethodContract)DeclarationParser.ParseMember(
+            "public void M(OrderStatus status = OrderStatus.Pending)");
 
-        Assert.Contains("underlying numeric value", ex.Message);
+        // The comparer resolves the name against enums defined in the scanned assembly.
+        Assert.Equal(ConstantValue.Of("OrderStatus.Pending"), method.Params![0].Default);
     }
 
     [Theory]
