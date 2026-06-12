@@ -138,6 +138,28 @@ public class AnalyzerTests
         Assert.Equal("CG0002", diagnostic.Id);
     }
 
+    [Fact]
+    public void Every_descriptor_links_to_its_own_diagnostics_anchor()
+    {
+        string manual = File.ReadAllText(RepoPath("docs", "diagnostics.md"));
+
+        foreach (DiagnosticDescriptor descriptor in new ContractGuardAnalyzer().SupportedDiagnostics)
+        {
+            Assert.EndsWith($"docs/diagnostics.md#{descriptor.Id.ToLowerInvariant()}", descriptor.HelpLinkUri);
+            Assert.Contains($"## {descriptor.Id}", manual);
+        }
+    }
+
+    private static string RepoPath(params string[] parts)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null && !File.Exists(Path.Combine(dir.FullName, "ContractGuard.slnx")))
+            dir = dir.Parent;
+
+        Assert.NotNull(dir);
+        return Path.Combine([dir.FullName, .. parts]);
+    }
+
     private sealed class TestAdditionalText(string path, string text) : AdditionalText
     {
         public override string Path => path;

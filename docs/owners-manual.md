@@ -24,7 +24,7 @@ That emits a contract covering every public and protected type in the assembly. 
 next to the csproj, named `<AssemblyName>.contract.json`, and add the build gate:
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.8-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.9-alpha" PrivateAssets="all" />
 ```
 
 Build again. You'll see `ContractGuard: PASS` in the output. Change any prescribed
@@ -191,8 +191,8 @@ Add the analyzer next to the gate and violations show up in the editor as you wr
 same CG codes, on the offending line:
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.8-alpha" PrivateAssets="all" />
-<PackageReference Include="ContractGuard.Analyzers" Version="0.0.8-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.9-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.Analyzers" Version="0.0.9-alpha" PrivateAssets="all" />
 ```
 
 Nothing else to configure — the MSBuild package hands the contract file to the compiler.
@@ -227,6 +227,10 @@ errors point at the contract file instead.
 The fix is one of two things: revert the code, or change the contract — and changing the
 contract is a normal PR touching a file your repo can protect with CODEOWNERS. That's the
 whole governance model.
+
+The full reference with one entry per code lives in
+[docs/diagnostics.md](diagnostics.md) — that's also where the error-code links in your
+IDE land.
 
 | ID | Meaning |
 |---|---|

@@ -61,7 +61,8 @@ internal static class Descriptors
                 isEnabledByDefault: true,
                 description: entry.Value + ". The contract file is the source of truth; "
                     + "change the code back, or change the contract through review.",
-                helpLinkUri: "https://github.com/lxman/ContractGuard"));
+                helpLinkUri: "https://github.com/lxman/ContractGuard/blob/main/docs/diagnostics.md#"
+                    + entry.Key.ToLowerInvariant()));
         }
 
         return builder.ToImmutable();
