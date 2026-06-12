@@ -15,11 +15,11 @@ settings in plain language, and what the diagnostic IDs mean.
 
 ## Status
 
-Core engine, CLI, and MSBuild gate work end to end. The Roslyn analyzer exists as a
-second front-end over the same comparison engine — same CG diagnostic ids, contract via
-AdditionalFiles, errors on the offending source line — and a consistency harness asserts
-the symbol and metadata front-ends produce identical models, so the analyzer and the gate
-cannot disagree. Analyzer packaging is the next step. See
+Core engine, CLI, MSBuild gate, and the Roslyn analyzer all work end to end. The analyzer
+is a second front-end over the same comparison engine — same CG diagnostic ids, contract
+via AdditionalFiles, errors on the offending source line — and a consistency harness
+asserts the symbol and metadata front-ends produce identical models, so the analyzer and
+the gate cannot disagree. See
 [What the gate can and can't see](#what-the-gate-can-and-cant-see) for the enforcement
 boundary.
 
@@ -80,7 +80,7 @@ canonical form (`--check` makes it a CI lint).
 **MSBuild package** (the drop-in):
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.4-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.5-alpha" PrivateAssets="all" />
 ```
 
 After every build, `<project>/<AssemblyName>.contract.json` is verified automatically —
@@ -88,6 +88,19 @@ violations land in the IDE error list pointing at the contract file. Projects wi
 contract file are skipped, so the reference can live solution-wide in Directory.Build.props.
 In CI, build with `-p:ContractGuardRequireContract=true` so a deleted contract file fails
 the build instead of silently removing the gate.
+
+**Roslyn analyzer** (editor-time assistance):
+
+```xml
+<PackageReference Include="ContractGuard.Analyzers" Version="0.0.5-alpha" PrivateAssets="all" />
+```
+
+The same comparison engine the gate runs, inside the compiler: violations appear as you
+type, with the same CG ids, on the offending line — which also puts them inside an AI
+coding agent's build loop, so the agent self-corrects instead of burning a CI round-trip.
+The MSBuild package hands the contract to the compiler automatically when both are
+installed. The analyzer is assistance, never the gate: analyzers can be switched off
+locally; the metadata check in CI is the part nobody can opt out of.
 
 ## What the gate can and can't see
 

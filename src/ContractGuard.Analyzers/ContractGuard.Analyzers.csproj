@@ -6,14 +6,31 @@
          (C# 12 era, VS 2022 17.8+). -->
     <TargetFramework>netstandard2.0</TargetFramework>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <!-- RS2008: analyzer release tracking - deferred until packaging. -->
-    <NoWarn>$(NoWarn);RS2008</NoWarn>
-    <IsPackable>false</IsPackable>
+    <!-- RS2008: analyzer release tracking - deferred. -->
+    <NoWarn>$(NoWarn);RS2008;NU5128</NoWarn>
+    <PackageId>ContractGuard.Analyzers</PackageId>
+    <Description>Editor-time ContractGuard: the same contract comparison the CI gate runs, surfaced as compiler diagnostics with the same CG ids on the offending source line. Assistance, not the gate - the metadata check in CI remains the enforcement nobody can switch off.</Description>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <!-- Analyzer package layout: everything ships under analyzers/dotnet/cs, nothing in
+         lib/, no package dependencies (the compiler host loads neighbors by path). -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);_PackAnalyzer</TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
     <ProjectReference Include="..\ContractGuard.Core\ContractGuard.Core.csproj" />
   </ItemGroup>
+
+  <Target Name="_PackAnalyzer">
+    <ItemGroup>
+      <!-- The analyzer, ContractGuard.Core, and the System.Text.Json closure. Roslyn
+           assemblies are provided by the host compiler and must not be shipped. -->
+      <_AnalyzerPayload Include="$(OutputPath)*.dll" Exclude="$(OutputPath)Microsoft.CodeAnalysis*.dll" />
+      <TfmSpecificPackageFile Include="@(_AnalyzerPayload)" PackagePath="analyzers/dotnet/cs/" />
+    </ItemGroup>
+  </Target>
 
 </Project>

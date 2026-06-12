@@ -1,4 +1,4 @@
-# ContractGuard Owner's Manual
+Okay, # ContractGuard Owner's Manual
 
 This is the practical guide. It assumes you want a working gate, not a tour of the design.
 If you only read one section, read "Getting a gate running" and "Trim the contract."
@@ -24,7 +24,7 @@ That emits a contract covering every public and protected type in the assembly. 
 next to the csproj, named `<AssemblyName>.contract.json`, and add the build gate:
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.4-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.5-alpha" PrivateAssets="all" />
 ```
 
 Build again. You'll see `ContractGuard: PASS` in the output. Change any prescribed
@@ -184,6 +184,21 @@ Projects without a contract file are skipped, so you can put the PackageReferenc
 In CI, build with `-p:ContractGuardRequireContract=true`. Without it, deleting the
 contract file deletes the gate, silently. The local default stays lenient so adding the
 package to a fresh solution doesn't break forty projects at once.
+
+## Squiggles while you type
+
+Add the analyzer next to the gate and violations show up in the editor as you write them,
+same CG codes, on the offending line:
+
+```xml
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.5-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.Analyzers" Version="0.0.5-alpha" PrivateAssets="all" />
+```
+
+Nothing else to configure — the MSBuild package hands the contract file to the compiler.
+One thing to keep straight: the analyzer is a convenience, not the gate. Anyone can turn
+analyzers off locally, which is fine, because the build-time check (and CI) still runs the
+real verification on the compiled assembly.
 
 ## CI without MSBuild
 

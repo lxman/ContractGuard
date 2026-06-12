@@ -39,9 +39,10 @@ jobs:
 
       - name: Pack
         run: |
-          dotnet pack src/ContractGuard.Core    -c Release -p:Version=$VERSION -o artifacts
-          dotnet pack src/ContractGuard.Cli     -c Release -p:Version=$VERSION -o artifacts
-          dotnet pack src/ContractGuard.MSBuild -c Release -p:Version=$VERSION -o artifacts
+          dotnet pack src/ContractGuard.Core      -c Release -p:Version=$VERSION -o artifacts
+          dotnet pack src/ContractGuard.Cli       -c Release -p:Version=$VERSION -o artifacts
+          dotnet pack src/ContractGuard.MSBuild   -c Release -p:Version=$VERSION -o artifacts
+          dotnet pack src/ContractGuard.Analyzers -c Release -p:Version=$VERSION -o artifacts
 
       - name: NuGet login (trusted publishing)
         id: login

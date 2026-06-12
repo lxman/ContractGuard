@@ -25,6 +25,12 @@
     <ContractGuardToolDll Condition="'$(ContractGuardToolDll)' == ''">$(MSBuildThisFileDirectory)../tools/net8.0/any/contractguard-gate.dll</ContractGuardToolDll>
   </PropertyGroup>
 
+  <!-- Hand the contract to the compiler so the ContractGuard.Analyzers package (when
+       installed) sees it as an AdditionalFile. Harmless without the analyzer. -->
+  <ItemGroup Condition="'$(ContractGuardEnabled)' == 'true' and Exists('$(ContractGuardContract)')">
+    <AdditionalFiles Include="$(ContractGuardContract)" />
+  </ItemGroup>
+
   <Target Name="ContractGuardRequireContractCheck" AfterTargets="Build"
           Condition="'$(ContractGuardEnabled)' == 'true' and '$(ContractGuardRequireContract)' == 'true' and !Exists('$(ContractGuardContract)')">
     <Error Text="ContractGuard: required contract file '$(ContractGuardContract)' does not exist (ContractGuardRequireContract=true)." />

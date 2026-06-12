@@ -62,11 +62,18 @@ public sealed class ContractGuardAnalyzer : DiagnosticAnalyzer
             Location location = MapLocation(context.Compilation, d.SourceLocation)
                 ?? (file is not null ? Location.Create(file.Path, default, default) : Location.None);
 
-            string message = d.ToString();
-            // Strip the leading "CGxxxx: " - the id is carried by the descriptor.
-            message = message[(d.Id.Length + 2)..];
+            // The id is carried by the descriptor and the source location by the Location;
+            // the message carries the rest.
+            string memberContext = (d.TypeName, d.Member) switch
+            {
+                (null, _) => string.Empty,
+                ({ } t, null) => $" [{t}]",
+                ({ } t, { } m) => $" [{t}.{m}]",
+            };
+            string reason = d.Reason is null ? string.Empty : $" ({d.Reason})";
 
-            context.ReportDiagnostic(Diagnostic.Create(Descriptors.For(d.Id), location, message));
+            context.ReportDiagnostic(Diagnostic.Create(
+                Descriptors.For(d.Id), location, $"{d.Message}{memberContext}{reason}"));
         }
     }
 
