@@ -1,0 +1,491 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://contractguard.dev/schema/v1.json",
+  "title": "ContractGuard assembly contract",
+  "description": "Prescribes the API surface of one assembly. The stored form is always decomposed signature elements - C# declaration strings and golden DLLs are authoring inputs that tooling decomposes into this form. Semantics-affecting configuration lives in this file (not in CLI flags) so that contract changes and policy changes pass through the same review gate.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assembly", "types"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this schema, enabling editor validation and completion."
+    },
+    "assembly": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Simple name of the assembly this contract governs (no path, no .dll extension), e.g. 'MyCompany.Orders'. The gate matches it against the scanned assembly's name."
+    },
+    "version": {
+      "type": "string",
+      "description": "Optional shop-managed version label for this contract. Not interpreted by the gate."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional human description of this contract's intent."
+    },
+    "settings": { "$ref": "#/definitions/settings" },
+    "usings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/definitions/namespaceName" },
+      "description": "Namespaces used to resolve shorthand type names, in addition to each governed type's own namespace and built-in aliases (int, string, ...)."
+    },
+    "types": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/definitions/typeEntry" },
+      "description": "The governed types. Types not listed here are ungoverned (subject only to settings.newTypes)."
+    }
+  },
+  "definitions": {
+    "accessibility": {
+      "enum": ["public", "protected", "internal", "protected internal", "private protected", "private"],
+      "description": "C# accessibility level."
+    },
+    "allowDeny": {
+      "enum": ["allow", "deny"]
+    },
+    "significance": {
+      "enum": ["significant", "ignored"],
+      "description": "Whether the comparer treats this aspect as part of the contract."
+    },
+    "mode": {
+      "enum": ["required", "forbidden"],
+      "default": "required",
+      "description": "'required': the member must exist exactly as prescribed. 'forbidden': the exact signature given must NOT exist (e.g. forbid a public parameterless constructor)."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Optional rationale, surfaced verbatim in gate diagnostics when this entry is violated."
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^@?[A-Za-z_][A-Za-z0-9_]*$",
+      "description": "A C# identifier."
+    },
+    "namespaceName": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)*$",
+      "description": "A dotted namespace name."
+    },
+    "typeName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "A type reference written as a canonical name string - the one deliberate exception to element decomposition. Accepts C#-style shorthand resolved via 'usings' plus the governed type's namespace: generics (Task<Result>), arrays (int[]), nullable (string?), tuples ((int x, int y)). Nullable annotations on reference types are compared only when settings.nullableAnnotations is 'significant'."
+    },
+    "attributeList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/definitions/typeName" },
+      "description": "Attribute type names (the 'Attribute' suffix may be omitted)."
+    },
+    "typeParamList": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/typeParam" }
+    },
+    "typeParam": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/definitions/identifier" },
+        "variance": {
+          "enum": ["in", "out"],
+          "description": "Variance of this type parameter. Interfaces and delegates only."
+        },
+        "constraints": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Constraint list: 'class', 'struct', 'notnull', 'unmanaged', 'new()', or base/interface type names."
+        }
+      }
+    },
+    "paramList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/definitions/param" }
+    },
+    "param": {
+      "oneOf": [
+        { "$ref": "#/definitions/paramPair" },
+        { "$ref": "#/definitions/paramObject" }
+      ]
+    },
+    "paramPair": {
+      "type": "array",
+      "items": [
+        { "$ref": "#/definitions/typeName" },
+        { "$ref": "#/definitions/identifier" }
+      ],
+      "minItems": 2,
+      "maxItems": 2,
+      "additionalItems": false,
+      "description": "Compact [type, name] shorthand for a plain parameter. Anything with a modifier or default value uses the object form."
+    },
+    "paramObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": { "$ref": "#/definitions/typeName" },
+        "name": {
+          "$ref": "#/definitions/identifier",
+          "description": "Parameter name. May be omitted when parameter names are not significant."
+        },
+        "modifier": {
+          "enum": ["ref", "out", "in", "ref readonly", "params", "this"],
+          "description": "Parameter passing modifier. 'this' marks an extension-method receiver."
+        },
+        "default": {
+          "$ref": "#/definitions/defaultValue",
+          "description": "Presence of this property marks the parameter optional."
+        }
+      }
+    },
+    "defaultValue": {
+      "oneOf": [
+        { "type": ["string", "number", "boolean", "null"] },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["$special"],
+          "properties": {
+            "$special": { "const": "default" }
+          }
+        }
+      ],
+      "description": "A constant as a typed JSON value. Enum constants may be written as the underlying number or as an 'EnumType.Member' string (the parameter's type disambiguates). {\"$special\": \"default\"} represents default(T) for value types with no representable constant."
+    },
+    "accessors": {
+      "type": "object",
+      "additionalProperties": false,
+      "not": { "required": ["set", "init"] },
+      "properties": {
+        "get": { "$ref": "#/definitions/accessibility" },
+        "set": { "$ref": "#/definitions/accessibility" },
+        "init": { "$ref": "#/definitions/accessibility" }
+      },
+      "description": "Accessor shape, each present accessor mapped to its accessibility (supports asymmetric cases like { get; private set; }). 'set' and 'init' are mutually exclusive. Omit the whole object to prescribe only the property's existence, type, and accessibility, leaving accessor shape ungoverned."
+    },
+    "memberEntry": {
+      "oneOf": [
+        { "$ref": "#/definitions/methodMember" },
+        { "$ref": "#/definitions/constructorMember" },
+        { "$ref": "#/definitions/propertyMember" },
+        { "$ref": "#/definitions/indexerMember" },
+        { "$ref": "#/definitions/eventMember" },
+        { "$ref": "#/definitions/fieldMember" },
+        { "$ref": "#/definitions/operatorMember" }
+      ]
+    },
+    "methodMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "returns"],
+      "properties": {
+        "kind": { "const": "method" },
+        "name": { "$ref": "#/definitions/identifier" },
+        "access": {
+          "$ref": "#/definitions/accessibility",
+          "default": "public",
+          "description": "Defaults to public when omitted."
+        },
+        "modifiers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["static", "abstract", "virtual", "sealed", "override", "readonly"] },
+          "description": "Signature-level modifiers. 'async' is deliberately absent: it is an implementation detail, not part of the binary signature, and implementers may freely choose it."
+        },
+        "returns": { "$ref": "#/definitions/typeName" },
+        "refKind": {
+          "enum": ["ref", "ref readonly"],
+          "description": "For ref-returning methods."
+        },
+        "typeParams": { "$ref": "#/definitions/typeParamList" },
+        "params": { "$ref": "#/definitions/paramList" },
+        "parameterNames": { "$ref": "#/definitions/significance" },
+        "attributes": { "$ref": "#/definitions/attributeList" },
+        "mode": { "$ref": "#/definitions/mode" },
+        "reason": { "$ref": "#/definitions/reason" }
+      }
+    },
+    "constructorMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "params"],
+      "properties": {
+        "kind": { "const": "constructor" },
+        "access": {
+          "$ref": "#/definitions/accessibility",
+          "default": "public"
+        },
+        "params": {
+          "$ref": "#/definitions/paramList",
+          "description": "Required even when empty ([]): the parameter list is a constructor's identity. Static constructors are not a contract concept."
+        },
+        "parameterNames": { "$ref": "#/definitions/significance" },
+        "attributes": { "$ref": "#/definitions/attributeList" },
+        "mode": { "$ref": "#/definitions/mode" },
+        "reason": { "$ref": "#/definitions/reason" }
+      }
+    },
+    "propertyMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "type"],
+      "properties": {
+        "kind": { "const": "property" },
+        "name": { "$ref": "#/definitions/identifier" },
+        "access": {
+          "$ref": "#/definitions/accessibility",
+          "default": "public"
+        },
+        "modifiers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["static", "abstract", "virtual", "sealed", "override", "readonly"] }
+        },
+        "type": { "$ref": "#/definitions/typeName" },
+        "refKind": {
+          "enum": ["ref", "ref readonly"],
+          "description": "For ref-returning properties."
+        },
+        "accessors": { "$ref": "#/definitions/accessors" },
+        "attributes": { "$ref": "#/definitions/attributeList" },
+        "mode": { "$ref": "#/definitions/mode" },
+        "reason": { "$ref": "#/definitions/reason" }
+      }
+    },
+    "indexerMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "type", "params"],
+      "properties": {
+        "kind": { "const": "indexer" },
+        "access": {
+          "$ref": "#/definitions/accessibility",
+          "default": "public"
+        },
+        "modifiers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["static", "abstract", "virtual", "sealed", "override", "readonly"] }
+        },
+        "type": { "$ref": "#/definitions/typeName" },
+        "refKind": {
+          "enum": ["ref", "ref readonly"]
+        },
+        "params": {
+          "$ref": "#/definitions/paramList",
+          "minItems": 1,
+          "description": "Index parameters."
+        },
+        "accessors": { "$ref": "#/definitions/accessors" },
+        "parameterNames": { "$ref": "#/definitions/significance" },
+        "attributes": { "$ref": "#/definitions/attributeList" },
+        "mode": { "$ref": "#/definitions/mode" },
+        "reason": { "$ref": "#/definitions/reason" }
+      }
+    },
+    "eventMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "type"],
+      "properties": {
+        "kind": { "const": "event" },
+        "name": { "$ref": "#/definitions/identifier" },
+        "access": {
+          "$ref": "#/definitions/accessibility",
+          "default": "public"
+        },
+        "modifiers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["static", "abstract", "virtual", "sealed", "override"] }
+        },
+        "type": {
+          "$ref": "#/definitions/typeName",
+          "description": "The event's delegate type."
+        },
+        "attributes": { "$ref": "#/definitions/attributeList" },
+        "mode": { "$ref": "#/definitions/mode" },
+        "reason": { "$ref": "#/definitions/reason" }
+      }
+    },
+    "fieldMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "type"],
+      "properties": {
+        "kind": { "const": "field" },
+        "name": { "$ref": "#/definitions/identifier" },
+        "access": {
+          "$ref": "#/definitions/accessibility",
+          "default": "public"
+        },
+        "modifiers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["static", "readonly", "const", "volatile"] }
+        },
+        "type": { "$ref": "#/definitions/typeName" },
+        "value": {
+          "$ref": "#/definitions/defaultValue",
+          "description": "For const fields: the constant value. Part of the contract - consumers compile the value in. Also used for enum members."
+        },
+        "attributes": { "$ref": "#/definitions/attributeList" },
+        "mode": { "$ref": "#/definitions/mode" },
+        "reason": { "$ref": "#/definitions/reason" }
+      }
+    },
+    "operatorMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name", "returns", "params"],
+      "properties": {
+        "kind": { "const": "operator" },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The operator symbol or conversion keyword: + - * / % == != < > <= >= & | ^ ! ~ ++ -- << >> true false, or 'implicit' / 'explicit' for conversions. Operators are always public static, so no access or modifiers are accepted here."
+        },
+        "returns": { "$ref": "#/definitions/typeName" },
+        "params": { "$ref": "#/definitions/paramList" },
+        "parameterNames": { "$ref": "#/definitions/significance" },
+        "attributes": { "$ref": "#/definitions/attributeList" },
+        "mode": { "$ref": "#/definitions/mode" },
+        "reason": { "$ref": "#/definitions/reason" }
+      }
+    },
+    "typeEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full type name including namespace, e.g. 'MyCompany.Orders.OrderService'. Nested types use '+': 'Outer+Inner'."
+        },
+        "access": {
+          "$ref": "#/definitions/accessibility",
+          "default": "public",
+          "description": "The type's accessibility; defaults to public. A public type silently becoming internal is a violation."
+        },
+        "kind": {
+          "enum": ["class", "struct", "interface", "record", "record-struct", "enum", "delegate"],
+          "description": "When present, the type's kind is part of the contract (a class silently becoming a struct is a violation). Omit to govern members only."
+        },
+        "modifiers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["static", "abstract", "sealed", "readonly", "ref"] },
+          "description": "'readonly' and 'ref' apply to structs."
+        },
+        "underlyingType": {
+          "$ref": "#/definitions/typeName",
+          "description": "Enum types only: the underlying integral type."
+        },
+        "extends": {
+          "$ref": "#/definitions/typeName",
+          "description": "Required base type."
+        },
+        "implements": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/typeName" },
+          "description": "Interfaces the type must implement. Not exhaustive: implementing additional interfaces is not a violation."
+        },
+        "typeParams": { "$ref": "#/definitions/typeParamList" },
+        "newMembers": {
+          "$ref": "#/definitions/allowDeny",
+          "description": "May developers add members beyond those prescribed? Overrides settings.newMembers for this type."
+        },
+        "parameterNames": {
+          "$ref": "#/definitions/significance",
+          "description": "Overrides settings.parameterNames for this type's members."
+        },
+        "members": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/definitions/memberEntry" }
+        },
+        "returns": {
+          "$ref": "#/definitions/typeName",
+          "description": "Delegate types only: the delegate's return type."
+        },
+        "params": {
+          "$ref": "#/definitions/paramList",
+          "description": "Delegate types only: the delegate's parameter list."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "required": ["kind"],
+            "properties": { "kind": { "const": "delegate" } }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                { "required": ["returns"] },
+                { "required": ["params"] }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Contract-wide policy. Lives inside the contract file deliberately: CLI flags and MSBuild properties control only operational concerns and can never weaken these semantics.",
+      "properties": {
+        "newTypes": {
+          "$ref": "#/definitions/allowDeny",
+          "default": "allow",
+          "description": "May developers add new types (within scanned scope) beyond those governed here?"
+        },
+        "newMembers": {
+          "$ref": "#/definitions/allowDeny",
+          "default": "allow",
+          "description": "Default for whether governed types may gain members beyond those prescribed. Overridable per type."
+        },
+        "parameterNames": {
+          "$ref": "#/definitions/significance",
+          "default": "significant",
+          "description": "Whether parameter names are part of the contract. Overridable per type and per member."
+        },
+        "defaultValues": {
+          "$ref": "#/definitions/significance",
+          "default": "significant",
+          "description": "Whether optional-parameter default values are part of the contract. Defaults compile into call sites, so silent changes alter caller behavior."
+        },
+        "nullableAnnotations": {
+          "$ref": "#/definitions/significance",
+          "default": "ignored",
+          "description": "Whether nullable reference annotations (string vs string?) are part of the contract. Nullable value types (int?) are distinct types and always significant."
+        },
+        "tupleElementNames": {
+          "$ref": "#/definitions/significance",
+          "default": "significant",
+          "description": "Whether tuple element names ((int x, int y) vs (int a, int b)) are part of the contract."
+        },
+        "scope": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": { "enum": ["public", "protected", "internal", "private"] },
+          "default": ["public", "protected"],
+          "description": "Accessibility levels the gate scans and governs. 'protected internal' members are in scope if either level is listed."
+        },
+        "significantAttributes": {
+          "$ref": "#/definitions/attributeList",
+          "description": "Attribute types the comparer pays attention to. Attributes not listed are invisible to the gate."
+        }
+      }
+    }
+  }
+}

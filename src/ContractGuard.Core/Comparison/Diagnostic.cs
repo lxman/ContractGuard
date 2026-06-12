@@ -1,0 +1,66 @@
+namespace ContractGuard.Comparison;
+
+public enum DiagnosticSeverity
+{
+    Error,
+    Warning,
+}
+
+public sealed record Diagnostic(
+    string Id,
+    DiagnosticSeverity Severity,
+    string Message,
+    string? TypeName = null,
+    string? Member = null,
+    string? Reason = null)
+{
+    public override string ToString()
+    {
+        var location = (TypeName, Member) switch
+        {
+            (null, _) => string.Empty,
+            (var t, null) => $" [{t}]",
+            (var t, var m) => $" [{t}.{m}]",
+        };
+
+        var reason = Reason is null ? string.Empty : $" ({Reason})";
+        return $"{Id}: {Message}{location}{reason}";
+    }
+}
+
+public sealed record ComparisonResult(IReadOnlyList<Diagnostic> Diagnostics)
+{
+    public bool Passed => Diagnostics.All(d => d.Severity != DiagnosticSeverity.Error);
+}
+
+public static class DiagnosticIds
+{
+    public const string AssemblyNameMismatch = "CG0001";
+
+    public const string TypeMissing = "CG0100";
+    public const string TypeKindMismatch = "CG0101";
+    public const string TypeModifiersMismatch = "CG0102";
+    public const string BaseTypeMismatch = "CG0103";
+    public const string InterfaceMissing = "CG0104";
+    public const string TypeParamsMismatch = "CG0105";
+    public const string UnderlyingTypeMismatch = "CG0106";
+    public const string DelegateSignatureMismatch = "CG0107";
+
+    public const string MemberMissing = "CG0200";
+    public const string MemberSignatureChanged = "CG0201";
+    public const string AccessMismatch = "CG0202";
+    public const string ModifiersMismatch = "CG0203";
+    public const string ReturnTypeMismatch = "CG0204";
+    public const string ParameterNamesChanged = "CG0205";
+    public const string ParameterDefaultsChanged = "CG0206";
+    public const string AccessorsMismatch = "CG0207";
+    public const string ConstValueChanged = "CG0208";
+    public const string TypeParamsChanged = "CG0209";
+    public const string ParameterModifiersChanged = "CG0210";
+
+    public const string ForbiddenMemberPresent = "CG0300";
+
+    public const string UnexpectedMember = "CG0400";
+
+    public const string UnexpectedType = "CG0500";
+}

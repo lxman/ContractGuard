@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RollForward>LatestMajor</RollForward>
+    <AssemblyName>contractguard</AssemblyName>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>contractguard</ToolCommandName>
+    <PackageId>ContractGuard.Cli</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ContractGuard.Core\ContractGuard.Core.csproj" />
+  </ItemGroup>
+
+</Project>

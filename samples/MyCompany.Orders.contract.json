@@ -1,0 +1,155 @@
+{
+  "$schema": "../schema/contractguard.schema.json",
+  "assembly": "MyCompany.Orders",
+  "version": "1.0",
+  "description": "API contract for the Orders domain assembly.",
+  "settings": {
+    "newTypes": "allow",
+    "newMembers": "allow",
+    "parameterNames": "significant",
+    "defaultValues": "significant",
+    "nullableAnnotations": "ignored",
+    "tupleElementNames": "significant",
+    "scope": ["public", "protected"]
+  },
+  "usings": [
+    "System",
+    "System.Threading.Tasks",
+    "Microsoft.Extensions.Logging",
+    "MyCompany.Orders.Model"
+  ],
+  "types": [
+    {
+      "type": "MyCompany.Orders.OrderService",
+      "kind": "class",
+      "implements": ["IOrderService"],
+      "newMembers": "deny",
+      "members": [
+        {
+          "kind": "constructor",
+          "access": "public",
+          "params": [
+            ["IOrderRepository", "repository"],
+            ["ILogger<OrderService>", "logger"]
+          ]
+        },
+        {
+          "kind": "constructor",
+          "access": "public",
+          "params": [],
+          "mode": "forbidden",
+          "reason": "Always construct through DI; the parameterless constructor bypasses validation."
+        },
+        {
+          "kind": "method",
+          "name": "Submit",
+          "access": "public",
+          "returns": "Task<Result>",
+          "params": [["Order", "order"]]
+        },
+        {
+          "kind": "method",
+          "name": "Cancel",
+          "access": "public",
+          "returns": "void",
+          "params": [
+            ["Guid", "orderId"],
+            { "type": "string?", "name": "reason", "default": null }
+          ]
+        },
+        {
+          "kind": "method",
+          "name": "Find",
+          "access": "public",
+          "returns": "T",
+          "typeParams": [{ "name": "T", "constraints": ["struct"] }],
+          "params": [
+            { "type": "Span<T>", "name": "buffer", "modifier": "ref" },
+            { "type": "int", "name": "start", "default": 0 }
+          ]
+        },
+        {
+          "kind": "property",
+          "name": "PendingCount",
+          "access": "public",
+          "type": "int",
+          "accessors": { "get": "public", "set": "private" }
+        },
+        {
+          "kind": "event",
+          "name": "OrderSubmitted",
+          "access": "public",
+          "type": "EventHandler<OrderEventArgs>"
+        },
+        {
+          "kind": "field",
+          "name": "MaxRetries",
+          "access": "public",
+          "type": "int",
+          "modifiers": ["const"],
+          "value": 3
+        }
+      ]
+    },
+    {
+      "type": "MyCompany.Orders.IOrderRepository",
+      "kind": "interface",
+      "newMembers": "deny",
+      "members": [
+        {
+          "kind": "method",
+          "name": "GetAsync",
+          "returns": "Task<Order?>",
+          "params": [["Guid", "id"]]
+        },
+        {
+          "kind": "method",
+          "name": "SaveAsync",
+          "returns": "Task",
+          "params": [["Order", "order"]]
+        }
+      ]
+    },
+    {
+      "type": "MyCompany.Orders.Projections.IProjection",
+      "kind": "interface",
+      "typeParams": [{ "name": "TOut", "variance": "out" }],
+      "members": [
+        {
+          "kind": "method",
+          "name": "Project",
+          "returns": "TOut",
+          "params": [["Order", "order"]]
+        }
+      ]
+    },
+    {
+      "type": "MyCompany.Orders.Money",
+      "kind": "struct",
+      "modifiers": ["readonly"],
+      "members": [
+        {
+          "kind": "property",
+          "name": "Amount",
+          "type": "decimal",
+          "accessors": { "get": "public" }
+        },
+        {
+          "kind": "operator",
+          "name": "+",
+          "returns": "Money",
+          "params": [
+            ["Money", "left"],
+            ["Money", "right"]
+          ]
+        },
+        {
+          "kind": "operator",
+          "name": "implicit",
+          "returns": "Money",
+          "params": [["decimal", "amount"]]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+using ContractGuard.Metadata;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
+namespace ContractGuard.Core.Tests;
+
+/// <summary>
+/// The project's core test harness: compile a snippet in-memory with Roslyn, then read the
+/// emitted PE bytes with the metadata reader. When the Roslyn ISymbol front-end arrives
+/// (phase 2), the same snippets assert that both front-ends produce identical models.
+/// </summary>
+internal static class TestCompiler
+{
+    private static readonly Lazy<IReadOnlyList<MetadataReference>> References = new(() =>
+        ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
+        .Split(Path.PathSeparator)
+        .Where(p => p.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) && File.Exists(p))
+        .Select(p => (MetadataReference)MetadataReference.CreateFromFile(p))
+        .ToList());
+
+    public static AssemblySurface CompileAndRead(string source, string assemblyName = "TestLib")
+    {
+        var compilation = CSharpCompilation.Create(
+            assemblyName,
+            [CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Latest))],
+            References.Value,
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        using var stream = new MemoryStream();
+        var emit = compilation.Emit(stream);
+        if (!emit.Success)
+        {
+            var errors = string.Join(Environment.NewLine,
+                emit.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error));
+            throw new InvalidOperationException($"Test snippet failed to compile:{Environment.NewLine}{errors}");
+        }
+
+        stream.Position = 0;
+        return AssemblyReader.Read(stream);
+    }
+}
