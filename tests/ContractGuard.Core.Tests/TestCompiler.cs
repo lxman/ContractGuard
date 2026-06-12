@@ -18,13 +18,19 @@ internal static class TestCompiler
         .Select(p => (MetadataReference)MetadataReference.CreateFromFile(p))
         .ToList());
 
-    public static AssemblySurface CompileAndRead(string source, string assemblyName = "TestLib")
+    public static AssemblySurface CompileAndRead(
+        string source,
+        string assemblyName = "TestLib",
+        ReaderOptions? readerOptions = null,
+        bool nullableEnable = true)
     {
         var compilation = CSharpCompilation.Create(
             assemblyName,
             [CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Latest))],
             References.Value,
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new CSharpCompilationOptions(
+                OutputKind.DynamicallyLinkedLibrary,
+                nullableContextOptions: nullableEnable ? NullableContextOptions.Enable : NullableContextOptions.Disable));
 
         using var stream = new MemoryStream();
         var emit = compilation.Emit(stream);
@@ -36,6 +42,6 @@ internal static class TestCompiler
         }
 
         stream.Position = 0;
-        return AssemblyReader.Read(stream);
+        return AssemblyReader.Read(stream, readerOptions ?? ReaderOptions.Default);
     }
 }

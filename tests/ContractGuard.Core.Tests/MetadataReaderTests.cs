@@ -153,6 +153,26 @@ public class MetadataReaderTests
     }
 
     [Fact]
+    public void Clamps_nested_type_accessibility_to_the_declaring_chain()
+    {
+        // Caught by dogfooding: NestedPublic inside an internal type is effectively
+        // internal and must not surface in a public-scoped extract.
+        var source = """
+            namespace TestLib
+            {
+                internal class Outer
+                {
+                    public class Inner { }
+                }
+            }
+            """;
+        var surface = TestCompiler.CompileAndRead(source);
+        var inner = surface.Types.Single(t => t.Type == "TestLib.Outer+Inner");
+
+        Assert.Equal(Model.Accessibility.Internal, inner.Access);
+    }
+
+    [Fact]
     public void Reads_interface_variance()
     {
         var projection = Type("TestLib.IProjection");

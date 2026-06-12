@@ -466,12 +466,12 @@
         "nullableAnnotations": {
           "$ref": "#/definitions/significance",
           "default": "ignored",
-          "description": "Whether nullable reference annotations (string vs string?) are part of the contract. Nullable value types (int?) are distinct types and always significant."
+          "description": "Whether nullable reference annotations (string vs string?) are part of the contract, decoded from NullableAttribute/NullableContextAttribute. Oblivious (pre-nullable) assemblies carry no annotations and compare as unannotated. Nullable value types (int?) are distinct types and always significant."
         },
         "tupleElementNames": {
           "$ref": "#/definitions/significance",
-          "default": "ignored",
-          "description": "Whether tuple element names ((int x, int y) vs (int a, int b)) are part of the contract. Not enforced yet: the reader does not decode TupleElementNamesAttribute, so this defaults to ignored rather than over-promise."
+          "default": "significant",
+          "description": "Whether tuple element names ((int x, int y) vs (int a, int b)) are part of the contract. Renames break source compatibility for consumers using named access."
         },
         "scope": {
           "type": "array",

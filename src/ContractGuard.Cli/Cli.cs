@@ -40,7 +40,12 @@ public static class Cli
         var assemblyPath = options.Require("assembly");
 
         var contract = ContractJson.Load(contractPath);
-        var surface = AssemblyReader.Read(assemblyPath);
+        var readerOptions = new ReaderOptions
+        {
+            // 'ignored' is implemented by not decoding annotations; see ReaderOptions.
+            DecodeNullableAnnotations = contract.Settings.NullableAnnotations == Significance.Significant,
+        };
+        var surface = AssemblyReader.Read(assemblyPath, readerOptions);
         var result = ContractComparer.Compare(contract, surface);
 
         if (options.Get("format") == "msbuild")

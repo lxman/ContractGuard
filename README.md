@@ -95,16 +95,21 @@ kinds of limits apply — ones that are permanent, and ones that are just not bu
   contract vocabulary. Prescribe `Task<T> Submit(...)`; whether the body is `async` is not
   the architect's business.
 
+### Decoded from attribute metadata
+
+- **Nullable reference annotations** (`NullableAttribute`/`NullableContextAttribute`) are
+  decoded, so `nullableAnnotations: significant` enforces `string` vs `string?` for real.
+  The default stays `ignored` — oblivious (pre-nullable) assemblies carry no annotations,
+  and a mixed-context shop turning this on should do so deliberately. `int?` is a real
+  type, `Nullable<int>`, and is always enforced regardless.
+- **Tuple element names** (`TupleElementNamesAttribute`) are decoded and significant by
+  default — renaming `(int x, int y)` to `(int a, int b)` breaks consumers using named
+  access.
+
 ### Not decoded yet — accepted by the schema, but not enforced
 
-- **Nullable reference annotations.** Leave `nullableAnnotations` at its default
-  (`ignored`): setting it to `significant` today produces false violations, because the
-  reader does not yet decode `NullableAttribute` from metadata, so an observed `string?`
-  always looks like `string`. (`int?` is a real type, `Nullable<int>`, and is always
-  enforced.)
-- **Tuple element names.** The reader does not yet decode `TupleElementNamesAttribute`, so
-  `tupleElementNames` defaults to `ignored` rather than promise enforcement that doesn't
-  happen. Tuple element *types* are enforced.
+- **Constraint and inheritance nullability.** `where T : class?` / `notnull` constraints
+  and annotations on base types and implemented interfaces are not decoded.
 - **Enum parameter defaults.** Write them as the underlying numeric value
   (`"default": 0`); `"default": "OrderStatus.Pending"` strings are not resolved yet and
   will report a mismatch.

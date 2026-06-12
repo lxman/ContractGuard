@@ -59,14 +59,20 @@ from CI config, a developer who can't touch the contract could still weaken the 
 | `newMembers` | May governed types gain members beyond those listed? | `allow` |
 | `parameterNames` | Is renaming a parameter a violation? | `significant` |
 | `defaultValues` | Is changing `= 0` to `= 1` a violation? | `significant` |
-| `nullableAnnotations` | Is `string?` vs `string` a violation? | `ignored` (leave it — not enforced yet) |
-| `tupleElementNames` | Is `(int x, int y)` vs `(int a, int b)` a violation? | `ignored` (leave it — not enforced yet) |
+| `nullableAnnotations` | Is `string?` vs `string` a violation? | `ignored` |
+| `tupleElementNames` | Is `(int x, int y)` vs `(int a, int b)` a violation? | `significant` |
 | `scope` | Which accessibility levels the deny sweeps treat as surface | `["public", "protected"]` |
 | `significantAttributes` | Which attributes the gate pays attention to | none (not enforced yet) |
 
 `defaultValues` deserves a word: default values compile into the *caller's* code, so
 changing one silently changes behavior for everyone who recompiles. That's why it
 defaults to significant.
+
+`nullableAnnotations` is the one strictness knob that's off by default. Turning it on
+makes `string` vs `string?` part of the contract, which is exactly right for a shop that
+builds everything with nullable enabled — but assemblies compiled before nullable
+reference types (or with it off) carry no annotations at all, and against those the
+setting reports drift that's really just missing metadata. Turn it on deliberately.
 
 `newMembers` and `parameterNames` can also be set per type, and `parameterNames` per
 member, when one type or member needs a different rule than the rest.

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
@@ -12,25 +13,32 @@ namespace ContractGuard.Metadata;
 /// </summary>
 public static class AssemblyReader
 {
-    public static AssemblySurface Read(string path)
+    public static AssemblySurface Read(string path) => Read(path, ReaderOptions.Default);
+
+    public static AssemblySurface Read(Stream stream) => Read(stream, ReaderOptions.Default);
+
+    public static AssemblySurface Read(string path, ReaderOptions options)
     {
         using var stream = File.OpenRead(path);
-        return Read(stream);
+        return Read(stream, options);
     }
 
-    public static AssemblySurface Read(Stream stream)
+    public static AssemblySurface Read(Stream stream, ReaderOptions options)
     {
         using var pe = new PEReader(stream, PEStreamOptions.LeaveOpen);
         var md = pe.GetMetadataReader();
-        return new Session(md).ReadAssembly();
+        return new Session(md, options).ReadAssembly();
     }
 
-    private sealed class Session(MetadataReader md)
+    private sealed class Session(MetadataReader md, ReaderOptions options)
     {
         private const string ReadOnlyAttribute = "System.Runtime.CompilerServices.IsReadOnlyAttribute";
         private const string ByRefLikeAttribute = "System.Runtime.CompilerServices.IsByRefLikeAttribute";
         private const string ExtensionAttribute = "System.Runtime.CompilerServices.ExtensionAttribute";
         private const string ParamArrayAttribute = "System.ParamArrayAttribute";
+        private const string ExternalInitModifier = "System.Runtime.CompilerServices.IsExternalInit";
+
+        private readonly NullabilityDecoder _decoder = new(md);
 
         public AssemblySurface ReadAssembly()
         {
@@ -53,8 +61,9 @@ public static class AssemblyReader
             if (shortName.StartsWith('<'))
                 return null;
 
-            var accessibility = TypeAccessibility(td.Attributes);
+            var accessibility = EffectiveTypeAccessibility(td);
             var fullName = MetadataNames.FullName(md, handle);
+            var typeContext = _decoder.TypeContext(handle);
 
             var typeParamNames = td.GetGenericParameters()
                 .Select(h => md.GetString(md.GetGenericParameter(h).Name))
@@ -68,11 +77,13 @@ public static class AssemblyReader
             if (kind == TypeKind.Class && baseTypeName is not null && baseTypeName != "System.Object")
                 extends = baseTypeName;
 
+            // TODO: base type / interface nullable annotations (NullableAttribute on the
+            // InterfaceImpl rows) are not decoded.
             var implements = new List<string>();
             foreach (var ih in td.GetInterfaceImplementations())
             {
                 var impl = md.GetInterfaceImplementation(ih);
-                implements.Add(TypeNameFromEntity(impl.Interface, context));
+                implements.Add(RenderEntity(impl.Interface, context));
             }
 
             var contract = new TypeContract
@@ -92,17 +103,19 @@ public static class AssemblyReader
                     return contract with
                     {
                         UnderlyingType = EnumUnderlyingType(td, context),
-                        Members = NullIfEmpty(ReadEnumMembers(td, context)),
+                        Members = NullIfEmpty(ReadEnumMembers(td, context, typeContext)),
                     };
                 case TypeKind.Delegate:
                     var invoke = FindMethod(td, "Invoke");
                     if (invoke is MethodDefinition invokeDef)
                     {
-                        var sig = invokeDef.DecodeSignature(TypeNameProvider.Instance, context);
+                        var methodContext = MethodContext(invokeDef, typeContext);
+                        var sig = invokeDef.DecodeSignature(MetaTypeProvider.Instance, context);
+                        var (returnType, _) = RenderReturn(invokeDef, sig.ReturnType, methodContext);
                         return contract with
                         {
-                            Returns = StripRef(sig.ReturnType, out _),
-                            Params = BuildParams(invokeDef, sig.ParameterTypes),
+                            Returns = returnType,
+                            Params = BuildParams(invokeDef, sig.ParameterTypes, methodContext),
                         };
                     }
 
@@ -110,12 +123,12 @@ public static class AssemblyReader
                 default:
                     return contract with
                     {
-                        Members = NullIfEmpty(ReadMembers(td, context)),
+                        Members = NullIfEmpty(ReadMembers(td, context, typeContext)),
                     };
             }
         }
 
-        private List<MemberContract> ReadMembers(TypeDefinition td, GenericContext typeContext)
+        private List<MemberContract> ReadMembers(TypeDefinition td, GenericContext typeContext, byte nullableContext)
         {
             var members = new List<MemberContract>();
             var accessorHandles = new HashSet<MethodDefinitionHandle>();
@@ -131,7 +144,7 @@ public static class AssemblyReader
                 if (!accessors.Setter.IsNil)
                     accessorHandles.Add(accessors.Setter);
 
-                var property = ReadProperty(pd, accessors, typeContext, isInterface);
+                var property = ReadProperty(pd, accessors, typeContext, nullableContext, isInterface);
                 if (property is not null)
                     members.Add(property);
             }
@@ -145,14 +158,14 @@ public static class AssemblyReader
                 if (!accessors.Remover.IsNil)
                     accessorHandles.Add(accessors.Remover);
 
-                var evt = ReadEvent(ed, accessors, typeContext, isInterface);
+                var evt = ReadEvent(ed, accessors, typeContext, nullableContext, isInterface);
                 if (evt is not null)
                     members.Add(evt);
             }
 
             foreach (var fh in td.GetFields())
             {
-                var field = ReadField(md.GetFieldDefinition(fh), typeContext);
+                var field = ReadField(md.GetFieldDefinition(fh), typeContext, nullableContext);
                 if (field is not null)
                     members.Add(field);
             }
@@ -162,7 +175,7 @@ public static class AssemblyReader
                 if (accessorHandles.Contains(mh))
                     continue;
 
-                var method = ReadMethod(md.GetMethodDefinition(mh), typeContext, isInterface);
+                var method = ReadMethod(md.GetMethodDefinition(mh), typeContext, nullableContext, isInterface);
                 if (method is not null)
                     members.Add(method);
             }
@@ -170,7 +183,8 @@ public static class AssemblyReader
             return members;
         }
 
-        private MemberContract? ReadMethod(MethodDefinition def, GenericContext typeContext, bool isInterface)
+        private MemberContract? ReadMethod(
+            MethodDefinition def, GenericContext typeContext, byte typeNullableContext, bool isInterface)
         {
             var name = md.GetString(def.Name);
             if (name.StartsWith('<') || name == ".cctor")
@@ -185,30 +199,32 @@ public static class AssemblyReader
                 .Select(h => md.GetString(md.GetGenericParameter(h).Name))
                 .ToList();
             var context = new GenericContext(typeContext.TypeParameters, methodParamNames);
-            var sig = def.DecodeSignature(TypeNameProvider.Instance, context);
+            var sig = def.DecodeSignature(MetaTypeProvider.Instance, context);
             var access = MemberAccessibility(def.Attributes);
+            var nullableContext = MethodContext(def, typeNullableContext);
 
             if (name == ".ctor")
             {
                 return new ConstructorMemberContract
                 {
                     Access = access,
-                    Params = BuildParams(def, sig.ParameterTypes),
+                    Params = BuildParams(def, sig.ParameterTypes, nullableContext),
                 };
             }
 
             if ((def.Attributes & MethodAttributes.SpecialName) != 0 && name.StartsWith("op_", StringComparison.Ordinal))
             {
+                var (operatorReturn, _) = RenderReturn(def, sig.ReturnType, nullableContext);
                 return new OperatorContract
                 {
                     Name = OperatorSymbol(name),
-                    Returns = StripRef(sig.ReturnType, out _),
-                    Params = BuildParams(def, sig.ParameterTypes),
+                    Returns = operatorReturn,
+                    Params = BuildParams(def, sig.ParameterTypes, nullableContext),
                 };
             }
 
-            var returns = StripRef(sig.ReturnType, out var refKind);
-            var parameters = BuildParams(def, sig.ParameterTypes);
+            var (returns, refKind) = RenderReturn(def, sig.ReturnType, nullableContext);
+            var parameters = BuildParams(def, sig.ParameterTypes, nullableContext);
 
             if (parameters.Count > 0 && MetadataNames.HasAttribute(md, def.GetCustomAttributes(), ExtensionAttribute)
                 && parameters[0].Modifier is null)
@@ -229,7 +245,8 @@ public static class AssemblyReader
         }
 
         private MemberContract? ReadProperty(
-            PropertyDefinition pd, PropertyAccessors accessors, GenericContext context, bool isInterface)
+            PropertyDefinition pd, PropertyAccessors accessors, GenericContext context,
+            byte typeNullableContext, bool isInterface)
         {
             var name = md.GetString(pd.Name);
             if (name.Contains('.'))
@@ -240,8 +257,13 @@ public static class AssemblyReader
             if (getter is null && setter is null)
                 return null;
 
-            var sig = pd.DecodeSignature(TypeNameProvider.Instance, context);
-            var type = StripRef(sig.ReturnType, out var refKind);
+            var nullableContext = getter is MethodDefinition g0 ? MethodContext(g0, typeNullableContext)
+                : setter is MethodDefinition s0 ? MethodContext(s0, typeNullableContext)
+                : typeNullableContext;
+
+            var sig = pd.DecodeSignature(MetaTypeProvider.Instance, context);
+            var typeMeta = ApplyAnnotations(sig.ReturnType, pd.GetCustomAttributes(), nullableContext);
+            var (type, refKind) = SplitByRef(typeMeta);
 
             Accessibility? getterAccess = getter is MethodDefinition g ? MemberAccessibility(g.Attributes) : null;
             Accessibility? setterAccess = setter is MethodDefinition s ? MemberAccessibility(s.Attributes) : null;
@@ -250,8 +272,8 @@ public static class AssemblyReader
             var isInit = false;
             if (setter is MethodDefinition setterDef)
             {
-                var setterSig = setterDef.DecodeSignature(TypeNameProvider.Instance, context);
-                isInit = setterSig.ReturnType == TypeNameProvider.InitMarker;
+                var setterSig = setterDef.DecodeSignature(MetaTypeProvider.Instance, context);
+                isInit = setterSig.ReturnType.HasRequiredModifier(ExternalInitModifier);
             }
 
             var primary = getter ?? setter!.Value;
@@ -272,7 +294,7 @@ public static class AssemblyReader
                     Modifiers = NullIfEmpty(MethodModifiers(primary, isInterface)),
                     Type = type,
                     RefKind = refKind,
-                    Params = BuildParams(paramSource, sig.ParameterTypes),
+                    Params = BuildParams(paramSource, sig.ParameterTypes, nullableContext),
                     Accessors = accessorsContract,
                 };
             }
@@ -289,7 +311,8 @@ public static class AssemblyReader
         }
 
         private EventContract? ReadEvent(
-            EventDefinition ed, EventAccessors accessors, GenericContext context, bool isInterface)
+            EventDefinition ed, EventAccessors accessors, GenericContext context,
+            byte typeNullableContext, bool isInterface)
         {
             var name = md.GetString(ed.Name);
             if (name.Contains('.'))
@@ -299,16 +322,19 @@ public static class AssemblyReader
                 return null;
 
             var adder = md.GetMethodDefinition(accessors.Adder);
+            var nullableContext = MethodContext(adder, typeNullableContext);
+            var typeMeta = ApplyAnnotations(MetaTypeFromEntity(ed.Type, context), ed.GetCustomAttributes(), nullableContext);
+
             return new EventContract
             {
                 Name = name,
                 Access = MemberAccessibility(adder.Attributes),
                 Modifiers = NullIfEmpty(MethodModifiers(adder, isInterface)),
-                Type = TypeNameFromEntity(ed.Type, context),
+                Type = MetaTypeRenderer.Render(typeMeta),
             };
         }
 
-        private FieldContract? ReadField(FieldDefinition fd, GenericContext context)
+        private FieldContract? ReadField(FieldDefinition fd, GenericContext context, byte typeNullableContext)
         {
             var name = md.GetString(fd.Name);
             if (name.StartsWith('<') || name == "value__")
@@ -328,22 +354,25 @@ public static class AssemblyReader
                     modifiers.Add(MemberModifier.Readonly);
             }
 
+            var typeMeta = ApplyAnnotations(
+                fd.DecodeSignature(MetaTypeProvider.Instance, context), fd.GetCustomAttributes(), typeNullableContext);
+
             return new FieldContract
             {
                 Name = name,
                 Access = FieldAccessibility(fd.Attributes),
                 Modifiers = NullIfEmpty(modifiers),
-                Type = fd.DecodeSignature(TypeNameProvider.Instance, context),
+                Type = MetaTypeRenderer.Render(typeMeta),
                 Value = isConst && !fd.GetDefaultValue().IsNil ? ReadConstant(fd.GetDefaultValue()) : null,
             };
         }
 
-        private List<MemberContract> ReadEnumMembers(TypeDefinition td, GenericContext context)
+        private List<MemberContract> ReadEnumMembers(TypeDefinition td, GenericContext context, byte nullableContext)
         {
             var members = new List<MemberContract>();
             foreach (var fh in td.GetFields())
             {
-                var field = ReadField(md.GetFieldDefinition(fh), context);
+                var field = ReadField(md.GetFieldDefinition(fh), context, nullableContext);
                 if (field is not null)
                     members.Add(field);
             }
@@ -351,7 +380,8 @@ public static class AssemblyReader
             return members;
         }
 
-        private List<ParamContract> BuildParams(MethodDefinition def, IReadOnlyList<string> signatureTypes)
+        private List<ParamContract> BuildParams(
+            MethodDefinition def, ImmutableArray<MetaType> signatureTypes, byte nullableContext)
         {
             var bySequence = new Dictionary<int, Parameter>();
             foreach (var ph in def.GetParameters())
@@ -360,39 +390,101 @@ public static class AssemblyReader
                 bySequence[p.SequenceNumber] = p;
             }
 
-            var result = new List<ParamContract>(signatureTypes.Count);
-            for (var i = 0; i < signatureTypes.Count; i++)
+            var result = new List<ParamContract>(signatureTypes.Length);
+            for (var i = 0; i < signatureTypes.Length; i++)
             {
-                var type = StripRefPrefix(signatureTypes[i], out var byRef);
+                var meta = signatureTypes[i];
                 string? name = null;
-                ParamModifier? modifier = byRef ? ParamModifier.Ref : null;
+                ParamModifier? modifier = null;
                 ConstantValue? defaultValue = null;
 
-                if (bySequence.TryGetValue(i + 1, out var row))
+                Parameter? row = bySequence.TryGetValue(i + 1, out var found) ? found : null;
+                meta = ApplyAnnotations(meta, row?.GetCustomAttributes(), nullableContext);
+                var byRef = meta is MetaType.ByRef;
+                if (meta is MetaType.ByRef br)
+                    meta = br.Element;
+                if (byRef)
+                    modifier = ParamModifier.Ref;
+
+                if (row is Parameter p)
                 {
-                    name = row.Name.IsNil ? null : md.GetString(row.Name);
+                    name = p.Name.IsNil ? null : md.GetString(p.Name);
                     if (byRef)
                     {
-                        var isOut = (row.Attributes & ParameterAttributes.Out) != 0;
-                        var isIn = (row.Attributes & ParameterAttributes.In) != 0;
+                        var isOut = (p.Attributes & ParameterAttributes.Out) != 0;
+                        var isIn = (p.Attributes & ParameterAttributes.In) != 0;
                         modifier = isIn ? ParamModifier.In : isOut ? ParamModifier.Out : ParamModifier.Ref;
                     }
-                    else if (MetadataNames.HasAttribute(md, row.GetCustomAttributes(), ParamArrayAttribute))
+                    else if (MetadataNames.HasAttribute(md, p.GetCustomAttributes(), ParamArrayAttribute))
                     {
                         modifier = ParamModifier.Params;
                     }
 
-                    if ((row.Attributes & ParameterAttributes.HasDefault) != 0 && !row.GetDefaultValue().IsNil)
-                        defaultValue = ReadConstant(row.GetDefaultValue());
-                    else if ((row.Attributes & ParameterAttributes.Optional) != 0)
+                    if ((p.Attributes & ParameterAttributes.HasDefault) != 0 && !p.GetDefaultValue().IsNil)
+                        defaultValue = ReadConstant(p.GetDefaultValue());
+                    else if ((p.Attributes & ParameterAttributes.Optional) != 0)
                         defaultValue = ConstantValue.DefaultSentinel;
                 }
 
-                result.Add(new ParamContract { Type = type, Name = name, Modifier = modifier, Default = defaultValue });
+                result.Add(new ParamContract
+                {
+                    Type = MetaTypeRenderer.Render(meta),
+                    Name = name,
+                    Modifier = modifier,
+                    Default = defaultValue,
+                });
             }
 
             return result;
         }
+
+        /// <summary>Return-position annotations live on the parameter row with sequence 0.</summary>
+        private (string Type, ReturnRefKind? RefKind) RenderReturn(
+            MethodDefinition def, MetaType returnType, byte nullableContext)
+        {
+            CustomAttributeHandleCollection? returnAttributes = null;
+            foreach (var ph in def.GetParameters())
+            {
+                var p = md.GetParameter(ph);
+                if (p.SequenceNumber == 0)
+                {
+                    returnAttributes = p.GetCustomAttributes();
+                    break;
+                }
+            }
+
+            var meta = ApplyAnnotations(returnType, returnAttributes, nullableContext);
+            return SplitByRef(meta);
+        }
+
+        private static (string Type, ReturnRefKind? RefKind) SplitByRef(MetaType meta)
+        {
+            // TODO: distinguish ref readonly returns (modreq InAttribute).
+            if (meta.Unwrap() is MetaType.ByRef byRef)
+                return (MetaTypeRenderer.Render(byRef.Element), ReturnRefKind.Ref);
+
+            return (MetaTypeRenderer.Render(meta), null);
+        }
+
+        private MetaType ApplyAnnotations(MetaType meta, CustomAttributeHandleCollection? attributes, byte context)
+        {
+            var names = attributes is CustomAttributeHandleCollection a
+                ? _decoder.FindTupleNames(a)
+                : [];
+
+            NullabilityDecoder.Flags? flags = null;
+            byte effectiveContext = 0;
+            if (options.DecodeNullableAnnotations)
+            {
+                flags = attributes is CustomAttributeHandleCollection attrs ? _decoder.FindNullableFlags(attrs) : null;
+                effectiveContext = context;
+            }
+
+            return _decoder.Apply(meta, flags, effectiveContext, names);
+        }
+
+        private byte MethodContext(MethodDefinition def, byte typeContext) =>
+            _decoder.FindNullableContext(def.GetCustomAttributes()) ?? typeContext;
 
         private List<TypeParamContract> ReadGenericParams(
             GenericParameterHandleCollection handles, GenericContext context)
@@ -404,6 +496,7 @@ public static class AssemblyReader
                 var attrs = gp.Attributes;
                 var isStruct = (attrs & GenericParameterAttributes.NotNullableValueTypeConstraint) != 0;
 
+                // TODO: constraint nullability ('class?', 'notnull') is not decoded.
                 var constraints = new List<string>();
                 if ((attrs & GenericParameterAttributes.ReferenceTypeConstraint) != 0)
                     constraints.Add("class");
@@ -413,7 +506,7 @@ public static class AssemblyReader
                 foreach (var ch in gp.GetConstraints())
                 {
                     var constraint = md.GetGenericParameterConstraint(ch);
-                    var typeName = TypeNameFromEntity(constraint.Type, context);
+                    var typeName = RenderEntity(constraint.Type, context);
                     if (typeName is "System.ValueType" or "System.Object")
                         continue;
                     constraints.Add(typeName);
@@ -441,7 +534,7 @@ public static class AssemblyReader
 
         private TypeKind ClassifyType(TypeDefinition td, GenericContext context, out string? baseTypeName)
         {
-            baseTypeName = td.BaseType.IsNil ? null : TypeNameFromEntity(td.BaseType, context);
+            baseTypeName = td.BaseType.IsNil ? null : RenderEntity(td.BaseType, context);
             if ((td.Attributes & TypeAttributes.Interface) != 0)
                 return TypeKind.Interface;
 
@@ -526,7 +619,7 @@ public static class AssemblyReader
             {
                 var fd = md.GetFieldDefinition(fh);
                 if ((fd.Attributes & FieldAttributes.Static) == 0)
-                    return fd.DecodeSignature(TypeNameProvider.Instance, context);
+                    return MetaTypeRenderer.Render(fd.DecodeSignature(MetaTypeProvider.Instance, context));
             }
 
             return "int";
@@ -544,15 +637,20 @@ public static class AssemblyReader
             return null;
         }
 
-        private string TypeNameFromEntity(EntityHandle handle, GenericContext context) => handle.Kind switch
+        private MetaType MetaTypeFromEntity(EntityHandle handle, GenericContext context) => handle.Kind switch
         {
-            HandleKind.TypeDefinition => MetadataNames.FullName(md, (TypeDefinitionHandle)handle),
-            HandleKind.TypeReference => MetadataNames.FullName(md, (TypeReferenceHandle)handle),
+            HandleKind.TypeDefinition => MetaTypeProvider.Instance.GetTypeFromDefinition(
+                md, (TypeDefinitionHandle)handle, 0),
+            HandleKind.TypeReference => MetaTypeProvider.Instance.GetTypeFromReference(
+                md, (TypeReferenceHandle)handle, 0),
             HandleKind.TypeSpecification =>
                 md.GetTypeSpecification((TypeSpecificationHandle)handle)
-                    .DecodeSignature(TypeNameProvider.Instance, context),
-            _ => "?",
+                    .DecodeSignature(MetaTypeProvider.Instance, context),
+            _ => new MetaType.Named("?", false, []),
         };
+
+        private string RenderEntity(EntityHandle handle, GenericContext context) =>
+            MetaTypeRenderer.Render(MetaTypeFromEntity(handle, context));
 
         private ConstantValue ReadConstant(ConstantHandle handle)
         {
@@ -579,23 +677,23 @@ public static class AssemblyReader
             return ConstantValue.Of(value);
         }
 
-        private static string StripRef(string type, out ReturnRefKind? refKind)
+        /// <summary>A nested type is only as visible as its declaring chain: NestedPublic
+        /// inside an internal type is effectively internal. Clamp to the narrowest level
+        /// in the chain so scope filtering sees reality.</summary>
+        private Accessibility EffectiveTypeAccessibility(TypeDefinition td)
         {
-            // TODO: distinguish ref readonly returns (modreq InAttribute).
-            if (type.StartsWith("ref ", StringComparison.Ordinal))
+            var access = TypeAccessibility(td.Attributes);
+            var declaring = td.GetDeclaringType();
+            while (!declaring.IsNil)
             {
-                refKind = ReturnRefKind.Ref;
-                return type[4..];
+                var parent = md.GetTypeDefinition(declaring);
+                var parentAccess = TypeAccessibility(parent.Attributes);
+                if (Rank(parentAccess) < Rank(access))
+                    access = parentAccess;
+                declaring = parent.GetDeclaringType();
             }
 
-            refKind = null;
-            return type;
-        }
-
-        private static string StripRefPrefix(string type, out bool byRef)
-        {
-            byRef = type.StartsWith("ref ", StringComparison.Ordinal);
-            return byRef ? type[4..] : type;
+            return access;
         }
 
         private static Accessibility TypeAccessibility(TypeAttributes attributes) =>
@@ -638,17 +736,17 @@ public static class AssemblyReader
             if (b is null)
                 return a.Value;
             return Rank(a.Value) >= Rank(b.Value) ? a.Value : b.Value;
-
-            static int Rank(Accessibility access) => access switch
-            {
-                Accessibility.Public => 5,
-                Accessibility.ProtectedInternal => 4,
-                Accessibility.Protected => 3,
-                Accessibility.Internal => 2,
-                Accessibility.PrivateProtected => 1,
-                _ => 0,
-            };
         }
+
+        private static int Rank(Accessibility access) => access switch
+        {
+            Accessibility.Public => 5,
+            Accessibility.ProtectedInternal => 4,
+            Accessibility.Protected => 3,
+            Accessibility.Internal => 2,
+            Accessibility.PrivateProtected => 1,
+            _ => 0,
+        };
 
         private static string OperatorSymbol(string metadataName) => metadataName switch
         {
