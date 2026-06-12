@@ -30,7 +30,7 @@ A contract names one assembly, the types it governs, and the members each type m
 
 ```json
 {
-  "$schema": "https://contractguard.dev/schema/v1.json",
+  "$schema": "https://raw.githubusercontent.com/lxman/ContractGuard/main/schema/contractguard.schema.json",
   "assembly": "Shop.Domain",
   "types": [
     {

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://contractguard.dev/schema/v1.json",
+  "$id": "https://raw.githubusercontent.com/lxman/ContractGuard/main/schema/contractguard.schema.json",
   "title": "ContractGuard assembly contract",
   "description": "Prescribes the API surface of one assembly. The stored form is always decomposed signature elements - C# declaration strings and golden DLLs are authoring inputs that tooling decomposes into this form. Semantics-affecting configuration lives in this file (not in CLI flags) so that contract changes and policy changes pass through the same review gate.",
   "type": "object",

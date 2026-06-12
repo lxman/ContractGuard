@@ -12,7 +12,8 @@ namespace ContractGuard.Cli;
 /// </summary>
 public static class Cli
 {
-    private const string SchemaUrl = "https://contractguard.dev/schema/v1.json";
+    private const string SchemaUrl =
+        "https://raw.githubusercontent.com/lxman/ContractGuard/main/schema/contractguard.schema.json";
 
     public static int Run(string[] args)
     {
