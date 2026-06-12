@@ -80,7 +80,7 @@ canonical form (`--check` makes it a CI lint).
 **MSBuild package** (the drop-in):
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.6-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.7-alpha" PrivateAssets="all" />
 ```
 
 After every build, `<project>/<AssemblyName>.contract.json` is verified automatically —
@@ -92,7 +92,7 @@ the build instead of silently removing the gate.
 **Roslyn analyzer** (editor-time assistance):
 
 ```xml
-<PackageReference Include="ContractGuard.Analyzers" Version="0.0.6-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.Analyzers" Version="0.0.7-alpha" PrivateAssets="all" />
 ```
 
 The same comparison engine the gate runs, inside the compiler: violations appear as you

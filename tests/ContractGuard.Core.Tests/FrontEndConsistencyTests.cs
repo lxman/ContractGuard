@@ -32,15 +32,16 @@ public class FrontEndConsistencyTests
     private static string Canonical(AssemblySurface surface)
     {
         List<TypeContract> types = surface.Types
-            .Select(t => t.Members is null
-                ? t
-                : t with
-                {
-                    Members = t.Members
-                        .OrderBy(m => m.KindName, StringComparer.Ordinal)
-                        .ThenBy(m => Core.Comparison.DeclarationRenderer.Render(m), StringComparer.Ordinal)
-                        .ToList(),
-                })
+            .Select(t => t with
+            {
+                Members = t.Members?
+                    .OrderBy(m => m.KindName, StringComparer.Ordinal)
+                    .ThenBy(m => Core.Comparison.DeclarationRenderer.Render(m), StringComparer.Ordinal)
+                    .ToList(),
+                // The InterfaceImpl table and the symbol closure walk enumerate the same
+                // set in different orders; the comparer is order-insensitive.
+                Implements = t.Implements?.OrderBy(i => i, StringComparer.Ordinal).ToList(),
+            })
             .OrderBy(t => t.Type, StringComparer.Ordinal)
             .ToList();
 
@@ -105,6 +106,37 @@ public class FrontEndConsistencyTests
             public interface IRepo<in TKey, out TValue> where TKey : notnull
             {
                 TValue Find(TKey key);
+            }
+        }
+        """);
+
+    [Fact]
+    public void Agrees_on_interface_hierarchies() => AssertConsistent("""
+        using System;
+
+        namespace Stores
+        {
+            public interface IStore<T> : IDisposable
+            {
+                T Find(string id);
+            }
+
+            public interface IQueryableStore<T> : IStore<T>
+            {
+                int Count { get; }
+            }
+
+            // Declares only the most-derived interface; metadata records the closure.
+            public class RoleStore<TRole> : IQueryableStore<TRole> where TRole : class
+            {
+                public TRole Find(string id) => null!;
+                public int Count => 0;
+                public void Dispose() { }
+            }
+
+            // Interfaces inherited through the base class are NOT re-recorded.
+            public class SubStore : RoleStore<string>
+            {
             }
         }
         """);

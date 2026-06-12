@@ -71,6 +71,42 @@ public class AnalyzerTests
     }
 
     [Fact]
+    public async Task Honors_interface_closures_extracted_from_metadata()
+    {
+        // Field regression: a contract extracted from metadata prescribes the full
+        // interface closure (IQueryableStore -> IStore -> IDisposable); the analyzer must
+        // not report CG0104 for the inherited entries.
+        var contract = """
+            {
+                "assembly": "Shop",
+                "usings": ["System"],
+                "types": [
+                    {
+                        "type": "Shop.RoleStore",
+                        "kind": "class",
+                        "implements": ["Shop.IQueryableStore", "Shop.IStore", "IDisposable"]
+                    }
+                ]
+            }
+            """;
+
+        ImmutableArray<Diagnostic> diagnostics = await RunAsync("""
+            using System;
+            namespace Shop
+            {
+                public interface IStore : IDisposable { }
+                public interface IQueryableStore : IStore { }
+                public class RoleStore : IQueryableStore
+                {
+                    public void Dispose() { }
+                }
+            }
+            """, contract);
+
+        Assert.Empty(diagnostics);
+    }
+
+    [Fact]
     public async Task Stays_silent_without_a_matching_contract()
     {
         ImmutableArray<Diagnostic> diagnostics = await RunAsync(

@@ -24,7 +24,7 @@ That emits a contract covering every public and protected type in the assembly. 
 next to the csproj, named `<AssemblyName>.contract.json`, and add the build gate:
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.6-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.7-alpha" PrivateAssets="all" />
 ```
 
 Build again. You'll see `ContractGuard: PASS` in the output. Change any prescribed
@@ -191,8 +191,8 @@ Add the analyzer next to the gate and violations show up in the editor as you wr
 same CG codes, on the offending line:
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.6-alpha" PrivateAssets="all" />
-<PackageReference Include="ContractGuard.Analyzers" Version="0.0.6-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.7-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.Analyzers" Version="0.0.7-alpha" PrivateAssets="all" />
 ```
 
 Nothing else to configure — the MSBuild package hands the contract file to the compiler.

@@ -71,8 +71,15 @@ public static class SymbolSurfaceReader
             extends = SymbolTypeRenderer.Render(baseType, decode);
         }
 
+        // The compiler emits the transitive closure of each DECLARED interface into the
+        // InterfaceImpl table (but not interfaces inherited through the base class), so the
+        // symbol side walks the same closure. Caught in the field by a store class declaring
+        // IQueryableRoleStore<T>, whose IRoleStore<T> and IDisposable bases the direct
+        // Interfaces list never showed.
         List<string> implements = type.Interfaces
+            .SelectMany(i => new[] { i }.Concat(i.AllInterfaces))
             .Select(i => SymbolTypeRenderer.Render(i, decode))
+            .Distinct(StringComparer.Ordinal)
             .ToList();
 
         var contract = new TypeContract
