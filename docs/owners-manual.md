@@ -24,7 +24,7 @@ That emits a contract covering every public and protected type in the assembly. 
 next to the csproj, named `<AssemblyName>.contract.json`, and add the build gate:
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.1-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.2-alpha" PrivateAssets="all" />
 ```
 
 Build again. You'll see `ContractGuard: PASS` in the output. Change any prescribed
