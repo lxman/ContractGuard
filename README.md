@@ -76,7 +76,7 @@ canonical form (`--check` makes it a CI lint).
 **MSBuild package** (the drop-in):
 
 ```xml
-<PackageReference Include="ContractGuard.MSBuild" Version="0.0.3-alpha" PrivateAssets="all" />
+<PackageReference Include="ContractGuard.MSBuild" Version="0.0.4-alpha" PrivateAssets="all" />
 ```
 
 After every build, `<project>/<AssemblyName>.contract.json` is verified automatically —
