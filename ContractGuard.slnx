@@ -1,4 +1,17 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/owners-manual.md" />
+  </Folder>
+  <Folder Name="/samples/">
+    <File Path="samples/MyCompany.Orders.contract.json" />
+  </Folder>
+  <Folder Name="/schema/">
+    <File Path="schema/contractguard.schema.json" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/ContractGuard.Cli/ContractGuard.Cli.csproj" />
     <Project Path="src/ContractGuard.Core/ContractGuard.Core.csproj" />

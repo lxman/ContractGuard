@@ -128,3 +128,7 @@ dotnet pack src/ContractGuard.MSBuild -c Release
 Requires the .NET 8 SDK or later. Tests compile C# snippets in-memory with Roslyn and read
 the emitted PE bytes back through the metadata reader — the same harness that will pin
 metadata-vs-ISymbol front-end consistency when the Roslyn analyzer (phase 2) lands.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
