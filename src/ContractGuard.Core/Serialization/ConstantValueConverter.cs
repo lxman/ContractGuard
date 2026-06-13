@@ -64,13 +64,20 @@ internal sealed class ConstantValueConverter : JsonConverter<ConstantValue>
 
     private static ConstantValue ReadSpecial(JsonObject obj)
     {
-        if (obj.Count == 1 && obj.TryGetPropertyValue("$special", out JsonNode? special)
-            && special?.GetValue<string>() == "default")
+        if (obj.Count == 1 && obj.TryGetPropertyValue("$special", out JsonNode? special))
         {
-            return ConstantValue.DefaultSentinel;
+            switch (special?.GetValue<string>())
+            {
+                case "default": return ConstantValue.DefaultSentinel;
+                // JSON has no literal for non-finite doubles; they ride in the $special form.
+                case "NaN": return ConstantValue.Of(double.NaN);
+                case "Infinity": return ConstantValue.Of(double.PositiveInfinity);
+                case "-Infinity": return ConstantValue.Of(double.NegativeInfinity);
+            }
         }
 
-        throw new JsonException("The only object form of a constant is {\"$special\": \"default\"}.");
+        throw new JsonException(
+            "The object form of a constant must be {\"$special\": \"default\"|\"NaN\"|\"Infinity\"|\"-Infinity\"}.");
     }
 
     public override void Write(Utf8JsonWriter writer, ConstantValue value, JsonSerializerOptions options)
@@ -98,7 +105,7 @@ internal sealed class ConstantValueConverter : JsonConverter<ConstantValue>
                 writer.WriteNumberValue(l);
                 break;
             case double d:
-                writer.WriteNumberValue(d);
+                WriteDouble(writer, d);
                 break;
             case decimal m:
                 writer.WriteNumberValue(m);
@@ -106,5 +113,23 @@ internal sealed class ConstantValueConverter : JsonConverter<ConstantValue>
             default:
                 throw new JsonException($"Cannot serialize constant of type {value.Value.GetType()}.");
         }
+    }
+
+    private static void WriteDouble(Utf8JsonWriter writer, double value)
+    {
+        string? special = double.IsNaN(value) ? "NaN"
+            : double.IsPositiveInfinity(value) ? "Infinity"
+            : double.IsNegativeInfinity(value) ? "-Infinity"
+            : null;
+        if (special is null)
+        {
+            writer.WriteNumberValue(value);
+            return;
+        }
+
+        // JSON forbids NaN/Infinity as numbers; carry them in the $special object form.
+        writer.WriteStartObject();
+        writer.WriteString("$special", special);
+        writer.WriteEndObject();
     }
 }

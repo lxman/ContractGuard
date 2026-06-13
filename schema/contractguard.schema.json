@@ -152,11 +152,11 @@
           "additionalProperties": false,
           "required": ["$special"],
           "properties": {
-            "$special": { "const": "default" }
+            "$special": { "enum": ["default", "NaN", "Infinity", "-Infinity"] }
           }
         }
       ],
-      "description": "A constant as a typed JSON value. Enum constants may be written as the underlying number or as an 'EnumType.Member' string (the parameter's type disambiguates). {\"$special\": \"default\"} represents default(T) for value types with no representable constant."
+      "description": "A constant as a typed JSON value. Enum constants may be written as the underlying number or as an 'EnumType.Member' string (the parameter's type disambiguates). {\"$special\": \"default\"} represents default(T) for value types with no representable constant; \"NaN\"/\"Infinity\"/\"-Infinity\" carry non-finite floating-point constants, which have no JSON number literal."
     },
     "accessors": {
       "type": "object",

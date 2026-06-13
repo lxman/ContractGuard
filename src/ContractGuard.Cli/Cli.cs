@@ -20,6 +20,12 @@ public static class Cli
     {
         try
         {
+            if (args.Length == 0)
+                return Usage();
+            if (args[0] is "help" or "--help" or "-h" or "-?" or "/?"
+                || args.Any(a => a is "--help" or "-h"))
+                return Usage(error: false);
+
             return args switch
             {
                 ["verify", .. var rest] => Verify(Options.Parse(rest)),
@@ -43,6 +49,9 @@ public static class Cli
     {
         string contractPath = options.Require("contract");
         string assemblyPath = options.Require("assembly");
+        string? format = options.Get("format");
+        if (format is not (null or "text" or "json" or "msbuild"))
+            throw new InvalidDataException($"'{format}' is not an output format. Allowed: text, json, msbuild.");
 
         AssemblyContract contract = ContractJson.Load(contractPath);
         var readerOptions = new ReaderOptions
@@ -54,7 +63,7 @@ public static class Cli
         AssemblySurface surface = AssemblyReader.Read(assemblyPath, readerOptions);
         ComparisonResult result = ContractComparer.Compare(contract, surface);
 
-        if (options.Get("format") == "msbuild")
+        if (format == "msbuild")
         {
             foreach (Diagnostic d in result.Diagnostics)
                 Console.WriteLine(d.ToMsBuildString(contractPath));
@@ -62,7 +71,7 @@ public static class Cli
             if (result.Passed)
                 Console.WriteLine($"ContractGuard: PASS ({contract.Types.Count} governed types)");
         }
-        else if (options.Get("format") == "json")
+        else if (format == "json")
         {
             Console.WriteLine(JsonSerializer.Serialize(
                 new
@@ -307,9 +316,9 @@ public static class Cli
         return $"{member.KindName}|{member.DisplayName}|{string.Join(",", paramTypes)}";
     }
 
-    private static int Usage()
+    private static int Usage(bool error = true)
     {
-        Console.Error.WriteLine(
+        const string text =
             """
             ContractGuard - verifies built assemblies against a prescribed API contract.
 
@@ -322,8 +331,15 @@ public static class Cli
               contractguard normalize --contract <file> [--check]
 
             exit codes: 0 pass, 1 contract violations / not canonical, 2 usage/load errors
-            """);
-        return 2;
+            """;
+        if (error)
+        {
+            Console.Error.WriteLine(text);
+            return 2;
+        }
+
+        Console.WriteLine(text);
+        return 0;
     }
 
     private static string ShortName(string fullTypeName)

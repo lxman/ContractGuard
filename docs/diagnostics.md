@@ -49,7 +49,8 @@ so removing a base interface from a declared one also triggers this.
 ## CG0105
 
 **Type generic parameters do not match.** Count, variance (`in`/`out`), or constraints on
-the type's generic parameters changed.
+the type's generic parameters changed. A `notnull` or `class?` difference is a nullable
+annotation, so it only counts when `nullableAnnotations` is significant.
 
 ## CG0106
 
@@ -116,7 +117,8 @@ Consumers compile const values in, so this is a silent behavior change for them.
 ## CG0209
 
 **Member generic parameters do not match.** A method's generic parameter count or
-constraints changed.
+constraints changed. As with CG0105, a `notnull`/`class?` difference counts only when
+`nullableAnnotations` is significant.
 
 ## CG0210
 

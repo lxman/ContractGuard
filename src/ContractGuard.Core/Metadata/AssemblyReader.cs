@@ -28,6 +28,14 @@ public static class AssemblyReader
     private static AssemblySurface Read(Stream stream, ReaderOptions options, string? assemblyPath)
     {
         using var pe = new PEReader(stream, PEStreamOptions.LeaveOpen);
+        // A valid PE with no CLI header is a native (unmanaged) binary; GetMetadataReader
+        // would throw InvalidOperationException, which is not a load error the CLI catches.
+        // Surface it as the BadImageFormatException the other non-managed inputs produce.
+        if (!pe.HasMetadata)
+            throw new BadImageFormatException(
+                "The file is a valid PE image but has no .NET metadata - it is a native "
+                + "(unmanaged) binary, not a managed assembly.");
+
         MetadataReader md = pe.GetMetadataReader();
         using SourceLocator? locator = options.IncludeSourceLocations
             ? SourceLocator.TryCreate(pe, assemblyPath)

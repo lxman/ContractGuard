@@ -420,8 +420,15 @@ public sealed class ContractComparer
                 continue;
 
             IReadOnlyList<string> observedConstraints = o.Constraints ?? [];
-            bool matched = c.Constraints.Count == observedConstraints.Count
-                           && c.Constraints.All(cc => observedConstraints.Any(oc => ConstraintMatches(cc, oc, ns)));
+            // 'notnull' and the '?' on 'class?' are reference-type nullability on the type
+            // parameter; when nullableAnnotations is ignored they drop out, exactly as
+            // 'string?' normalizes to 'string'. Extract emits them (decode on) while a verify
+            // run with the setting off never observes them, so normalize both sides - a
+            // contract must round-trip against the assembly it was extracted from.
+            IReadOnlyList<string> prescribed = NormalizeNullableConstraints(c.Constraints);
+            IReadOnlyList<string> observedForMatch = NormalizeNullableConstraints(observedConstraints);
+            bool matched = prescribed.Count == observedForMatch.Count
+                           && prescribed.All(cc => observedForMatch.Any(oc => ConstraintMatches(cc, oc, ns)));
             if (!matched)
             {
                 Add(id, DiagnosticSeverity.Error,
@@ -436,6 +443,20 @@ public sealed class ContractComparer
         contract is "class" or "class?" or "struct" or "notnull" or "unmanaged" or "new()"
             ? string.Equals(contract, observed, StringComparison.Ordinal)
             : _matcher.Matches(contract, observed, ns);
+
+    /// <summary>'notnull' and 'class?' carry reference-type nullability; when the contract
+    /// treats nullable annotations as insignificant they drop out of constraint comparison,
+    /// just as 'string?' normalizes to 'string'.</summary>
+    private IReadOnlyList<string> NormalizeNullableConstraints(IReadOnlyList<string> constraints)
+    {
+        if (_settings.NullableAnnotations == Significance.Significant)
+            return constraints;
+
+        return constraints
+            .Where(c => c != "notnull")
+            .Select(c => c == "class?" ? "class" : c)
+            .ToList();
+    }
 
     private bool ParamTypesMatch(
         IReadOnlyList<ParamContract> contract, IReadOnlyList<ParamContract> observed, string ns)
